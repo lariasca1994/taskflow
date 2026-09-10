@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block titulo %}{{ dataset.nombre }} · TaskFlow{% endblock %}
+
+{% block cabeza %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="flex items-start justify-between gap-4 mb-7 flex-wrap">
+    <div>
+        <a href="/datos" class="text-sm text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">&larr; Volver a datos</a>
+        <h1 class="text-3xl font-bold tracking-tight mt-1">{{ dataset.nombre }}</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">
+            {{ "{:,}".format(perfil.filas) }} filas · {{ perfil.columnas }} columnas · {{ perfil.memoria_kb }} KB en memoria
+        </p>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+    <section class="lg:col-span-2 space-y-6">
+
+        <div class="panel">
+            <h2 class="panel-titulo">Explorador de gráficos</h2>
+            <p class="panel-nota">Cada cambio recalcula en el servidor con pandas.</p>
+
+            <form id="controles"
+                  hx-get="/datos/{{ dataset._id }}/grafico"
+                  hx-target="#lienzo" hx-swap="innerHTML"
+                  hx-trigger="load, change"
+                  class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+
+                <div>
+                    <label for="tipo" class="etiqueta">Gráfico</label>
+                    <select id="tipo" name="tipo" class="campo">
+                        {% for clave, nombre in tipos.items() %}
+                        <option value="{{ clave }}">{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="dimension" class="etiqueta">Agrupar por</label>
+                    <select id="dimension" name="dimension" class="campo">
+                        {% for c in columnas %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="medida" class="etiqueta">Medida</label>
+                    <select id="medida" name="medida" class="campo">
+                        <option value="">Ninguna</option>
+                        {% for c in numericas %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="funcion" class="etiqueta">Función</label>
+                    <select id="funcion" name="funcion" class="campo">
+                        {% for clave, nombre in agregaciones.items() %}
+                        <option value="{{ clave }}">{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            <div id="lienzo" class="min-h-[380px]">
+                <div class="flex items-center justify-center h-[380px] text-sm text-slate-400 dark:text-slate-500">
+                    <span class="girando mr-2"></span> Preparando el gráfico…
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-titulo">Vista previa</h2>
+            <div hx-get="/datos/{{ dataset._id }}/vista" hx-trigger="load" hx-swap="innerHTML"
+                 class="text-sm text-slate-400 dark:text-slate-500 py-6">
+                Cargando filas…
+            </div>
+        </div>
+    </section>
+
+    <aside>
+        <div class="panel">
+            <h2 class="panel-titulo">Perfil de columnas</h2>
+            <p class="panel-nota">Detectado automáticamente al subir el archivo.</p>
+
+            <div class="space-y-3 max-h-[640px] overflow-y-auto pr-1">
+                {% for c in perfil.detalle %}
+                <div class="columna-perfil">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-medium text-sm truncate" title="{{ c.nombre }}">{{ c.nombre }}</span>
+                        <span class="pastilla tipo-{{ c.tipo }}">{{ c.tipo }}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span>Únicos</span><span class="text-right font-medium">{{ "{:,}".format(c.unicos) }}</span>
+                        <span>Nulos</span><span class="text-right font-medium">{{ c.porcentaje_nulos }}%</span>
+                        {% if c.tipo == 'numerica' and c.media is defined %}
+                        <span>Media</span><span class="text-right font-medium">{{ c.media }}</span>
+                        <span>Mediana</span><span class="text-right font-medium">{{ c.mediana }}</span>
+                        <span>Mínimo</span><span class="text-right font-medium">{{ c.minimo }}</span>
+                        <span>Máximo</span><span class="text-right font-medium">{{ c.maximo }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if c.porcentaje_nulos > 0 %}
+                    <div class="barra-nulos mt-2">
+                        <span style="width: {{ c.porcentaje_nulos }}%"></span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

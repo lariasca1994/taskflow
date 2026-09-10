@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Datos · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-7">
+    <h1 class="text-3xl font-bold tracking-tight">Análisis de datos</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">Sube un archivo y explóralo con pandas, sin escribir una línea de código.</p>
+</header>
+
+<form hx-post="/datos" hx-target="#lista-datasets" hx-swap="outerHTML"
+      hx-encoding="multipart/form-data"
+      hx-indicator="#cargando"
+      class="mb-7">
+
+    <label for="archivo" class="zona-carga">
+        <div class="text-center">
+            <div class="w-11 h-11 mx-auto mb-3 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center">
+                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-.41-8.98 5.25 5.25 0 0110.32-1.32A4.5 4.5 0 1117.25 19.5H6.75z"/>
+                </svg>
+            </div>
+            <p class="font-medium text-sm">Selecciona un archivo</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">CSV, Excel o JSON · máximo {{ max_mb }} MB · 5 archivos por cuenta</p>
+        </div>
+        <input type="file" id="archivo" name="archivo" accept=".csv,.xlsx,.json" required
+               class="sr-only" onchange="this.form.requestSubmit()">
+    </label>
+
+    <div id="cargando" class="htmx-indicator mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <span class="girando"></span> Procesando el archivo…
+    </div>
+</form>
+
+{% include "_datasets.html" %}
+{% endblock %}

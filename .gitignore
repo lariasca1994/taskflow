@@ -1,0 +1,15 @@
+# Secretos y configuracion local
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Herramientas
+.vscode/
+.idea/
+*.log

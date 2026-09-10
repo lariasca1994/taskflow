@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set centrar = true %}
+{% block titulo %}Crear cuenta · TaskFlow{% endblock %}
+
+{% block contenido %}
+<div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+        <span class="inline-flex w-12 h-12 rounded-xl bg-indigo-600 items-center justify-center text-white text-xl font-bold mb-4">T</span>
+        <h1 class="text-2xl font-bold tracking-tight">Crea tu cuenta</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Organiza tus tareas y mide tu avance</p>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
+        {% if error %}
+        <div class="mb-5 px-4 py-3 rounded-lg bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-sm border border-rose-100 dark:border-rose-900">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/registro" class="space-y-4">
+            <div>
+                <label for="nombre" class="etiqueta">Nombre</label>
+                <input type="text" id="nombre" name="nombre" required autofocus
+                       value="{{ nombre or '' }}" class="campo">
+            </div>
+            <div>
+                <label for="email" class="etiqueta">Correo electrónico</label>
+                <input type="email" id="email" name="email" required
+                       value="{{ email or '' }}" class="campo">
+            </div>
+            <div>
+                <label for="password" class="etiqueta">Contraseña</label>
+                <input type="password" id="password" name="password" required minlength="10" class="campo">
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5">Mínimo 10 caracteres</p>
+            </div>
+            <button type="submit" class="boton-primario w-full">Crear cuenta</button>
+        </form>
+    </div>
+
+    <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+        ¿Ya tienes cuenta? <a href="/ingresar" class="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Ingresar</a>
+    </p>
+</div>
+{% endblock %}

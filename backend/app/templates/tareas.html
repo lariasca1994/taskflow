@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% set activo = 'tareas' %}
+{% block titulo %}Tareas · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight">Tus tareas</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">Hola, {{ usuario.nombre }}. Esto es lo que tienes por delante.</p>
+</header>
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+    <section class="lg:col-span-2 space-y-5">
+
+        <form hx-post="/tareas" hx-target="#lista-tareas" hx-swap="outerHTML"
+              hx-on::after-request="this.reset()"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+            <div class="flex gap-2">
+                <input type="text" name="titulo" required maxlength="140" placeholder="¿Qué necesitas hacer?"
+                       class="campo flex-1">
+                <button type="submit" class="boton-primario px-5">Agregar</button>
+            </div>
+
+            <details class="mt-3">
+                <summary class="text-sm text-slate-400 dark:text-slate-500 cursor-pointer select-none hover:text-slate-600 dark:hover:text-slate-300">
+                    Más opciones
+                </summary>
+                <div class="grid sm:grid-cols-2 gap-3 mt-3">
+                    <input type="text" name="categoria" placeholder="Categoría" maxlength="40" class="campo">
+                    <select name="prioridad" class="campo">
+                        <option value="baja">Prioridad baja</option>
+                        <option value="media" selected>Prioridad media</option>
+                        <option value="alta">Prioridad alta</option>
+                    </select>
+                    <input type="date" name="fecha_limite" class="campo">
+                    <input type="text" name="descripcion" placeholder="Descripción" maxlength="1000" class="campo">
+                </div>
+            </details>
+        </form>
+
+        {% include "_lista.html" %}
+    </section>
+
+    <aside class="space-y-5">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">Filtrar</h2>
+
+            <form method="get" action="/tareas" class="space-y-3">
+                <input type="search" name="buscar" value="{{ buscar }}" placeholder="Buscar por título"
+                       class="campo">
+
+                <select name="estado" class="campo">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente" {% if filtro_estado == 'pendiente' %}selected{% endif %}>Pendientes</option>
+                    <option value="en_progreso" {% if filtro_estado == 'en_progreso' %}selected{% endif %}>En progreso</option>
+                    <option value="completada" {% if filtro_estado == 'completada' %}selected{% endif %}>Completadas</option>
+                </select>
+
+                <select name="categoria" class="campo">
+                    <option value="">Todas las categorías</option>
+                    {% for c in categorias %}
+                    <option value="{{ c }}" {% if filtro_categoria == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="boton-secundario flex-1">Aplicar</button>
+                    <a href="/tareas" class="boton-secundario flex-1 text-center">Limpiar</a>
+                </div>
+            </form>
+        </div>
+
+        <a href="/analitica" class="block bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-5 text-white hover:shadow-lg hover:shadow-indigo-200 transition">
+            <div class="text-xs uppercase tracking-wider opacity-70 mb-1">Panel</div>
+            <div class="text-lg font-semibold">Ver tu analítica</div>
+            <p class="text-sm opacity-80 mt-1 leading-relaxed">
+                Cumplimiento, tiempos de cierre y evolución semanal.
+            </p>
+        </a>
+    </aside>
+</div>
+{% endblock %}

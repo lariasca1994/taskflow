@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Analítica · TaskFlow{% endblock %}
+
+{% block cabeza %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block contenido %}
+<header class="mb-7">
+    <h1 class="text-3xl font-bold tracking-tight">Analítica</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">Cálculos con pandas sobre tus tareas. Los filtros actualizan sin recargar.</p>
+</header>
+
+<form id="filtros-analitica"
+      hx-get="/analitica/panel"
+      hx-target="#panel-analitica"
+      hx-swap="outerHTML"
+      hx-trigger="change"
+      class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 mb-6 shadow-sm">
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+        <div>
+            <label for="desde" class="etiqueta">Desde</label>
+            <input type="date" id="desde" name="desde" value="{{ filtros.desde }}" class="campo">
+        </div>
+        <div>
+            <label for="hasta" class="etiqueta">Hasta</label>
+            <input type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}" class="campo">
+        </div>
+        <div>
+            <label for="categoria" class="etiqueta">Categoría</label>
+            <select id="categoria" name="categoria" class="campo">
+                <option value="">Todas</option>
+                {% for c in categorias %}
+                <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="prioridad" class="etiqueta">Prioridad</label>
+            <select id="prioridad" name="prioridad" class="campo">
+                <option value="">Todas</option>
+                <option value="alta"  {% if filtros.prioridad == 'alta'  %}selected{% endif %}>Alta</option>
+                <option value="media" {% if filtros.prioridad == 'media' %}selected{% endif %}>Media</option>
+                <option value="baja"  {% if filtros.prioridad == 'baja'  %}selected{% endif %}>Baja</option>
+            </select>
+        </div>
+        <a href="/analitica" class="boton-secundario text-center">Limpiar filtros</a>
+    </div>
+</form>
+
+{% include "_panel.html" %}
+{% endblock %}

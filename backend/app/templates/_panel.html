@@ -1,0 +1,51 @@
+{# Bloque de indicadores y graficos. Se reemplaza al cambiar un filtro
+   o cuando llega un evento en vivo. #}
+<div id="panel-analitica"
+     hx-get="/analitica/panel"
+     hx-trigger="refrescar"
+     hx-include="#filtros-analitica"
+     hx-swap="outerHTML">
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="kpi">
+            <div class="kpi-valor">{{ kpi.total }}</div>
+            <div class="kpi-titulo">Tareas totales</div>
+        </div>
+        <div class="kpi kpi-indigo">
+            <div class="kpi-valor">{{ kpi.cumplimiento }}%</div>
+            <div class="kpi-titulo">Cumplimiento</div>
+        </div>
+        <div class="kpi kpi-teal">
+            <div class="kpi-valor">{% if kpi.horas_medias is not none %}{{ kpi.horas_medias }}h{% else %}—{% endif %}</div>
+            <div class="kpi-titulo">Tiempo medio de cierre</div>
+        </div>
+        <div class="kpi kpi-rose">
+            <div class="kpi-valor">{{ kpi.vencidas }}</div>
+            <div class="kpi-titulo">Vencidas sin cerrar</div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-5">
+        <div class="panel lg:col-span-2">
+            <h2 class="panel-titulo">Creadas frente a completadas</h2>
+            <p class="panel-nota">Serie semanal de las últimas 12 semanas.</p>
+            {{ grafico_evolucion | safe }}
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-titulo">Distribución por estado</h2>
+            {{ grafico_estados | safe }}
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-titulo">Estado por prioridad</h2>
+            {{ grafico_prioridades | safe }}
+        </div>
+
+        <div class="panel lg:col-span-2">
+            <h2 class="panel-titulo">Categorías</h2>
+            <p class="panel-nota">Volumen por categoría y porcentaje completado.</p>
+            {{ grafico_categorias | safe }}
+        </div>
+    </div>
+</div>

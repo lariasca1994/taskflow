@@ -1,0 +1,13 @@
+<div class="overflow-x-auto">
+    <table class="tabla-datos">
+        <thead>
+            <tr>{% for c in columnas %}<th>{{ c }}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+            {% for fila in filas %}
+            <tr>{% for celda in fila %}<td>{{ celda[:60] }}</td>{% endfor %}</tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="text-xs text-slate-400 dark:text-slate-500 mt-3">Primeras 20 filas.</p>

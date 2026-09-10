@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}TaskFlow{% endblock %}
+
+{% block contenido %}
+<section class="text-center py-10">
+    <span class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 items-center justify-center text-white text-2xl font-bold mb-5 shadow-lg shadow-indigo-200 dark:shadow-none">T</span>
+    <h1 class="text-4xl font-bold tracking-tight">TaskFlow</h1>
+    <p class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mt-3 leading-relaxed">
+        Gestión de tareas personales con analítica en pandas: organiza, prioriza y
+        mide tu avance en tiempo real, sin depender de una hoja de cálculo.
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-2 mt-5">
+        <span class="pastilla bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">FastAPI</span>
+        <span class="pastilla bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">MongoDB</span>
+        <span class="pastilla bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">HTMX</span>
+        <span class="pastilla bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">pandas</span>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mt-7">
+        {% if usuario %}
+        <a href="/tareas" class="boton-primario px-6">Ir a tus tareas</a>
+        {% else %}
+        <a href="/registro" class="boton-primario px-6">Crear cuenta</a>
+        <a href="/ingresar" class="boton-secundario px-6">Ya tengo cuenta</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+    <div class="panel">
+        <h3 class="panel-titulo">Tareas y categorías</h3>
+        <p class="panel-nota">Prioridad, fecha límite y categoría libre para organizar tu día a día.</p>
+    </div>
+    <div class="panel">
+        <h3 class="panel-titulo">Analítica con pandas</h3>
+        <p class="panel-nota">Cumplimiento, tiempo medio de cierre y evolución semanal, calculados en el servidor.</p>
+    </div>
+    <div class="panel">
+        <h3 class="panel-titulo">Explora tus datos</h3>
+        <p class="panel-nota">Sube un CSV, Excel o JSON y arma gráficos sin escribir código.</p>
+    </div>
+    <div class="panel">
+        <h3 class="panel-titulo">En vivo</h3>
+        <p class="panel-nota">Los cambios se reflejan al instante vía HTMX y eventos en tiempo real.</p>
+    </div>
+</section>
+{% endblock %}

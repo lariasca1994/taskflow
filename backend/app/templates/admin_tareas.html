@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set activo = 'admin' %}
+{% block titulo %}Admin · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight">Panel de administración</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">
+        Vista de solo lectura sobre las tareas de todos los usuarios, para revisión del proyecto.
+    </p>
+</header>
+
+<div class="grid sm:grid-cols-3 gap-4 mb-6">
+    <div class="kpi kpi-indigo">
+        <div class="kpi-valor">{{ total_usuarios }}</div>
+        <div class="kpi-titulo">Usuarios registrados</div>
+    </div>
+    <div class="kpi kpi-teal">
+        <div class="kpi-valor">{{ tareas|length }}</div>
+        <div class="kpi-titulo">Tareas mostradas (más recientes)</div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2 class="panel-titulo">Todas las tareas</h2>
+    <p class="panel-nota">Ordenadas por fecha de creación, más recientes primero.</p>
+
+    <div class="overflow-x-auto">
+        <table class="tabla-datos">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Usuario</th>
+                    <th>Categoría</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Creada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tareas %}
+                <tr>
+                    <td class="font-medium text-slate-700 dark:text-slate-300">{{ t.titulo }}</td>
+                    <td>
+                        <span class="text-slate-700 dark:text-slate-300">{{ t.usuario_nombre }}</span>
+                        <span class="text-slate-400 dark:text-slate-500 text-xs block">{{ t.usuario_email }}</span>
+                    </td>
+                    <td>{{ t.categoria }}</td>
+                    <td><span class="pastilla prioridad-{{ t.prioridad }}">{{ t.prioridad }}</span></td>
+                    <td>{{ t.estado }}</td>
+                    <td>{{ t.creada_en.strftime("%Y-%m-%d %H:%M") }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-slate-400 dark:text-slate-500 py-6">Todavía no hay tareas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

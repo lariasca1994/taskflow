@@ -1,0 +1,53 @@
+{# Lista de archivos subidos. HTMX la reemplaza tras subir o eliminar. #}
+<div id="lista-datasets">
+
+    {% if error %}
+    <div class="mb-4 px-4 py-3 rounded-xl bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-sm border border-rose-100 dark:border-rose-900">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if not datasets %}
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-14 text-center">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+            <svg class="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+            </svg>
+        </div>
+        <p class="text-slate-500 dark:text-slate-400 text-sm">Todavía no has subido archivos.</p>
+        <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Arrastra un CSV, Excel o JSON de hasta {{ max_mb }} MB.</p>
+    </div>
+    {% endif %}
+
+    <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {% for d in datasets %}
+        <article class="tarjeta-dataset group">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="chip-ext chip-{{ d.extension[1:] }}">{{ d.extension[1:] }}</span>
+                    <div class="min-w-0">
+                        <h3 class="font-medium truncate" title="{{ d.nombre }}">{{ d.nombre }}</h3>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                            {{ "{:,}".format(d.perfil.filas) }} filas · {{ d.perfil.columnas }} columnas
+                        </p>
+                    </div>
+                </div>
+
+                <button hx-delete="/datos/{{ d._id }}"
+                        hx-target="#lista-datasets" hx-swap="outerHTML"
+                        hx-confirm="¿Eliminar «{{ d.nombre }}»?"
+                        aria-label="Eliminar archivo"
+                        class="opacity-0 group-hover:opacity-100 transition text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 p-1 shrink-0">
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.9.6L7.4 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.4l-.7-1.4A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+
+            <a href="/datos/{{ d._id }}" class="boton-primario w-full mt-4 text-center block text-sm">
+                Explorar
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+</div>

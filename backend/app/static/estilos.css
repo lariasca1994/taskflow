@@ -1,0 +1,364 @@
+/* ==========================================================================
+   TaskFlow — componentes propios sobre Tailwind (cargado por CDN)
+   ========================================================================== */
+
+:root { font-family: Inter, system-ui, -apple-system, sans-serif; }
+
+::selection { background: #d3f0ea; }
+
+/* ------------------------------------------------------------ formularios */
+
+.campo {
+    width: 100%;
+    padding: .6rem .85rem;
+    font-size: .9rem;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: .625rem;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+}
+.campo:focus {
+    outline: none;
+    border-color: #1daf8d;
+    box-shadow: 0 0 0 3px rgb(29 175 141 / .12);
+}
+
+.etiqueta {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: .35rem;
+}
+
+/* ---------------------------------------------------------------- botones */
+
+.boton-primario {
+    padding: .6rem 1.25rem;
+    font-size: .9rem;
+    font-weight: 600;
+    color: #fff;
+    background: #0b7360;
+    border-radius: .625rem;
+    transition: background .15s, transform .1s, box-shadow .15s;
+}
+.boton-primario:hover {
+    background: #095c4d;
+    box-shadow: 0 4px 12px rgb(11 115 96 / .25);
+}
+.boton-primario:active { transform: translateY(1px); }
+
+.boton-secundario {
+    padding: .6rem 1rem;
+    font-size: .85rem;
+    font-weight: 500;
+    color: #475569;
+    background: #f1f5f9;
+    border-radius: .625rem;
+    transition: background .15s;
+}
+.boton-secundario:hover { background: #e2e8f0; }
+
+.boton-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background .15s, border-color .15s;
+}
+.boton-tema:hover { background: #f1f5f9; }
+
+/* ------------------------------------------------------------- navegacion */
+
+.nav-enlace {
+    padding: .45rem .8rem;
+    font-size: .9rem;
+    font-weight: 500;
+    color: #64748b;
+    border-radius: .5rem;
+    transition: color .15s, background .15s;
+}
+.nav-enlace:hover { color: #0f172a; background: #f8fafc; }
+.nav-activo { color: #0b7360; background: #dff3ef; }
+
+/* ---------------------------------------------------------------- tarjetas */
+
+.tarjeta-tarea,
+.tarjeta-dataset {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+.tarjeta-tarea { padding: 1.1rem 1.25rem; }
+.tarjeta-dataset { padding: 1.25rem; }
+
+.tarjeta-tarea:hover,
+.tarjeta-dataset:hover {
+    border-color: #a9e0d3;
+    box-shadow: 0 4px 16px rgb(15 23 42 / .06);
+}
+
+.panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+.panel-titulo { font-size: 1rem; font-weight: 600; margin-bottom: .2rem; }
+.panel-nota   { font-size: .8rem; color: #94a3b8; margin-bottom: 1.1rem; }
+
+/* ------------------------------------------------------------- indicadores */
+
+.kpi {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #cbd5e1;
+    border-radius: 1rem;
+    padding: 1.25rem;
+}
+.kpi-valor  { font-size: 1.9rem; font-weight: 700; line-height: 1; letter-spacing: -.025em; }
+.kpi-titulo { font-size: .75rem; color: #64748b; margin-top: .55rem; }
+
+.kpi-indigo { border-left-color: #6366f1; }
+.kpi-teal   { border-left-color: #14b8a6; }
+.kpi-rose   { border-left-color: #f43f5e; }
+
+/* --------------------------------------------------------------- pastillas */
+
+.pastilla {
+    display: inline-block;
+    padding: .12rem .5rem;
+    font-size: .68rem;
+    font-weight: 600;
+    border-radius: 999px;
+    text-transform: lowercase;
+    letter-spacing: .01em;
+}
+.prioridad-alta  { background: #fef2f2; color: #b91c1c; }
+.prioridad-media { background: #fffbeb; color: #b45309; }
+.prioridad-baja  { background: #f0fdf4; color: #15803d; }
+
+.tipo-numerica { background: #eef2ff; color: #4338ca; }
+.tipo-texto    { background: #f1f5f9; color: #475569; }
+.tipo-fecha    { background: #ecfeff; color: #0e7490; }
+
+/* --------------------------------------------------------- carga y archivos */
+
+.zona-carga {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    background: #fff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+.zona-carga:hover { border-color: #1daf8d; background: #fafaff; }
+
+.chip-ext {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem; height: 2.5rem;
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: .625rem;
+    flex-shrink: 0;
+}
+.chip-csv  { background: #ecfdf5; color: #047857; }
+.chip-xlsx { background: #eff6ff; color: #1d4ed8; }
+.chip-json { background: #fef3c7; color: #b45309; }
+
+.columna-perfil {
+    padding: .8rem .9rem;
+    background: #f8fafc;
+    border-radius: .75rem;
+}
+
+.barra-nulos {
+    height: 3px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.barra-nulos span {
+    display: block;
+    height: 100%;
+    background: #f59e0b;
+}
+
+/* ------------------------------------------------------------------ tablas */
+
+.tabla-datos { width: 100%; font-size: .8rem; border-collapse: collapse; }
+.tabla-datos th {
+    text-align: left;
+    padding: .5rem .7rem;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+}
+.tabla-datos td {
+    padding: .5rem .7rem;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;
+    color: #475569;
+}
+.tabla-datos tr:hover td { background: #fafafa; }
+
+/* ------------------------------------------------------- avisos en vivo */
+
+.aviso {
+    padding: .7rem 1.1rem;
+    font-size: .85rem;
+    color: #fff;
+    background: #1e293b;
+    border-radius: .75rem;
+    box-shadow: 0 8px 24px rgb(15 23 42 / .18);
+    animation: entrar .25s ease;
+}
+@keyframes entrar {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------- indicadores */
+
+.girando {
+    display: inline-block;
+    width: 1rem; height: 1rem;
+    border: 2px solid #e2e8f0;
+    border-top-color: #1daf8d;
+    border-radius: 50%;
+    animation: girar .7s linear infinite;
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator { display: flex; }
+
+/* Atenua el bloque mientras se recalcula, sin moverlo de sitio. */
+.htmx-swapping { opacity: .45; transition: opacity .15s; }
+
+/* ---------------------------------------------------- accesibilidad */
+
+:focus-visible {
+    outline: 3px solid #5fd1b3;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+
+/* ============================================================================
+   Tema oscuro — mismo mecanismo (data-tema) y filosofia que Gestor de Casos
+   QA / PRPagos: el acento se mantiene, solo cambian superficies y bordes.
+   ========================================================================== */
+
+html[data-tema="oscuro"] { color-scheme: dark; }
+
+[data-tema="oscuro"] ::selection { background: #16342a; }
+
+[data-tema="oscuro"] .boton-tema {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-tema="oscuro"] .boton-tema:hover { background: #263447; }
+
+[data-tema="oscuro"] .campo {
+    color: #e2e8f0;
+    border-color: #334155;
+    background: #1a2333;
+}
+[data-tema="oscuro"] .campo:focus {
+    box-shadow: 0 0 0 3px rgb(29 175 141 / .18);
+}
+
+[data-tema="oscuro"] .etiqueta { color: #94a3b8; }
+
+[data-tema="oscuro"] .boton-secundario {
+    color: #cbd5e1;
+    background: #1e293b;
+}
+[data-tema="oscuro"] .boton-secundario:hover { background: #2c3a4f; }
+
+[data-tema="oscuro"] .nav-enlace { color: #94a3b8; }
+[data-tema="oscuro"] .nav-enlace:hover { color: #f1f5f9; background: #1e293b; }
+[data-tema="oscuro"] .nav-activo { color: #5fd1b3; background: #0d2b25; }
+
+[data-tema="oscuro"] .tarjeta-tarea,
+[data-tema="oscuro"] .tarjeta-dataset,
+[data-tema="oscuro"] .panel,
+[data-tema="oscuro"] .kpi {
+    background: #161e2c;
+    border-color: #2d3a4f;
+}
+[data-tema="oscuro"] .kpi-valor { color: #e2e8f0; }
+[data-tema="oscuro"] .kpi-titulo { color: #94a3b8; }
+
+[data-tema="oscuro"] .tarjeta-tarea:hover,
+[data-tema="oscuro"] .tarjeta-dataset:hover {
+    border-color: #2e6657;
+    box-shadow: 0 4px 16px rgb(0 0 0 / .35);
+}
+
+[data-tema="oscuro"] .panel-nota { color: #64748b; }
+
+[data-tema="oscuro"] .prioridad-alta  { background: #3a1a1a; color: #f29a94; }
+[data-tema="oscuro"] .prioridad-media { background: #3a2c10; color: #f2c26b; }
+[data-tema="oscuro"] .prioridad-baja  { background: #163a22; color: #6fdb8f; }
+
+[data-tema="oscuro"] .tipo-numerica { background: #201f3a; color: #a5b0f2; }
+[data-tema="oscuro"] .tipo-texto    { background: #1e293b; color: #b7bcd6; }
+[data-tema="oscuro"] .tipo-fecha    { background: #103235; color: #6bd7e0; }
+
+[data-tema="oscuro"] .zona-carga {
+    background: #161e2c;
+    border-color: #334155;
+}
+[data-tema="oscuro"] .zona-carga:hover { background: #12211d; border-color: #1daf8d; }
+
+[data-tema="oscuro"] .chip-csv  { background: #103622; color: #4ade80; }
+[data-tema="oscuro"] .chip-xlsx { background: #102338; color: #60a5fa; }
+[data-tema="oscuro"] .chip-json { background: #3a2c10; color: #fbbf24; }
+
+[data-tema="oscuro"] .columna-perfil { background: #1a2333; }
+[data-tema="oscuro"] .barra-nulos { background: #334155; }
+
+[data-tema="oscuro"] .tabla-datos th {
+    background: #161e2c;
+    color: #94a3b8;
+    border-color: #2d3a4f;
+}
+[data-tema="oscuro"] .tabla-datos td {
+    border-color: #253044;
+    color: #cbd5e1;
+}
+[data-tema="oscuro"] .tabla-datos tr:hover td { background: #1c2637; }
+
+[data-tema="oscuro"] .aviso { background: #0f172a; box-shadow: 0 8px 24px rgb(0 0 0 / .4); }
+
+[data-tema="oscuro"] .girando {
+    border-color: #334155;
+    border-top-color: #1daf8d;
+}
