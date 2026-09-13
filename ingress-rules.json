@@ -1,0 +1,26 @@
+[
+  {
+    "protocol": "6",
+    "source": "0.0.0.0/0",
+    "isStateless": false,
+    "tcpOptions": { "destinationPortRange": { "min": 22, "max": 22 } }
+  },
+  {
+    "protocol": "6",
+    "source": "0.0.0.0/0",
+    "isStateless": false,
+    "tcpOptions": { "destinationPortRange": { "min": 8000, "max": 8000 } }
+  },
+  {
+    "protocol": "1",
+    "source": "0.0.0.0/0",
+    "isStateless": false,
+    "icmpOptions": { "type": 3, "code": 4 }
+  },
+  {
+    "protocol": "1",
+    "source": "10.0.0.0/16",
+    "isStateless": false,
+    "icmpOptions": { "type": 3 }
+  }
+]
