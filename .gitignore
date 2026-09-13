@@ -13,3 +13,7 @@ venv/
 .vscode/
 .idea/
 *.log
+
+# Script real de arranque de la VM de OCI: trae la cadena de Mongo, los
+# secretos del servidor y la contrasena del admin. Solo se queda local.
+oci-deploy/cloud-init.sh

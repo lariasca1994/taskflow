@@ -34,6 +34,13 @@
 
 /* ---------------------------------------------------------------- botones */
 
+/* Verde inspirado en MongoDB (el motor de esta app) -- mismo criterio que
+   gestor-casos-qa/verificador-api/reservas-corferias: el color del boton
+   primario delata a que base de datos se conecta el proyecto. En tema
+   oscuro no se mantiene igual (ver bloque de tema oscuro mas abajo): se usa
+   el verde "Spring Green" con el que la propia MongoDB identifica su modo
+   oscuro, porque el verde oscuro de aqui pierde contraste sobre un fondo ya
+   oscuro. */
 .boton-primario {
     padding: .6rem 1.25rem;
     font-size: .9rem;
@@ -41,7 +48,7 @@
     color: #fff;
     background: #0b7360;
     border-radius: .625rem;
-    transition: background .15s, transform .1s, box-shadow .15s;
+    transition: background .15s, color .15s, transform .1s, box-shadow .15s;
 }
 .boton-primario:hover {
     background: #095c4d;
@@ -271,8 +278,13 @@
 }
 
 /* ============================================================================
-   Tema oscuro — mismo mecanismo (data-tema) y filosofia que Gestor de Casos
-   QA / PRPagos: el acento se mantiene, solo cambian superficies y bordes.
+   Tema oscuro — mismo mecanismo (data-tema) que Gestor de Casos QA / PRPagos
+   para superficies y bordes: esos se mantienen, solo cambian de tono. El
+   boton primario es la excepcion a propósito: en vez de conservar el mismo
+   verde oscuro (#0b7360, pensado para contrastar sobre blanco), aqui se
+   aclara al verde "Spring Green" (#00ed64) con el que la propia MongoDB
+   identifica su modo oscuro -- sobre un fondo ya oscuro, el verde oscuro
+   original perdía casi todo el contraste.
    ========================================================================== */
 
 html[data-tema="oscuro"] { color-scheme: dark; }
@@ -295,6 +307,15 @@ html[data-tema="oscuro"] { color-scheme: dark; }
 }
 
 [data-tema="oscuro"] .etiqueta { color: #94a3b8; }
+
+[data-tema="oscuro"] .boton-primario {
+    color: #00251c;
+    background: #00ed64;
+}
+[data-tema="oscuro"] .boton-primario:hover {
+    background: #00d158;
+    box-shadow: 0 4px 14px rgb(0 237 100 / .3);
+}
 
 [data-tema="oscuro"] .boton-secundario {
     color: #cbd5e1;
