@@ -1,11 +1,22 @@
 # TaskFlow
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)
+![HTMX](https://img.shields.io/badge/HTMX-3D72D7?style=flat&logo=htmx&logoColor=white)
+![Pandas](https://img.shields.io/badge/pandas-150458?style=flat&logo=pandas&logoColor=white)
+![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=flat&logo=googlecloud&logoColor=white)
+
 Aplicación web de gestión de tareas personales con un módulo de análisis de
 datos. Construida enteramente en Python: FastAPI en el servidor, Jinja2 con
 HTMX en la interfaz, pandas para el análisis y MongoDB como única base de datos.
 
 No hay JavaScript propio más allá del canal de eventos: la interactividad la
 resuelve HTMX pidiendo fragmentos de HTML al servidor.
+
+## Demo en vivo
+
+**Aplicación:** [taskflow-812302804238.us-central1.run.app](https://taskflow-812302804238.us-central1.run.app/)
 
 ## Funcionalidades
 
@@ -235,6 +246,16 @@ Con un único proceso de Uvicorn funciona correctamente; con varios trabajadores
 un evento generado en uno no alcanzaría a los clientes conectados a otro. La
 solución sería un intermediario como Redis, descartado para no añadir una
 dependencia externa a un proyecto que debe levantarse con un solo comando.
+
+## Despliegue
+
+La aplicación corre en Google Cloud Run, con MongoDB Atlas M0 (plan gratuito)
+como base de datos.
+
+## Autor
+
+**Luis Felipe Arias Carriazo**
+[GitHub](https://github.com/lariasca1994) · [LinkedIn](https://linkedin.com/in/lfac1)
 
 ## Licencia
 
