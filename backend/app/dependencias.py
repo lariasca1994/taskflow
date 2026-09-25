@@ -23,6 +23,12 @@ def _resolver(request: Request) -> dict | None:
     if not usuario:
         return None
 
+    # Cuenta suspendida por un admin: se trata igual que "no autenticado",
+    # sin importar que el token siga siendo valido. .get() porque los
+    # documentos creados antes de este campo no lo tienen (se asumen activos).
+    if not usuario.get("activo", True):
+        return None
+
     # El middleware recogera este token para refrescar la cookie: es lo
     # que hace que la inactividad sea deslizante.
     request.state.token_renovado = renovar(carga)
@@ -61,9 +67,11 @@ def es_admin(usuario: dict) -> bool:
 def usuario_admin_web(request: Request) -> dict:
     """Como usuario_web, pero exige ademas el rol ADMIN.
 
-    Es una vista de solo lectura sobre las tareas de todo el mundo (para
-    revision del portafolio), igual en espiritu a /admin/pagos en PRPagos
-    o proyecto_autorizado en Gestor de Casos QA.
+    Da acceso al panel de administracion: revisar, editar y eliminar las
+    tareas de cualquier usuario, y gestionar las cuentas (suspender,
+    reactivar, eliminar). Mismo espiritu que /admin/pagos en PRPagos o
+    proyecto_autorizado en Gestor de Casos QA, pero con permisos de
+    escritura reales sobre los datos ajenos.
     """
     usuario = usuario_web(request)
     if not es_admin(usuario):

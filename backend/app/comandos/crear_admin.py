@@ -7,9 +7,9 @@ Si el correo ya existe (por ejemplo, porque ya te registraste desde
 basta con pasar cualquier valor de relleno en <contrasena> en ese caso.
 Si no existe, se crea de una vez con rol ADMIN.
 
-El rol ADMIN da acceso de solo lectura a /admin/tareas: todas las tareas
-de todos los usuarios, sin poder editarlas ni eliminarlas. Es el mismo
-patron que la cuenta ADMIN en Gestor de Casos QA y PRPagos.
+El rol ADMIN da acceso al panel de administracion (/admin/tareas y
+/admin/usuarios): puede ver, editar y eliminar las tareas de cualquier
+usuario, y suspender, reactivar o eliminar cuentas (salvo la propia).
 """
 
 import sys

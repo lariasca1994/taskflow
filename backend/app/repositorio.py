@@ -29,6 +29,7 @@ def crear_usuario(
         "email": email.lower(),
         "password": clave_cifrada,
         "rol": rol,
+        "activo": True,
         "creado_en": _ahora(),
     }
     try:
@@ -67,6 +68,54 @@ def buscar_usuario(usuario_id: str) -> dict | None:
     if not ObjectId.is_valid(usuario_id):
         return None
     return usuarios.find_one({"_id": ObjectId(usuario_id)})
+
+
+def listar_usuarios() -> list[dict]:
+    """Todas las cuentas, sin el hash de password, para el panel admin."""
+    return list(usuarios.find({}, {"password": 0}).sort("creado_en", -1))
+
+
+def suspender_usuario(usuario_id: str) -> bool:
+    if not ObjectId.is_valid(usuario_id):
+        return False
+    resultado = usuarios.update_one(
+        {"_id": ObjectId(usuario_id)}, {"$set": {"activo": False}}
+    )
+    return resultado.matched_count > 0
+
+
+def reactivar_usuario(usuario_id: str) -> bool:
+    if not ObjectId.is_valid(usuario_id):
+        return False
+    resultado = usuarios.update_one(
+        {"_id": ObjectId(usuario_id)}, {"$set": {"activo": True}}
+    )
+    return resultado.matched_count > 0
+
+
+def eliminar_usuario(usuario_id: str) -> bool:
+    """Borrado duro de la cuenta.
+
+    No cascadea sus tareas: quedan huerfanas (con un usuario_id que ya no
+    resuelve a nadie). Para un proyecto de portafolio alcanza; en un
+    sistema real se cascadearia el borrado o se reasignaria el dueno.
+    """
+    if not ObjectId.is_valid(usuario_id):
+        return False
+    resultado = usuarios.delete_one({"_id": ObjectId(usuario_id)})
+    return resultado.deleted_count == 1
+
+
+def usuario_a_salida(documento: dict) -> dict:
+    """Convierte un documento de usuario (sin password) al formato de plantilla."""
+    return {
+        "id": str(documento["_id"]),
+        "nombre": documento["nombre"],
+        "email": documento["email"],
+        "rol": documento.get("rol", "USUARIO"),
+        "activo": documento.get("activo", True),
+        "creado_en": documento.get("creado_en"),
+    }
 
 
 # ──────────────────────────────── tareas ───────────────────────────────
@@ -116,16 +165,22 @@ def obtener_tarea(usuario_id: str, tarea_id: str) -> dict | None:
     )
 
 
+def _cambios_estado(estado: Estado) -> dict:
+    """Arma el $set de un cambio de estado. Lo comparten cambiar_estado y
+    admin_cambiar_estado para no duplicar la logica de completada_en."""
+    return {
+        "estado": estado.value,
+        "completada_en": _ahora() if estado == Estado.COMPLETADA else None,
+    }
+
+
 def cambiar_estado(usuario_id: str, tarea_id: str, estado: Estado) -> dict | None:
     if not ObjectId.is_valid(tarea_id):
         return None
 
-    cambios = {"estado": estado.value}
-    cambios["completada_en"] = _ahora() if estado == Estado.COMPLETADA else None
-
     return tareas.find_one_and_update(
         {"_id": ObjectId(tarea_id), "usuario_id": ObjectId(usuario_id)},
-        {"$set": cambios},
+        {"$set": _cambios_estado(estado)},
         return_document=True,
     )
 
@@ -146,6 +201,37 @@ def eliminar_tarea(usuario_id: str, tarea_id: str) -> bool:
     resultado = tareas.delete_one(
         {"_id": ObjectId(tarea_id), "usuario_id": ObjectId(usuario_id)}
     )
+    return resultado.deleted_count == 1
+
+
+def admin_actualizar_tarea(tarea_id: str, datos: dict) -> dict | None:
+    """Como actualizar_tarea, pero sin exigir dueno: filtra solo por _id
+    para que ADMIN pueda editar la tarea de cualquier usuario."""
+    if not ObjectId.is_valid(tarea_id):
+        return None
+    return tareas.find_one_and_update(
+        {"_id": ObjectId(tarea_id)},
+        {"$set": datos},
+        return_document=True,
+    )
+
+
+def admin_cambiar_estado(tarea_id: str, estado: Estado) -> dict | None:
+    """Como cambiar_estado, sin filtrar por dueno."""
+    if not ObjectId.is_valid(tarea_id):
+        return None
+    return tareas.find_one_and_update(
+        {"_id": ObjectId(tarea_id)},
+        {"$set": _cambios_estado(estado)},
+        return_document=True,
+    )
+
+
+def admin_eliminar_tarea(tarea_id: str) -> bool:
+    """Como eliminar_tarea, sin filtrar por dueno."""
+    if not ObjectId.is_valid(tarea_id):
+        return False
+    resultado = tareas.delete_one({"_id": ObjectId(tarea_id)})
     return resultado.deleted_count == 1
 
 

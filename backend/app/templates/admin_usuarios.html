@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% set activo = 'admin_usuarios' %}
+{% block titulo %}Usuarios · Admin · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight">Cuentas de usuario</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">
+        Suspendé, reactivá o eliminá cuentas. No podés hacerlo sobre la tuya propia.
+    </p>
+</header>
+
+<div class="panel">
+    <h2 class="panel-titulo">Todas las cuentas</h2>
+    <p class="panel-nota">Ordenadas por fecha de alta, más recientes primero.</p>
+
+    <div class="overflow-x-auto">
+        <table class="tabla-datos">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Alta</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td class="font-medium text-slate-700 dark:text-slate-300">{{ u.nombre }}</td>
+                    <td class="text-slate-500 dark:text-slate-400">{{ u.email }}</td>
+                    <td>
+                        {% if u.rol == 'ADMIN' %}
+                        <span class="pastilla bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">ADMIN</span>
+                        {% else %}
+                        <span class="pastilla bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">usuario</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.activo %}
+                        <span class="pastilla bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">activa</span>
+                        {% else %}
+                        <span class="pastilla bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300">suspendida</span>
+                        {% endif %}
+                    </td>
+                    <td class="whitespace-nowrap">{{ u.creado_en.strftime("%Y-%m-%d") if u.creado_en else "—" }}</td>
+                    <td class="whitespace-nowrap">
+                        {% if u.id == usuario._id|string %}
+                        <span class="text-xs text-slate-400 dark:text-slate-500">Tu cuenta</span>
+                        {% else %}
+                            {% if u.activo %}
+                            <form method="post" action="/admin/usuarios/{{ u.id }}/suspender" class="inline"
+                                  onsubmit="return confirm('¿Suspender la cuenta de {{ u.nombre }}?');">
+                                <button type="submit" class="text-xs font-medium text-amber-600 hover:text-amber-700 hover:underline">Suspender</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="/admin/usuarios/{{ u.id }}/reactivar" class="inline">
+                                <button type="submit" class="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline">Reactivar</button>
+                            </form>
+                            {% endif %}
+                            <form method="post" action="/admin/usuarios/{{ u.id }}/eliminar" class="inline"
+                                  onsubmit="return confirm('¿Eliminar definitivamente la cuenta de {{ u.nombre }}? Sus tareas quedarán huérfanas.');">
+                                <button type="submit" class="text-xs font-medium text-rose-500 hover:text-rose-600 hover:underline ml-3">Eliminar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-slate-400 dark:text-slate-500 py-6">Todavía no hay cuentas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

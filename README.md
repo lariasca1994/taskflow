@@ -66,6 +66,119 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 
 No requiere ningún otro servicio, cuenta ni clave de API.
 
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+
+    subgraph Clientes["👤 Cliente"]
+        Browser["🌐 Navegador Web<br/>Jinja2 + HTMX + Tailwind CSS"]
+    end
+
+    subgraph CloudRun["☁️ Google Cloud Run"]
+        subgraph Backend["Backend — FastAPI + Uvicorn"]
+            Main["main.py<br/>Punto de entrada · middleware · barrido periódico"]
+            
+            subgraph Routers["Routers"]
+                ApiRouter["routers/api.py<br/>API REST"]
+                WebRouter["routers/web.py<br/>Páginas de tareas y analítica"]
+                DatasetsRouter["routers/datasets.py<br/>Módulo de análisis de archivos"]
+                EventosRouter["routers/eventos.py<br/>Canal SSE"]
+            end
+
+            subgraph Domain["Lógica de negocio"]
+                Repository["repositorio.py<br/>Acceso a datos de tareas"]
+                Analytics["analitica.py<br/>Cálculos con pandas"]
+                Datos["datos.py<br/>Carga · perfilado · almacenamiento"]
+                Graficos["graficos.py<br/>Construcción de gráficos (Plotly)"]
+                Eventos["eventos.py<br/>Canal de eventos en vivo"]
+                Comandos["comandos/<br/>Generador de datos de ejemplo"]
+            end
+
+            subgraph Seguridad["Seguridad"]
+                Security["security.py<br/>JWT · bcrypt + pimiento"]
+                Dependencias["dependencias.py<br/>Identificación del usuario"]
+            end
+
+            subgraph Config["Configuración"]
+                ConfigFile["config.py<br/>Carga del .env y límites"]
+                Database["database.py<br/>Conexión · índices · GridFS"]
+            end
+
+            subgraph Presentacion["Presentación"]
+                Templates["templates/<br/>Plantillas Jinja2"]
+                Static["static/<br/>Hoja de estilos"]
+            end
+        end
+    end
+
+    subgraph MongoDB["🗄️ MongoDB"]
+        DB[("Base de datos<br/>Tareas · Usuarios<br/>Archivos (GridFS)")]
+    end
+
+    subgraph Almacenamiento["📁 Almacenamiento interno"]
+        Parquet["Formato Parquet<br/>Datos procesados"]
+    end
+
+    %% ---- Flujo de datos ----
+    Browser -->|HTTPS| Main
+    Main --> ApiRouter
+    Main --> WebRouter
+    Main --> DatasetsRouter
+    Main --> EventosRouter
+    WebRouter --> Templates
+    WebRouter --> Static
+    ApiRouter --> Repository
+    WebRouter --> Repository
+    DatasetsRouter --> Datos
+    DatasetsRouter --> Analytics
+    DatasetsRouter --> Graficos
+    EventosRouter --> Eventos
+    Repository --> Database
+    Analytics --> Parquet
+    Datos --> Parquet
+    Datos --> Database
+    Graficos --> Templates
+    Security --> Dependencias
+    Dependencias --> Repository
+    Database -->|PyMongo| DB
+    Eventos -->|SSE| Browser
+
+    %% ---- Colores de marca (Brand Colors) ----
+    classDef fastapi fill:#009688,stroke:#004D40,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
+    classDef python fill:#3572A5,stroke:#1A3A5C,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
+    classDef mongodb fill:#47A248,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF;
+    classDef gcp fill:#4285F4,stroke:#1A4B9C,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
+    classDef jinja fill:#B41717,stroke:#7F0000,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
+    classDef htmx fill:#3D72D7,stroke:#1A3A6C,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
+    classDef tailwind fill:#06B6D4,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
+    classDef plotly fill:#3F4F75,stroke:#1A1F2E,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
+    classDef security fill:#333333,stroke:#000000,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
+    classDef neutral fill:#F5F5F5,stroke:#CCCCCC,stroke-width:1px,color:#333333,rx:10,ry:10;
+
+    class Browser neutral;
+    class Main,ApiRouter,WebRouter,DatasetsRouter,EventosRouter fastapi;
+    class Repository,Analytics,Datos,Graficos,Eventos,Comandos,ConfigFile,Database python;
+    class Security,Dependencias security;
+    class Templates jinja;
+    class Static htmx;
+    class DB mongodb;
+    class Parquet neutral;
+    class Graficos plotly;
+
+    %% ---- Estilos de subgráficos ----
+    style Clientes fill:#FAFAFA,stroke:#DDDDDD,stroke-width:1px,rx:14,ry:14;
+    style CloudRun fill:#E1F5FE,stroke:#4285F4,stroke-width:2px,stroke-dasharray:6 4,rx:16,ry:16;
+    style Backend fill:#E0F2F1,stroke:#009688,stroke-width:1px,rx:12,ry:12;
+    style Routers fill:#E3F2FD,stroke:#009688,stroke-width:1px,rx:10,ry:10;
+    style Domain fill:#EDE7F6,stroke:#009688,stroke-width:1px,rx:10,ry:10;
+    style Seguridad fill:#F5F5F5,stroke:#333333,stroke-width:1px,rx:10,ry:10;
+    style Config fill:#F3E8FF,stroke:#009688,stroke-width:1px,rx:10,ry:10;
+    style Presentacion fill:#FFF3E0,stroke:#009688,stroke-width:1px,rx:10,ry:10;
+    style MongoDB fill:#E8F5E9,stroke:#47A248,stroke-width:2px,stroke-dasharray:6 4,rx:16,ry:16;
+    style Almacenamiento fill:#F0F0F0,stroke:#CCCCCC,stroke-width:1px,stroke-dasharray:4 3,rx:14,ry:14;
+```
+
 ## Estructura
 
 ```
