@@ -6,7 +6,7 @@
 <header class="mb-8">
     <h1 class="text-3xl font-bold tracking-tight">Panel de administración</h1>
     <p class="text-slate-500 dark:text-slate-400 mt-1">
-        Vista de solo lectura sobre las tareas de todos los usuarios, para revisión del proyecto.
+        Tareas de todos los usuarios. Podés editar el estado, el contenido o eliminar cualquiera.
     </p>
 </header>
 
@@ -35,6 +35,7 @@
                     <th>Prioridad</th>
                     <th>Estado</th>
                     <th>Creada</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,12 +48,40 @@
                     </td>
                     <td>{{ t.categoria }}</td>
                     <td><span class="pastilla prioridad-{{ t.prioridad }}">{{ t.prioridad }}</span></td>
-                    <td>{{ t.estado }}</td>
-                    <td>{{ t.creada_en.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td>
+                        <form method="post" action="/admin/tareas/{{ t.id }}/estado">
+                            <select name="estado" class="campo text-xs py-1" onchange="this.form.submit()">
+                                <option value="pendiente" {% if t.estado == 'pendiente' %}selected{% endif %}>pendiente</option>
+                                <option value="en_progreso" {% if t.estado == 'en_progreso' %}selected{% endif %}>en progreso</option>
+                                <option value="completada" {% if t.estado == 'completada' %}selected{% endif %}>completada</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td class="whitespace-nowrap">{{ t.creada_en.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td class="whitespace-nowrap relative">
+                        <details class="inline-block">
+                            <summary class="cursor-pointer select-none text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Editar</summary>
+                            <form method="post" action="/admin/tareas/{{ t.id }}/editar"
+                                  class="absolute z-10 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-4 space-y-2">
+                                <input type="text" name="titulo" value="{{ t.titulo }}" required maxlength="140" class="campo">
+                                <textarea name="descripcion" maxlength="1000" rows="2" class="campo" placeholder="Descripción">{{ t.descripcion or '' }}</textarea>
+                                <select name="estado" class="campo">
+                                    <option value="pendiente" {% if t.estado == 'pendiente' %}selected{% endif %}>pendiente</option>
+                                    <option value="en_progreso" {% if t.estado == 'en_progreso' %}selected{% endif %}>en progreso</option>
+                                    <option value="completada" {% if t.estado == 'completada' %}selected{% endif %}>completada</option>
+                                </select>
+                                <button type="submit" class="boton-primario w-full text-sm py-1.5">Guardar</button>
+                            </form>
+                        </details>
+                        <form method="post" action="/admin/tareas/{{ t.id }}/eliminar" class="inline"
+                              onsubmit="return confirm('¿Eliminar esta tarea de {{ t.usuario_nombre }}?');">
+                            <button type="submit" class="text-xs font-medium text-rose-500 hover:text-rose-600 hover:underline ml-3">Eliminar</button>
+                        </form>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="text-center text-slate-400 dark:text-slate-500 py-6">Todavía no hay tareas registradas.</td>
+                    <td colspan="7" class="text-center text-slate-400 dark:text-slate-500 py-6">Todavía no hay tareas registradas.</td>
                 </tr>
                 {% endfor %}
             </tbody>
