@@ -1,11 +1,17 @@
 # TaskFlow
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)
-![HTMX](https://img.shields.io/badge/HTMX-3D72D7?style=flat&logo=htmx&logoColor=white)
-![Pandas](https://img.shields.io/badge/pandas-150458?style=flat&logo=pandas&logoColor=white)
-![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=flat&logo=googlecloud&logoColor=white)
+<p>
+  <a href="https://taskflow-812302804238.us-central1.run.app/"><img src="docs/demo-badge.svg" alt="Abrir la demo en vivo" height="32"></a>
+  <a href="https://frontend-nine-topaz-99.vercel.app"><img src="https://portafolio-status.onrender.com/api/status/taskflow/badge.svg" alt="Estado en vivo del proyecto" height="32"></a>
+  <a href="https://d4i3vsgw7xwmh.cloudfront.net"><img src="https://portafolio-status.onrender.com/api/status/taskflow/qa-badge.svg" alt="Fecha y resultado de la última prueba E2E" height="32"></a>
+</p>
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![HTMX](https://img.shields.io/badge/HTMX-3D72D7?style=for-the-badge&logo=htmx&logoColor=white)
+![Pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)
 
 Aplicación web de gestión de tareas personales con un módulo de análisis de
 datos. Construida enteramente en Python: FastAPI en el servidor, Jinja2 con
@@ -13,6 +19,17 @@ HTMX en la interfaz, pandas para el análisis y MongoDB como única base de dato
 
 No hay JavaScript propio más allá del canal de eventos: la interactividad la
 resuelve HTMX pidiendo fragmentos de HTML al servidor.
+
+### En pocas palabras
+
+- **Qué hace:** es una lista de tareas con fechas, prioridades y categorías, más
+  un panel que muestra cómo vas: cuántas cumples, cuánto tardas en cerrarlas y
+  cuáles están vencidas. Los números se actualizan solos, sin recargar.
+- **Extra:** puedes subir un CSV, Excel o JSON y la app lo describe
+  automáticamente (tipos de dato, vacíos, estadísticas) y te deja graficarlo.
+- **Cómo probarlo:** entra a la [demo](https://taskflow-812302804238.us-central1.run.app/),
+  crea una cuenta y agrega un par de tareas. Para correrlo en tu equipo, ve a
+  [Instalación](#instalación) y [Ejecución](#ejecución).
 
 ## Demo en vivo
 
@@ -66,118 +83,22 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 
 No requiere ningún otro servicio, cuenta ni clave de API.
 
-## Diagrama de Arquitectura
+## Arquitectura
 
-```mermaid
-flowchart TB
+<p align="center">
+  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: FastAPI en Google Cloud Run con páginas HTMX, sesión JWT, analítica con pandas, análisis de archivos, eventos en vivo y barrido horario; MongoDB Atlas con GridFS" width="100%">
+</p>
 
-    subgraph Clientes["👤 Cliente"]
-        Browser["🌐 Navegador Web<br/>Jinja2 + HTMX + Tailwind CSS"]
-    end
-
-    subgraph CloudRun["☁️ Google Cloud Run"]
-        subgraph Backend["Backend — FastAPI + Uvicorn"]
-            Main["main.py<br/>Punto de entrada · middleware · barrido periódico"]
-            
-            subgraph Routers["Routers"]
-                ApiRouter["routers/api.py<br/>API REST"]
-                WebRouter["routers/web.py<br/>Páginas de tareas y analítica"]
-                DatasetsRouter["routers/datasets.py<br/>Módulo de análisis de archivos"]
-                EventosRouter["routers/eventos.py<br/>Canal SSE"]
-            end
-
-            subgraph Domain["Lógica de negocio"]
-                Repository["repositorio.py<br/>Acceso a datos de tareas"]
-                Analytics["analitica.py<br/>Cálculos con pandas"]
-                Datos["datos.py<br/>Carga · perfilado · almacenamiento"]
-                Graficos["graficos.py<br/>Construcción de gráficos (Plotly)"]
-                Eventos["eventos.py<br/>Canal de eventos en vivo"]
-                Comandos["comandos/<br/>Generador de datos de ejemplo"]
-            end
-
-            subgraph Seguridad["Seguridad"]
-                Security["security.py<br/>JWT · bcrypt + pimiento"]
-                Dependencias["dependencias.py<br/>Identificación del usuario"]
-            end
-
-            subgraph Config["Configuración"]
-                ConfigFile["config.py<br/>Carga del .env y límites"]
-                Database["database.py<br/>Conexión · índices · GridFS"]
-            end
-
-            subgraph Presentacion["Presentación"]
-                Templates["templates/<br/>Plantillas Jinja2"]
-                Static["static/<br/>Hoja de estilos"]
-            end
-        end
-    end
-
-    subgraph MongoDB["🗄️ MongoDB"]
-        DB[("Base de datos<br/>Tareas · Usuarios<br/>Archivos (GridFS)")]
-    end
-
-    subgraph Almacenamiento["📁 Almacenamiento interno"]
-        Parquet["Formato Parquet<br/>Datos procesados"]
-    end
-
-    %% ---- Flujo de datos ----
-    Browser -->|HTTPS| Main
-    Main --> ApiRouter
-    Main --> WebRouter
-    Main --> DatasetsRouter
-    Main --> EventosRouter
-    WebRouter --> Templates
-    WebRouter --> Static
-    ApiRouter --> Repository
-    WebRouter --> Repository
-    DatasetsRouter --> Datos
-    DatasetsRouter --> Analytics
-    DatasetsRouter --> Graficos
-    EventosRouter --> Eventos
-    Repository --> Database
-    Analytics --> Parquet
-    Datos --> Parquet
-    Datos --> Database
-    Graficos --> Templates
-    Security --> Dependencias
-    Dependencias --> Repository
-    Database -->|PyMongo| DB
-    Eventos -->|SSE| Browser
-
-    %% ---- Colores de marca (Brand Colors) ----
-    classDef fastapi fill:#009688,stroke:#004D40,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
-    classDef python fill:#3572A5,stroke:#1A3A5C,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
-    classDef mongodb fill:#47A248,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF;
-    classDef gcp fill:#4285F4,stroke:#1A4B9C,stroke-width:2px,color:#FFFFFF,rx:12,ry:12;
-    classDef jinja fill:#B41717,stroke:#7F0000,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
-    classDef htmx fill:#3D72D7,stroke:#1A3A6C,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
-    classDef tailwind fill:#06B6D4,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
-    classDef plotly fill:#3F4F75,stroke:#1A1F2E,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
-    classDef security fill:#333333,stroke:#000000,stroke-width:2px,color:#FFFFFF,rx:10,ry:10;
-    classDef neutral fill:#F5F5F5,stroke:#CCCCCC,stroke-width:1px,color:#333333,rx:10,ry:10;
-
-    class Browser neutral;
-    class Main,ApiRouter,WebRouter,DatasetsRouter,EventosRouter fastapi;
-    class Repository,Analytics,Datos,Graficos,Eventos,Comandos,ConfigFile,Database python;
-    class Security,Dependencias security;
-    class Templates jinja;
-    class Static htmx;
-    class DB mongodb;
-    class Parquet neutral;
-    class Graficos plotly;
-
-    %% ---- Estilos de subgráficos ----
-    style Clientes fill:#FAFAFA,stroke:#DDDDDD,stroke-width:1px,rx:14,ry:14;
-    style CloudRun fill:#E1F5FE,stroke:#4285F4,stroke-width:2px,stroke-dasharray:6 4,rx:16,ry:16;
-    style Backend fill:#E0F2F1,stroke:#009688,stroke-width:1px,rx:12,ry:12;
-    style Routers fill:#E3F2FD,stroke:#009688,stroke-width:1px,rx:10,ry:10;
-    style Domain fill:#EDE7F6,stroke:#009688,stroke-width:1px,rx:10,ry:10;
-    style Seguridad fill:#F5F5F5,stroke:#333333,stroke-width:1px,rx:10,ry:10;
-    style Config fill:#F3E8FF,stroke:#009688,stroke-width:1px,rx:10,ry:10;
-    style Presentacion fill:#FFF3E0,stroke:#009688,stroke-width:1px,rx:10,ry:10;
-    style MongoDB fill:#E8F5E9,stroke:#47A248,stroke-width:2px,stroke-dasharray:6 4,rx:16,ry:16;
-    style Almacenamiento fill:#F0F0F0,stroke:#CCCCCC,stroke-width:1px,stroke-dasharray:4 3,rx:14,ry:14;
-```
+- **Google Cloud Run** corre una sola app FastAPI: páginas Jinja2 + HTMX y la
+  API REST, protegidas por una sesión JWT en cookie.
+- La **analítica** se calcula con pandas y los gráficos se generan en el
+  servidor con Plotly.
+- Los archivos subidos se convierten a **Parquet** y se guardan en **GridFS**;
+  un barrido horario borra los que llevan 24 horas sin uso.
+- Los **eventos en vivo** (Server-Sent Events) avisan al navegador cuando
+  cambia una tarea, para que los indicadores se actualicen solos.
+- **MongoDB Atlas** guarda usuarios, tareas y archivos. **qa-evidencia** prueba
+  la demo automáticamente dos veces al día.
 
 ## Estructura
 
