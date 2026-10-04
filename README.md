@@ -283,7 +283,7 @@ dependencia externa a un proyecto que debe levantarse con un solo comando.
 
 ## Despliegue
 
-La aplicación corre en Google Cloud Run, con MongoDB Atlas M0 (plan gratuito)
+La aplicación corre en Google Cloud Run, con MongoDB Atlas
 como base de datos.
 
 ## Autor
