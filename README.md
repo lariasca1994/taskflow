@@ -33,7 +33,7 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 
 ## Demo en vivo
 
-**Aplicación:** [taskflow-812302804238.us-central1.run.app](https://taskflow-812302804238.us-central1.run.app/)
+**Aplicación:** [abrir la demo en vivo](https://taskflow-812302804238.us-central1.run.app/)
 
 ## Funcionalidades
 
