@@ -1,0 +1,488 @@
+/* Portada de acceso (ingresar y crear cuenta).
+   Identidad propia: verde MongoDB sobre menta en tema claro y casi negro
+   verdoso en oscuro; el motivo es un tablero de tres columnas donde una
+   tarea avanza sola hasta "Hecha", con los indicadores de avance debajo. */
+
+:root {
+  --t-acento: #0B7360;
+  --t-acento-hover: #095C4D;
+  --t-acento-texto: #FFFFFF;
+  --t-acento-suave: rgba(11, 115, 96, 0.14);
+  --t-enlace: #0B7360;
+
+  --t-fondo: #F6FAF8;
+  --t-superficie: #FFFFFF;
+  --t-borde: #DCE7E2;
+  --t-texto: #0F172A;
+  --t-suave: #5B6B66;
+
+  --t-marca-fondo: #E4F3EE;
+  --t-marca-texto: #062B23;
+  --t-marca-suave: #4D6B62;
+  --t-columna: rgba(255, 255, 255, 0.55);
+  --t-columna-borde: rgba(11, 115, 96, 0.14);
+  --t-tarjeta: #FFFFFF;
+  --t-linea: #D5E3DD;
+  --t-sombra: 0 1px 2px rgba(6, 43, 35, 0.06), 0 10px 24px -14px rgba(6, 43, 35, 0.3);
+  --t-hecha: #0B7360;
+
+  --t-error-fondo: #FFF1F2;
+  --t-error-texto: #BE123C;
+}
+
+[data-tema="oscuro"] {
+  --t-acento: #00ED64;
+  --t-acento-hover: #00D158;
+  --t-acento-texto: #00251C;
+  --t-acento-suave: rgba(0, 237, 100, 0.16);
+  --t-enlace: #5FD1B3;
+
+  --t-fondo: #020617;
+  --t-superficie: #0F172A;
+  --t-borde: #243247;
+  --t-texto: #E2E8F0;
+  --t-suave: #94A3B8;
+
+  --t-marca-fondo: #04140F;
+  --t-marca-texto: #ECFDF5;
+  --t-marca-suave: #8FB5A8;
+  --t-columna: rgba(255, 255, 255, 0.03);
+  --t-columna-borde: rgba(95, 209, 179, 0.14);
+  --t-tarjeta: #0D221B;
+  --t-linea: #1F3D33;
+  --t-sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 24px -14px rgba(0, 0, 0, 0.8);
+  --t-hecha: #00ED64;
+
+  --t-error-fondo: rgba(190, 18, 60, 0.18);
+  --t-error-texto: #FDA4AF;
+}
+
+body.acceso {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--t-fondo);
+  color: var(--t-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+.portada {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(420px, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ───── Panel de marca ───── */
+.marca {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow: hidden;
+  padding: 2rem clamp(1.75rem, 5vw, 4.5rem) 2.5rem;
+  background:
+    radial-gradient(70% 50% at 100% 0%, var(--t-acento-suave) 0%, transparent 70%),
+    var(--t-marca-fondo);
+  color: var(--t-marca-texto);
+}
+
+.marca-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.marca-logo img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.marca-mensaje {
+  max-width: 34rem;
+  margin-top: auto;
+}
+
+.en-vivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--t-columna-borde);
+  border-radius: 999px;
+  color: var(--t-marca-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.en-vivo::before {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--t-hecha);
+  box-shadow: 0 0 0 0 var(--t-acento-suave);
+  content: "";
+  animation: latir 1.8s ease-out infinite;
+}
+
+@keyframes latir {
+  0% { box-shadow: 0 0 0 0 var(--t-acento-suave); }
+  100% { box-shadow: 0 0 0 7px transparent; }
+}
+
+.marca-titular {
+  margin: 0 0 0.9rem;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.marca-titular span {
+  display: block;
+  background: linear-gradient(90deg, var(--t-acento) 0%, var(--t-enlace) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marca-bajada {
+  margin: 0;
+  color: var(--t-marca-suave);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Tablero kanban */
+.tablero {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 34rem;
+}
+
+/* Alto para tres tarjetas: la que viaja ocupa el tercer lugar al llegar. */
+.columna {
+  min-height: 13.4rem;
+  padding: 0.6rem;
+  border: 1px solid var(--t-columna-borde);
+  border-radius: 0.9rem;
+  background: var(--t-columna);
+}
+
+.columna-titulo {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.1rem 0.2rem 0.6rem;
+  color: var(--t-marca-suave);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tarea {
+  margin-bottom: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.6rem;
+  background: var(--t-tarjeta);
+  box-shadow: var(--t-sombra);
+}
+
+.tarea i {
+  display: block;
+  height: 0.38rem;
+  margin-bottom: 0.4rem;
+  border-radius: 999px;
+  background: var(--t-linea);
+}
+
+.tarea i + i {
+  width: 60%;
+}
+
+.tarea b {
+  display: inline-block;
+  width: 1.9rem;
+  height: 0.45rem;
+  border-radius: 999px;
+}
+
+.p-alta { background: #F43F5E; }
+.p-media { background: #F59E0B; }
+.p-baja { background: #22C55E; }
+
+.columna--hecha .tarea {
+  opacity: 0.7;
+}
+
+.columna--hecha .tarea i:first-child {
+  background: var(--t-hecha);
+  opacity: 0.45;
+}
+
+/* La tarea que se mueve: avanza de columna en columna y vuelve. */
+.tarea--viaja {
+  position: absolute;
+  top: 2.15rem;
+  left: 0.6rem;
+  width: calc((100% - 1.5rem) / 3 - 1.2rem);
+  outline: 2px solid var(--t-acento);
+  outline-offset: -1px;
+  animation: avanzar 7s ease-in-out infinite;
+}
+
+@keyframes avanzar {
+  0%, 12% { transform: translate(0, 7.4rem); }
+  30%, 45% { transform: translate(calc(100% + 1.95rem), 4rem); }
+  63%, 88% { transform: translate(calc(200% + 3.9rem), 7.4rem); opacity: 1; }
+  96% { transform: translate(calc(200% + 3.9rem), 7.4rem); opacity: 0; }
+  100% { transform: translate(0, 7.4rem); opacity: 0; }
+}
+
+/* Indicadores */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 34rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indicadores li {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--t-columna-borde);
+  border-radius: 0.75rem;
+}
+
+.indicadores strong {
+  display: block;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.indicadores span {
+  color: var(--t-marca-suave);
+  font-size: 0.72rem;
+}
+
+.barra-avance {
+  height: 0.3rem;
+  margin-top: 0.45rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--t-linea);
+}
+
+.barra-avance::after {
+  display: block;
+  width: 78%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--t-hecha);
+  content: "";
+  transform-origin: left;
+  animation: llenar 1.6s ease-out 0.3s both;
+}
+
+@keyframes llenar {
+  from { transform: scaleX(0); }
+}
+
+/* ───── Lado del formulario ───── */
+.lado {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 5rem 1.5rem 3rem;
+}
+
+.lado-tema {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.acceso .boton-tema {
+  border-color: var(--t-borde);
+  background: var(--t-superficie);
+}
+
+.tarjeta {
+  width: 100%;
+  max-width: 25rem;
+}
+
+.tarjeta-paso {
+  margin: 0 0 0.4rem;
+  color: var(--t-enlace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tarjeta-titulo {
+  margin: 0 0 0.4rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.tarjeta-subtitulo {
+  margin: 0 0 1.75rem;
+  color: var(--t-suave);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tarjeta form {
+  display: grid;
+  gap: 1rem;
+}
+
+.acceso .etiqueta {
+  color: var(--t-texto);
+  font-size: 0.82rem;
+}
+
+/* 16px: con menos, Safari en iPhone amplía la página al enfocar. */
+.acceso .campo {
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+}
+
+.acceso .boton-primario {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8rem 1rem;
+  background: var(--t-acento);
+  color: var(--t-acento-texto);
+}
+
+.acceso .boton-primario:hover {
+  background: var(--t-acento-hover);
+}
+
+.ayuda {
+  margin: 0.4rem 0 0;
+  color: var(--t-suave);
+  font-size: 0.75rem;
+}
+
+.alerta {
+  margin-bottom: 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.65rem;
+  background: var(--t-error-fondo);
+  color: var(--t-error-texto);
+  font-size: 0.875rem;
+}
+
+.alerta--info {
+  background: var(--t-acento-suave);
+  color: var(--t-texto);
+}
+
+.alterno {
+  margin: 1.75rem 0 0;
+  color: var(--t-suave);
+  font-size: 0.9rem;
+}
+
+.alterno a {
+  color: var(--t-enlace);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.alterno a:hover {
+  text-decoration: underline;
+}
+
+/* ───── Responsive: 1050 / 760 / 360, como el resto del portafolio ───── */
+@media (max-width: 1050px) {
+  .portada {
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 1fr);
+  }
+
+  .indicadores {
+    display: none;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 700px) {
+  .tablero,
+  .indicadores {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .portada {
+    position: relative;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .marca {
+    gap: 1.25rem;
+    padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem 1.75rem;
+  }
+
+  .marca-mensaje {
+    margin-top: 0;
+  }
+
+  .marca-bajada,
+  .tablero,
+  .indicadores {
+    display: none;
+  }
+
+  .en-vivo {
+    margin-bottom: 0.6rem;
+  }
+
+  .marca-titular {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  .lado {
+    position: static;
+    place-items: start center;
+    padding: 1.75rem 1.25rem calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .lado-tema {
+    top: calc(1rem + env(safe-area-inset-top, 0px));
+    right: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .marca,
+  .lado {
+    padding-inline: 1rem;
+  }
+
+  .marca-titular {
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarea--viaja {
+    display: none;
+  }
+}
