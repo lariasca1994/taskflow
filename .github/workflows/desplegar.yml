@@ -1,0 +1,60 @@
+# Despliegue continuo: cada push a main construye la imagen, la publica en
+# Artifact Registry y actualiza el servicio de Cloud Run "taskflow". Nada
+# se despliega a mano; las variables de entorno del servicio se conservan.
+#
+# Autenticación: federación de identidades GitHub -> Google (sin llaves
+# guardadas en GitHub). El proveedor solo acepta tokens de ESTE repo y de
+# la rama main; la cuenta "github-deploy" solo puede desplegar este
+# servicio y publicar en este registro.
+# Configuración en GitHub: variables GCP_WIF_PROVIDER y GCP_SERVICE_ACCOUNT.
+name: Desplegar en Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'Dockerfile'
+      - '.github/workflows/desplegar.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: produccion
+  cancel-in-progress: false
+
+env:
+  PROYECTO: taskflow-luis-2026
+  REGION: us-central1
+  SERVICIO: taskflow
+  IMAGEN: us-central1-docker.pkg.dev/taskflow-luis-2026/cloud-run-source-deploy/taskflow
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Construir y publicar la imagen
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$IMAGEN:${{ github.sha }}" .
+          docker push "$IMAGEN:${{ github.sha }}"
+
+      - name: Actualizar el servicio
+        run: |
+          gcloud run deploy "$SERVICIO" \
+            --image "$IMAGEN:${{ github.sha }}" \
+            --region "$REGION" --project "$PROYECTO" --quiet \
+            --format "value(status.url)"
