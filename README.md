@@ -13,6 +13,20 @@
 ![Pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
 ![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)
 
+## Contenido
+
+1. [Presentación](#1-presentación)
+2. [Estructura del proyecto](#2-estructura-del-proyecto)
+3. [Arquitectura](#3-arquitectura)
+4. [Plataformas y su función](#4-plataformas-y-su-función)
+5. [Cómo usar la plataforma](#5-cómo-usar-la-plataforma)
+6. [Instalación para pruebas](#6-instalación-para-pruebas)
+7. [Autor y licencia](#7-autor-y-licencia)
+
+---
+
+## 1. Presentación
+
 Aplicación web de gestión de tareas personales con un módulo de análisis de
 datos. Construida enteramente en Python: FastAPI en el servidor, Jinja2 con
 HTMX en la interfaz, pandas para el análisis y MongoDB como única base de datos.
@@ -29,13 +43,13 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
   automáticamente (tipos de dato, vacíos, estadísticas) y te deja graficarlo.
 - **Cómo probarlo:** entra a la [demo](https://taskflow-812302804238.us-central1.run.app/),
   crea una cuenta y agrega un par de tareas. Para correrlo en tu equipo, ve a
-  [Instalación](#instalación) y [Ejecución](#ejecución).
+  [Instalación para pruebas](#6-instalación-para-pruebas).
 
-## Demo en vivo
+### Demo en vivo
 
 **Aplicación:** [abrir la demo en vivo](https://taskflow-812302804238.us-central1.run.app/)
 
-## Funcionalidades
+### Funcionalidades
 
 **Cuentas**
 - Registro e ingreso con contraseñas hasheadas
@@ -61,7 +75,7 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 **Tiempo real**
 - Los indicadores se actualizan solos cuando cambia algo, sin recargar
 
-## Stack
+### Stack
 
 | Capa | Tecnología |
 |---|---|
@@ -75,32 +89,9 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 | Sesiones | JWT en cookie httponly |
 | Contraseñas | bcrypt con pimiento |
 
-## Conexiones externas
+---
 
-| Servicio | Uso | Obligatorio |
-|---|---|---|
-| MongoDB | Persistencia y almacenamiento de archivos | Sí |
-
-No requiere ningún otro servicio, cuenta ni clave de API.
-
-## Arquitectura
-
-<p align="center">
-  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: FastAPI en Google Cloud Run con páginas HTMX, sesión JWT, analítica con pandas, análisis de archivos, eventos en vivo y barrido horario; MongoDB Atlas con GridFS" width="100%">
-</p>
-
-- **Google Cloud Run** corre una sola app FastAPI: páginas Jinja2 + HTMX y la
-  API REST, protegidas por una sesión JWT en cookie.
-- La **analítica** se calcula con pandas y los gráficos se generan en el
-  servidor con Plotly.
-- Los archivos subidos se convierten a **Parquet** y se guardan en **GridFS**;
-  un barrido horario borra los que llevan 24 horas sin uso.
-- Los **eventos en vivo** (Server-Sent Events) avisan al navegador cuando
-  cambia una tarea, para que los indicadores se actualicen solos.
-- **MongoDB Atlas** guarda usuarios, tareas y archivos. **qa-evidencia** prueba
-  la demo automáticamente dos veces al día.
-
-## Estructura
+## 2. Estructura del proyecto
 
 ```
 backend/
@@ -127,12 +118,188 @@ backend/
     └── static/              Hoja de estilos
 ```
 
-## Requisitos
+---
+
+## 3. Arquitectura
+
+<p align="center">
+  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: FastAPI en Google Cloud Run con páginas HTMX, sesión JWT, analítica con pandas, análisis de archivos, eventos en vivo y barrido horario; MongoDB Atlas con GridFS" width="100%">
+</p>
+
+- Una sola app FastAPI sirve las páginas Jinja2 + HTMX y la API REST,
+  protegidas por una sesión JWT en cookie.
+- La **analítica** se calcula con pandas y los gráficos se generan en el
+  servidor con Plotly.
+- Los archivos subidos se convierten a **Parquet** y se guardan en **GridFS**;
+  un barrido horario borra los que llevan 24 horas sin uso.
+- Los **eventos en vivo** (Server-Sent Events) avisan al navegador cuando
+  cambia una tarea, para que los indicadores se actualicen solos.
+
+### Decisiones de diseño
+
+**Parquet como formato interno.** El archivo que sube el usuario se lee una sola
+vez y se guarda convertido. Parquet es columnar y comprimido, así que cargar dos
+columnas cuesta milisegundos frente a releer y reinterpretar el original en cada
+cambio de filtro. Es lo que hace viable un explorador interactivo.
+
+**Los archivos viven en GridFS**, no en disco. La aplicación no depende del
+sistema de archivos local, así que funciona igual en un servicio con
+almacenamiento efímero.
+
+**La agregación se hace en pandas y no en la base.** El volumen por usuario es
+reducido, y trabajar sobre un DataFrame permite operaciones de series de tiempo
+—remuestreo semanal, medias— que en Mongo exigirían tuberías bastante más largas
+y difíciles de leer.
+
+**Los gráficos se renderizan en el servidor** y viajan como HTML. El navegador
+solo los dibuja.
+
+**Server-Sent Events y no WebSockets.** El flujo va en un solo sentido y SSE
+reconecta por su cuenta. Además, `EventSource` no admite cabeceras propias, de
+modo que la autenticación viaja necesariamente en la cookie de sesión: es la
+razón por la que la sesión se guarda así y no en almacenamiento del navegador.
+
+**Doble caducidad de los archivos.** Se borran al cerrar sesión, pero casi nadie
+pulsa "Salir": un barrido horario elimina los que lleven 24 horas sin uso, para
+que nada quede huérfano.
+
+### Seguridad
+
+#### Contraseñas
+
+Se **hashean**, no se cifran. El cifrado es reversible: en una filtración
+bastaría la clave para recuperarlas en claro. El hash es de una sola vía.
+
+Tres capas:
+
+| Capa | Qué aporta |
+|---|---|
+| Pimiento (HMAC-SHA256) | Un secreto que vive en la configuración, no en la base. Sin él, un volcado robado no sirve ni para probar contraseñas comunes |
+| bcrypt con sal única | Dos usuarios con la misma contraseña producen hashes distintos |
+| Coste 12 | Cada verificación cuesta unos 250 ms: irrelevante para el usuario, prohibitivo para la fuerza bruta |
+
+El pimiento resuelve además el límite de 72 bytes de bcrypt, que trunca en
+silencio las contraseñas más largas: el HMAC produce siempre una entrada de
+longitud fija.
+
+Las cuentas creadas con un esquema anterior se actualizan solas en el siguiente
+ingreso, sin obligar a nadie a restablecer su contraseña.
+
+#### Resto
+
+- Sesión en cookie `httponly`: JavaScript no puede leer el token
+- Inactividad deslizante de 30 minutos y expiración absoluta de 12 horas
+- Pertenencia verificada en el filtro de la consulta, no en la vista
+- Validación de archivos por extensión, tamaño y número de filas
+- Formatos que ejecutan código al deserializar, como pickle, rechazados
+- Cuota de archivos por cuenta
+- Búsquedas con la entrada escapada antes de construir la expresión regular
+- Cabeceras `X-Content-Type-Options`, `X-Frame-Options` y `Referrer-Policy`
+
+### Limitación conocida
+
+El registro de suscriptores del canal de eventos vive en memoria del proceso.
+Con un único proceso de Uvicorn funciona correctamente; con varios trabajadores,
+un evento generado en uno no alcanzaría a los clientes conectados a otro. La
+solución sería un intermediario como Redis, descartado para no añadir una
+dependencia externa a un proyecto que debe levantarse con un solo comando.
+
+---
+
+## 4. Plataformas y su función
+
+| Plataforma | Función en el proyecto |
+|---|---|
+| ![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white) | Corre la app FastAPI: páginas Jinja2 + HTMX, API REST y canal de eventos en vivo. |
+| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | MongoDB Atlas guarda usuarios, tareas y archivos (estos últimos en GridFS). Es el único servicio externo: no requiere otra cuenta ni clave de API. |
+| ![qa-evidencia](https://img.shields.io/badge/qa--evidencia-2EAD33?style=for-the-badge&logo=playwright&logoColor=white) | Prueba la demo automáticamente dos veces al día y publica la evidencia. |
+
+---
+
+## 5. Cómo usar la plataforma
+
+### 5.1 Crear una cuenta
+
+1. En la página de inicio, pulsa **Crear cuenta**.
+2. Completa **Nombre**, **Correo electrónico** y **Contraseña**.
+3. Pulsa **Crear cuenta**. La cuenta queda lista para usar de inmediato.
+
+### 5.2 Iniciar sesión
+
+1. Pulsa **Ya tengo cuenta** o **Ingresar** en el menú.
+2. Escribe **Correo electrónico** y **Contraseña** y pulsa **Ingresar**.
+3. El menú superior muestra **Tareas**, **Analítica**, **Datos**, **API ↗** y
+   **Salir**.
+
+La sesión se cierra tras 30 minutos sin actividad y, en cualquier caso, a las 12
+horas.
+
+### 5.3 Gestionar tareas
+
+1. En **Tareas**, escribe en **¿Qué necesitas hacer?** y, si quieres, completa:
+
+   | Campo | Dato |
+   |---|---|
+   | Categoría | Texto libre para agrupar tareas |
+   | Prioridad | Baja, media o alta |
+   | Fecha límite | Fecha de vencimiento |
+   | Descripción | Detalle de la tarea |
+
+2. Pulsa **Agregar**: la tarea aparece en la lista sin recargar la página.
+3. En cada tarea, el botón de estado la marca como completada (o la devuelve a
+   pendiente) y el de eliminar la borra.
+4. Para encontrar tareas, usa **Filtrar**: busca por título, elige estado
+   (Pendientes, En progreso, Completadas) o categoría y pulsa **Aplicar**.
+   **Limpiar** quita los filtros.
+
+### 5.4 Ver la analítica
+
+1. Abre **Analítica**.
+2. Filtra por **Desde** / **Hasta**, **Categoría** y **Prioridad**: los gráficos
+   se recalculan sin recargar.
+3. El panel muestra cumplimiento, tiempo medio de cierre, tareas vencidas,
+   **Creadas frente a completadas**, **Distribución por estado**, **Estado por
+   prioridad** y **Categorías**.
+
+### 5.5 Analizar un archivo
+
+1. Abre **Datos** y pulsa **Selecciona un archivo** (CSV, Excel o JSON).
+2. La app lo procesa y lo agrega a tu lista con su número de filas y columnas.
+3. Ábrelo para ver la **Vista previa** y el **Perfil de columnas** (tipos, nulos,
+   valores únicos y estadísticas).
+4. En el **Explorador de gráficos** elige:
+   - **Gráfico:** barras, líneas, área, torta, dispersión, caja o histograma.
+   - **Agrupar por** y **Medida:** las columnas a cruzar.
+   - **Función:** cantidad de registros, suma, promedio, máximo o mínimo.
+
+Límites del módulo de análisis:
+
+| Concepto | Valor |
+|---|---|
+| Formatos | CSV, XLSX, JSON |
+| Tamaño máximo | 10 MB |
+| Filas máximas | 500.000 |
+| Archivos por usuario | 5 |
+| Caducidad | 24 h sin uso, o al cerrar sesión |
+
+El JSON debe ser un arreglo de objetos. Las estructuras anidadas se rechazan con
+un aviso: no existe una forma única de convertirlas a tabla.
+
+### 5.6 Usar la API
+
+**API ↗** abre la documentación interactiva de la API REST (`/docs`), con la
+misma sesión de la interfaz.
+
+---
+
+## 6. Instalación para pruebas
+
+### Requisitos
 
 - Python 3.11 o superior
 - Una base MongoDB accesible
 
-## Instalación
+### Instalación
 
 ```bash
 git clone https://github.com/lariasca1994/taskflow.git
@@ -170,7 +337,7 @@ las contraseñas.
 Los límites del módulo de análisis también se configuran ahí. La plantilla
 indica el nombre y el propósito de cada variable.
 
-## Ejecución
+### Ejecución
 
 ```bash
 cd backend
@@ -186,7 +353,7 @@ resuelven desde ahí.
 | Documentación de la API | `http://127.0.0.1:8000/docs` |
 | Estado del servicio | `http://127.0.0.1:8000/api/health` |
 
-## Datos de ejemplo
+### Datos de ejemplo
 
 El panel de analítica necesita historia para que la serie semanal tenga forma.
 Tras crear una cuenta:
@@ -199,98 +366,16 @@ python -m app.comandos.generar_ejemplo tu@correo.com 180
 Genera tareas repartidas en varios meses, con sesgo hacia fechas recientes y
 tiempos de cierre verosímiles.
 
-## Límites del módulo de análisis
-
-| Concepto | Valor |
-|---|---|
-| Formatos | CSV, XLSX, JSON |
-| Tamaño máximo | 10 MB |
-| Filas máximas | 500.000 |
-| Archivos por usuario | 5 |
-| Caducidad | 24 h sin uso, o al cerrar sesión |
-
-El JSON debe ser un arreglo de objetos. Las estructuras anidadas se rechazan con
-un aviso: no existe una forma única de convertirlas a tabla.
-
-## Decisiones de diseño
-
-**Parquet como formato interno.** El archivo que sube el usuario se lee una sola
-vez y se guarda convertido. Parquet es columnar y comprimido, así que cargar dos
-columnas cuesta milisegundos frente a releer y reinterpretar el original en cada
-cambio de filtro. Es lo que hace viable un explorador interactivo.
-
-**Los archivos viven en GridFS**, no en disco. La aplicación no depende del
-sistema de archivos local, así que funciona igual en un servicio con
-almacenamiento efímero.
-
-**La agregación se hace en pandas y no en la base.** El volumen por usuario es
-reducido, y trabajar sobre un DataFrame permite operaciones de series de tiempo
-—remuestreo semanal, medias— que en Mongo exigirían tuberías bastante más largas
-y difíciles de leer.
-
-**Los gráficos se renderizan en el servidor** y viajan como HTML. El navegador
-solo los dibuja.
-
-**Server-Sent Events y no WebSockets.** El flujo va en un solo sentido y SSE
-reconecta por su cuenta. Además, `EventSource` no admite cabeceras propias, de
-modo que la autenticación viaja necesariamente en la cookie de sesión: es la
-razón por la que la sesión se guarda así y no en almacenamiento del navegador.
-
-**Doble caducidad de los archivos.** Se borran al cerrar sesión, pero casi nadie
-pulsa "Salir": un barrido horario elimina los que lleven 24 horas sin uso, para
-que nada quede huérfano.
-
-## Seguridad
-
-### Contraseñas
-
-Se **hashean**, no se cifran. El cifrado es reversible: en una filtración
-bastaría la clave para recuperarlas en claro. El hash es de una sola vía.
-
-Tres capas:
-
-| Capa | Qué aporta |
-|---|---|
-| Pimiento (HMAC-SHA256) | Un secreto que vive en la configuración, no en la base. Sin él, un volcado robado no sirve ni para probar contraseñas comunes |
-| bcrypt con sal única | Dos usuarios con la misma contraseña producen hashes distintos |
-| Coste 12 | Cada verificación cuesta unos 250 ms: irrelevante para el usuario, prohibitivo para la fuerza bruta |
-
-El pimiento resuelve además el límite de 72 bytes de bcrypt, que trunca en
-silencio las contraseñas más largas: el HMAC produce siempre una entrada de
-longitud fija.
-
-Las cuentas creadas con un esquema anterior se actualizan solas en el siguiente
-ingreso, sin obligar a nadie a restablecer su contraseña.
-
-### Resto
-
-- Sesión en cookie `httponly`: JavaScript no puede leer el token
-- Inactividad deslizante de 30 minutos y expiración absoluta de 12 horas
-- Pertenencia verificada en el filtro de la consulta, no en la vista
-- Validación de archivos por extensión, tamaño y número de filas
-- Formatos que ejecutan código al deserializar, como pickle, rechazados
-- Cuota de archivos por cuenta
-- Búsquedas con la entrada escapada antes de construir la expresión regular
-- Cabeceras `X-Content-Type-Options`, `X-Frame-Options` y `Referrer-Policy`
-
-## Limitación conocida
-
-El registro de suscriptores del canal de eventos vive en memoria del proceso.
-Con un único proceso de Uvicorn funciona correctamente; con varios trabajadores,
-un evento generado en uno no alcanzaría a los clientes conectados a otro. La
-solución sería un intermediario como Redis, descartado para no añadir una
-dependencia externa a un proyecto que debe levantarse con un solo comando.
-
-## Despliegue
+### Despliegue
 
 La aplicación corre en Google Cloud Run, con MongoDB Atlas
 como base de datos.
 
-## Autor
+---
+
+## 7. Autor y licencia
 
 **Luis Felipe Arias Carriazo**
 [GitHub](https://github.com/lariasca1994) · [LinkedIn](https://linkedin.com/in/lfac1)
 
-## Licencia
-
-MIT
+Licencia: MIT.
