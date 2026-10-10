@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{# Portada común de ingreso y registro. Las hijas definen paso,
+   titulo_form, subtitulo, formulario y alterno. #}
+{% block cabeza %}<link rel="stylesheet" href="/static/acceso.css">{% endblock %}
+{% block clase_body %}acceso{% endblock %}
+{% block cuerpo %}
+<div class="portada">
+    <aside class="marca">
+        <a href="/" class="marca-logo"><img src="/static/iconos/icono.svg" alt="">TaskFlow</a>
+
+        <div class="marca-mensaje">
+            <p class="en-vivo">Analítica en vivo</p>
+            <h2 class="marca-titular">Organiza el día. <span>Mide el avance.</span></h2>
+            <p class="marca-bajada">
+                Tareas con prioridad, categoría y fecha límite; cumplimiento,
+                tiempo de cierre y evolución semanal calculados con pandas, y
+                cada cambio reflejado al instante.
+            </p>
+        </div>
+
+        <div class="tablero" aria-hidden="true">
+            <div class="columna">
+                <p class="columna-titulo"><span>Pendiente</span><span>2</span></p>
+                <div class="tarea"><i></i><i></i><b class="p-alta"></b></div>
+                <div class="tarea"><i></i><i></i><b class="p-media"></b></div>
+            </div>
+            <div class="columna">
+                <p class="columna-titulo"><span>En progreso</span><span>1</span></p>
+                <div class="tarea"><i></i><i></i><b class="p-baja"></b></div>
+            </div>
+            <div class="columna columna--hecha">
+                <p class="columna-titulo"><span>Hecha</span><span>2</span></p>
+                <div class="tarea"><i></i><i></i><b class="p-media"></b></div>
+                <div class="tarea"><i></i><i></i><b class="p-baja"></b></div>
+            </div>
+            <div class="tarea tarea--viaja"><i></i><i></i><b class="p-alta"></b></div>
+        </div>
+
+        <ul class="indicadores" aria-hidden="true">
+            <li><strong>78 %</strong><span>Cumplimiento</span><div class="barra-avance"></div></li>
+            <li><strong>2,4 d</strong><span>Cierre medio</span></li>
+            <li><strong>+12</strong><span>Hechas esta semana</span></li>
+        </ul>
+    </aside>
+
+    <main class="lado">
+        <div class="lado-tema">
+            <button type="button" id="alternar-tema" class="boton-tema"
+                    aria-label="Cambiar entre tema claro y oscuro" title="Cambiar tema">🌓</button>
+        </div>
+
+        <section class="tarjeta" aria-labelledby="titulo-acceso">
+            <p class="tarjeta-paso">{% block paso %}{% endblock %}</p>
+            <h1 id="titulo-acceso" class="tarjeta-titulo">{% block titulo_form %}{% endblock %}</h1>
+            <p class="tarjeta-subtitulo">{% block subtitulo %}{% endblock %}</p>
+
+            {% if error %}
+            <div class="alerta" role="alert">{{ error }}</div>
+            {% elif request.query_params.get("expirada") %}
+            <div class="alerta alerta--info" role="status">Tu sesión expiró por inactividad. Vuelve a ingresar.</div>
+            {% endif %}
+
+            {% block formulario %}{% endblock %}
+
+            <p class="alterno">{% block alterno %}{% endblock %}</p>
+        </section>
+    </main>
+</div>
+{% endblock %}

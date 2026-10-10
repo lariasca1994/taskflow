@@ -8,7 +8,7 @@ escribir JavaScript propio.
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Form, Request, Response
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app import analitica, datos, eventos, repositorio
@@ -129,7 +129,17 @@ def salir(request: Request):
 
 @router.get("/", response_class=HTMLResponse)
 def inicio(request: Request, usuario: dict | None = Depends(usuario_opcional)):
-    return plantillas.TemplateResponse(request, "inicio.html", {"usuario": usuario})
+    # La portada de acceso es la primera pantalla, igual que en el resto
+    # del portafolio; con sesion abierta se va directo a las tareas.
+    if usuario:
+        return RedirectResponse("/tareas", status_code=303)
+    return plantillas.TemplateResponse(request, "login.html", {})
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    # Los navegadores lo piden en la raiz aunque la pagina declare otro icono.
+    return FileResponse("app/static/iconos/favicon.ico")
 
 
 @router.get("/tareas", response_class=HTMLResponse)
