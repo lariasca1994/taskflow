@@ -19,9 +19,11 @@ protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
 
 ## 1. En pocas palabras
 
-Una lista de tareas con fechas, prioridades y categorías, más un panel que muestra cómo vas
-(cumplimiento, tiempo de cierre, vencidas). También puedes subir un CSV, Excel o JSON: la app lo
-describe sola y te deja graficarlo. Los números se actualizan en vivo, sin recargar.
+Una lista de tareas con fechas, prioridades y categorías, más un **informe de productividad** que
+muestra cómo vas (cumplimiento, tiempo de cierre, vencidas). También puedes subir un CSV, Excel o
+JSON —o generar un lote de ventas simulado— y la app lo convierte en un **informe gerencial**:
+indicadores, gráficos explicados, medidas DAX, tabla dinámica y el origen de los datos. Los números
+se actualizan en vivo, sin recargar.
 
 ## 2. Antes de empezar
 
@@ -78,9 +80,9 @@ La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a l
 Pulsa **Aplicar** para filtrar o **Limpiar** para quitar los filtros. En cada tarea, la casilla la
 marca como completada (o la devuelve a pendiente) y el botón de eliminar la borra.
 
-### 3.5 Analítica
+### 3.5 Analítica: informe de productividad
 
-![Panel de analítica con filtros](img/manual/05-analitica.png)
+![Informe de productividad con filtros numerados](img/manual/05-analitica.png)
 
 | # | Filtro | Qué hace |
 |:-:|---|---|
@@ -89,36 +91,145 @@ marca como completada (o la devuelve a pendiente) y el botón de eliminar la bor
 | 3 | Categoría | Limita a una categoría |
 | 4 | Prioridad | Limita a una prioridad |
 
-Debajo están los indicadores (tareas totales, cumplimiento, tiempo medio de cierre, vencidas sin
-cerrar) y los gráficos **Creadas frente a completadas**, **Distribución por estado**, **Estado por
-prioridad** y **Categorías**. Todo se recalcula al cambiar un filtro.
+Todo se recalcula al cambiar un filtro, y también solo cuando creas, completas o eliminas una
+tarea. **Limpiar filtros** vuelve a mostrarlo todo.
 
-### 3.6 Datos: subir un archivo
+**Cómo leer este panel** (arriba, plegable) explica el panel en tres pasos y muestra la leyenda de
+colores: verde = completada, azul = en progreso, naranja = pendiente.
 
-![Pantalla de carga de archivos](img/manual/06-datos.png)
+**Indicadores.** Pasa el cursor por la **i** de cada tarjeta para ver qué mide.
 
-| # | Campo | Qué escribir | Reglas |
+| Indicador | Qué significa | Etiqueta debajo |
+|---|---|---|
+| Tareas registradas | Tareas que cumplen los filtros | Creadas en las últimas 4 semanas frente a las 4 anteriores |
+| Cumplimiento | Porcentaje de tareas completadas | Cambio en puntos; verde ▲ si mejora, rojo ▼ si empeora |
+| Tiempo medio de cierre | Promedio entre creación y finalización | Verde si baja (se cierra más rápido) |
+| Vencidas sin cerrar | Abiertas con la fecha límite vencida | Cuántas abiertas hay en total |
+
+Debajo, tres **hallazgos** resumen el panel en frases (por ejemplo, la categoría que concentra
+más tareas o la de menor cumplimiento).
+
+**Gráficos.** Cada uno tiene el botón **¿Cómo leerlo?**, que explica qué muestra, cómo leerlo y
+qué pregunta responde.
+
+| Gráfico | Qué responde |
+|---|---|
+| Creadas frente a completadas | ¿Estoy al día o se acumula trabajo? Semanas completas, de lunes a domingo |
+| Distribución por estado | ¿Cuánto está terminado, en marcha o sin empezar? |
+| Estado por prioridad | ¿Estoy atendiendo primero lo importante? |
+| Categorías | ¿Dónde se concentra el trabajo y qué área va más atrasada? |
+
+**Imprimir / PDF** genera el informe sin los controles.
+
+### 3.6 Datos: elegir una fuente
+
+![Página de datos con el generador, la carga y las fuentes](img/manual/06-datos.png)
+
+| # | Elemento | Qué hacer | Reglas |
 |:-:|---|---|---|
-| 1 | Selecciona un archivo | Un CSV, Excel (`.xlsx`) o JSON | Máximo **10 MB** y **500.000 filas**; el JSON debe ser una lista de objetos sin anidar |
+| 1 | Volumen | Elige **Aleatorio**, **Pequeño** (500 a 2.000 filas), **Mediano** (2.000 a 8.000) o **Grande** (8.000 a 20.000) | Solo para lotes simulados |
+| 2 | Generar lote | Crea un lote de ventas simulado | Cada clic usa una semilla nueva: cambian el volumen, el periodo, la tendencia, la temporada, la región y el canal líderes, y puede haber una promoción o un desabastecimiento |
+| 3 | Sube tu propio archivo | Arrastra un CSV, Excel (`.xlsx`) o JSON, o haz clic para elegirlo | Máximo **10 MB** y **500.000 filas**; el JSON debe ser una lista de objetos sin anidar |
+| 4 | Abrir informe | Abre el informe gerencial de esa fuente | — |
+| 5 | Eliminar | Borra la fuente (pide confirmación) | — |
 
-Cada cuenta conserva hasta **5 archivos**, que se borran tras **24 horas sin uso** o al cerrar
+Cada tarjeta indica si la fuente es un **archivo subido** o un lote **generado** (con su semilla),
+sus filas, columnas y tamaño. En los lotes generados se resume el escenario: periodo, tendencia,
+temporada alta, región líder y evento.
+
+Cada cuenta conserva hasta **5 fuentes**, que se borran tras **24 horas sin uso** o al cerrar
 sesión.
 
-### 3.7 Explorar un archivo
+### 3.7 Informe gerencial: resumen ejecutivo
 
-![Explorador de gráficos, perfil de columnas y vista previa](img/manual/07-explorador.png)
+![Resumen ejecutivo del informe con sus controles numerados](img/manual/07-informe.png)
+
+Arriba están el nombre de la fuente, su periodo y el **recorrido de los datos** en cinco pasos:
+fuente → lectura → almacén → modelo → informe. Debajo, **Cómo leer este informe** lo explica en
+cuatro pasos y aclara los símbolos (▲ mejora, ▼ empeora, «—» sin dato para comparar, **M** =
+millones, **mil M** = miles de millones).
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Desde / Hasta | Acota el periodo de todo el informe |
+| 2 | Segmentadores | Filtran por categoría (por ejemplo, canal o región). Aplican a todas las pestañas |
+| 3 | Pestañas | Resumen ejecutivo, Tabla dinámica, Medidas DAX, Explorador y Origen y calidad |
+| 4 | **i** de cada indicador | Explica en una frase qué mide |
+| 5 | ¿Cómo leerlo? | Explica el gráfico: qué muestra, cómo leerlo y qué pregunta responde |
+| 6 | Clic para filtrar | Un clic en una barra, una celda o un color filtra todo el informe por ese valor; aparece como un chip con **×** para quitarlo |
+| 7 | Descargar CSV | Baja la fuente completa, lista para Excel o Power BI |
+| 8 | Imprimir / PDF | Genera el informe sin los controles |
+
+Los **indicadores** muestran el total del periodo filtrado y una etiqueta que compara el último
+mes completo con el anterior. Debajo, tres **hallazgos** resumen lo más importante en frases.
+
+| Gráfico | Qué responde |
+|---|---|
+| Evolución mensual | ¿Crecemos, estamos estancados o caemos? Incluye promedio móvil de 3 meses y, si hay historia, el año anterior |
+| Participación | ¿De dónde sale la mayor parte del negocio? |
+| ¿Quién crece y quién cae? | ¿Qué explica la variación del mes? Verde ▲ sube, rojo ▼ baja |
+| Mezcla mensual | ¿Está cambiando la forma en que vendemos? |
+| Mapa de calor | ¿Hay meses fuertes o débiles que se repiten? |
+
+Al pie de cada gráfico se indica la **fuente**: el archivo, las filas filtradas y cómo se agrupó.
+
+### 3.8 Tabla dinámica
+
+![Tabla dinámica con sus campos numerados](img/manual/08-pivote.png)
 
 | # | Campo | Qué elegir |
 |:-:|---|---|
-| 1 | Gráfico | Barras, líneas, área, torta, dispersión, caja o histograma |
-| 2 | Agrupar por | La columna que forma las categorías (por ejemplo, ciudad) |
-| 3 | Medida | La columna numérica que se calcula (por ejemplo, valor) |
-| 4 | Función | Cantidad de registros, suma, promedio, máximo o mínimo |
+| 1 | Filas | La dimensión de las filas, o Año, Trimestre o Mes de la fecha |
+| 2 | Columnas | La dimensión de las columnas, o ninguna |
+| 3 | Valores | La columna numérica a resumir, o contar registros |
+| 4 | Resumir con | Suma, promedio, conteo, distintos, máximo o mínimo |
+| 5 | Mostrar como | Valor, % del total general, % de la fila o % de la columna |
+| 6 | Exportar | Descarga la tabla en CSV, con los filtros aplicados |
+| 7 | Ver la consulta DAX equivalente | Muestra la misma tabla escrita como consulta DAX |
 
-A la derecha, el **Perfil de columnas** muestra el tipo de cada columna, sus valores únicos, nulos
-y estadísticas. Abajo, la **Vista previa** muestra las primeras 20 filas.
+La última fila y la última columna son los **totales**. Cuanto más verde la celda, mayor el valor.
 
-### 3.8 API
+### 3.9 Medidas DAX
+
+![Medidas DAX y editor de nueva medida](img/manual/09-medidas.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Medidas del modelo | Cada medida con su fórmula DAX y su valor en el **rango filtrado** y en el **último mes completo** |
+| 2 | Ejemplos | Botones que escriben una fórmula de ejemplo en el editor |
+| 3 | Fórmula | Escribe tu medida, por ejemplo `Participación = DIVIDE([Total], CALCULATE([Total], ALL('tabla'[canal])))` |
+| 4 | Desglosar por | Calcula la medida para cada valor de una dimensión |
+| 5 | Calcular medida | Muestra el resultado, la fórmula, la tabla del desglose y su gráfico |
+
+Puedes usar las medidas del modelo entre corchetes (`[Total]`, `[Registros]`…). Funciones
+disponibles: SUM, AVERAGE, MIN, MAX, MEDIAN, COUNT, COUNTROWS, DISTINCTCOUNT, DIVIDE, CALCULATE,
+ALL, DATEADD, SAMEPERIODLASTYEAR, DATESYTD, DATESMTD, DATESINPERIOD, TOTALYTD, TOTALMTD, IF,
+ROUND y ABS. Si la fórmula tiene un error, se muestra un mensaje que dice qué corregir.
+
+### 3.10 Origen y calidad
+
+![Ficha de origen y calidad de los datos](img/manual/10-origen.png)
+
+| # | Elemento | Qué muestra |
+|:-:|---|---|
+| 1 | Ficha de origen | Archivo, formato, tamaño, fecha de carga, almacenamiento y vigencia. En los lotes simulados, además: semilla, volumen, periodo, tendencia, estacionalidad, región líder y evento |
+| 2 | Completitud | Porcentaje de celdas con dato, celdas vacías y filas duplicadas |
+| 3 | Cómo se interpretó cada columna | El rol que el informe le dio a cada columna: medida principal, eje de tiempo, dimensión o medida |
+
+### 3.11 Explorador
+
+La pestaña **Explorador** permite un gráfico libre:
+
+| Campo | Qué elegir |
+|---|---|
+| Gráfico | Barras, líneas, área, torta, dispersión, caja o histograma |
+| Agrupar por | La columna que forma las categorías |
+| Medida | La columna numérica que se calcula |
+| Función | Cantidad de registros, suma, promedio, máximo o mínimo |
+
+Debajo, la **Vista previa** muestra las primeras 20 filas de la fuente.
+
+### 3.12 API
 
 **API ↗** abre la documentación interactiva de la API REST (`/docs`), con tu misma sesión.
 
@@ -130,6 +241,8 @@ y estadísticas. Abajo, la **Vista previa** muestra las primeras 20 filas.
 | Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** (bcrypt con pimienta) | Nadie: no se puede leer ni recuperar |
 | Tareas | Tu lista y tu analítica | MongoDB Atlas, marcadas con tu cuenta | Tú y el administrador |
 | Archivos que subes | Análisis | MongoDB (GridFS, convertidos a Parquet) | Solo tú; se borran a las 24 h sin uso o al salir |
+| Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
+| Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
 | Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
 
 ## 5. Seguridad: qué se garantiza
@@ -148,7 +261,10 @@ Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.p
   caducidad automática.
 - **Cabeceras de seguridad** en todas las respuestas: `X-Content-Type-Options: nosniff`,
   `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy`.
-- **Plantillas con escape automático** (Jinja2).
+- **Plantillas con escape automático** (Jinja2). Los nombres que vienen de tus archivos también se
+  escapan en los hallazgos escritos.
+- **Las fórmulas DAX no ejecutan código:** un intérprete propio solo admite las funciones de la
+  lista; el texto nunca se pasa a `eval`.
 - **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
   entorno de Cloud Run.
 
@@ -171,3 +287,20 @@ sesión. Vuelve a subirlo.
 
 **¿Qué mide el "tiempo medio de cierre"?** El promedio entre la creación y la finalización de las
 tareas completadas en el rango filtrado.
+
+**¿Por qué cada lote generado es distinto?** Cada clic en **Generar lote** usa una semilla nueva que
+define el volumen, el periodo y el escenario de negocio. La semilla queda en **Origen y calidad**:
+con la misma semilla se obtiene exactamente el mismo lote.
+
+**¿Qué significa "—" en una medida?** Que no hay datos para comparar, por ejemplo el año anterior de
+un archivo que cubre menos de un año. Se deja vacío para no comparar contra un periodo a medias.
+
+**¿Por qué no se compara el mes en curso?** Si el archivo termina a mitad de mes, se compara el
+último mes completo: un mes a medias haría parecer que todo cayó. Por lo mismo, el informe de
+productividad muestra solo semanas completas.
+
+**¿Es Power BI?** No. Es un intérprete del DAX más usado en informes gerenciales, calculado con
+pandas sobre tu archivo. Las fórmulas se pueden copiar a Power BI.
+
+**¿Cómo quito un filtro que puse con un clic en un gráfico?** Pulsa la **×** del chip que aparece en
+la barra de filtros, o **Limpiar filtros**.
