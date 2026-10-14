@@ -154,7 +154,7 @@ backend/
 ## 3. Arquitectura
 
 <p align="center">
-  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: FastAPI en Google Cloud Run con páginas HTMX, sesión JWT, analítica con pandas, análisis de archivos, eventos en vivo y barrido horario; MongoDB Atlas con GridFS" width="100%">
+  <img src="docs/arquitectura.svg" alt="Diagrama de arquitectura: FastAPI en Google Cloud Run con páginas HTMX, sesión JWT, simulador de ventas, analítica de tareas, análisis de archivos, informe gerencial con DAX y tabla dinámica, eventos en vivo y barrido horario; MongoDB Atlas con GridFS" width="100%">
 </p>
 
 - Una sola app FastAPI sirve las páginas Jinja2 + HTMX y la API REST,
@@ -163,6 +163,11 @@ backend/
   servidor con Plotly.
 - Los archivos subidos se convierten a **Parquet** y se guardan en **GridFS**;
   un barrido horario borra los que llevan 24 horas sin uso.
+- El **simulador de ventas** crea lotes con una semilla nueva (otro volumen y
+  escenario) que entran por el mismo camino que un archivo subido.
+- El **informe gerencial** lee del Parquet solo las columnas que necesita,
+  detecta fecha, medida y dimensiones, y calcula las medidas DAX, la tabla
+  dinámica y los gráficos.
 - Los **eventos en vivo** (Server-Sent Events) avisan al navegador cuando
   cambia una tarea, para que los indicadores se actualicen solos.
 
