@@ -64,10 +64,13 @@ para filtrar y adaptar los gráficos al tema oscuro.
 - Crear, completar, filtrar, buscar y eliminar
 - Categorías, prioridades y fechas límite
 
-**Analítica de tareas**
-- Cumplimiento, tiempo medio de cierre y tareas vencidas
-- Serie semanal de creadas frente a completadas
-- Distribución por estado, prioridad y categoría
+**Analítica de tareas: informe de productividad**
+- Indicadores de cumplimiento, tiempo medio de cierre y tareas vencidas, con la
+  variación de las últimas 4 semanas frente a las 4 anteriores y minitendencia
+- Tres hallazgos escritos (categoría dominante, la más atrasada, ritmo de cierre)
+- Serie de creadas frente a completadas por semana completa, distribución por
+  estado, estado por prioridad y categorías, con un color fijo por estado
+- Guía de lectura y botón «¿Cómo leerlo?» en cada gráfico
 - Filtros por rango de fechas, categoría y prioridad que recalculan sin recargar
 
 **Análisis de archivos: informe gerencial**
@@ -304,9 +307,12 @@ horas.
 1. Abre **Analítica**.
 2. Filtra por **Desde** / **Hasta**, **Categoría** y **Prioridad**: los gráficos
    se recalculan sin recargar.
-3. El panel muestra cumplimiento, tiempo medio de cierre, tareas vencidas,
-   **Creadas frente a completadas**, **Distribución por estado**, **Estado por
-   prioridad** y **Categorías**.
+3. El informe muestra cumplimiento, tiempo medio de cierre y tareas vencidas
+   con su variación frente a las 4 semanas anteriores, tres hallazgos escritos
+   y los gráficos **Creadas frente a completadas**, **Distribución por estado**,
+   **Estado por prioridad** y **Categorías**.
+4. Pasa el cursor por la **i** de cada indicador o pulsa **¿Cómo leerlo?** en
+   un gráfico para ver qué mide y cómo interpretarlo.
 
 ### 5.5 Analizar un archivo
 

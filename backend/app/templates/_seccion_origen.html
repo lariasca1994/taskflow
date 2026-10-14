@@ -11,9 +11,9 @@
         </div>
         <dl class="tb-ficha">
             <dt>Archivo</dt><dd>{{ dataset.nombre }}</dd>
-            <dt>Formato original</dt><dd>{{ dataset.extension[1:] | upper }}{% if dataset.bytes %} · {{ "%.1f" | format(dataset.bytes / 1024) }} KB{% endif %}</dd>
+            <dt>Formato original</dt><dd>{{ dataset.extension[1:] | upper }}{% if dataset.bytes %} · {{ ("%.1f" | format(dataset.bytes / 1024)) | replace(".", ",") }} KB{% endif %}</dd>
             <dt>Cargado</dt><dd>{{ dataset.subido_en.strftime("%d/%m/%Y %H:%M") }} UTC</dd>
-            <dt>Almacenamiento</dt><dd>Parquet (snappy) en GridFS · {{ perfil.memoria_kb }} KB en memoria</dd>
+            <dt>Almacenamiento</dt><dd>Parquet (snappy) en GridFS · {{ perfil.memoria_kb | string | replace(".", ",") }} KB en memoria</dd>
             <dt>Vigencia</dt><dd>Se elimina tras {{ horas_vida }} h sin uso o al cerrar sesión</dd>
             {% if origen.tipo == "generado" %}
             <dt>Generador</dt><dd>Simulador de ventas TaskFlow · semilla <code>{{ origen.semilla }}</code></dd>

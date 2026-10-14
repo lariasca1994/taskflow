@@ -960,3 +960,7 @@ textarea.tb-campo { font-family: ui-monospace, "Cascadia Code", Consolas, monosp
 @media print {
   .tb-guia, .tb-ayuda, .tb-pista { display: none !important; }
 }
+
+/* Leyenda de estados y tarjeta en alerta (Analitica de tareas) */
+.tb-punto { display: inline-block; width: .6rem; height: .6rem; margin-right: .3rem; border-radius: 50%; vertical-align: middle; }
+.tb-kpi--alerta::before { background: var(--t-baja); }

@@ -1,51 +1,99 @@
-{# Bloque de indicadores y graficos. Se reemplaza al cambiar un filtro
+{# Indicadores y graficos de tareas. Se reemplaza al cambiar un filtro
    o cuando llega un evento en vivo. #}
+{% from "_ayuda.html" import ayuda, info %}
 <div id="panel-analitica"
      hx-get="/analitica/panel"
      hx-trigger="refrescar"
      hx-include="#filtros-analitica"
      hx-swap="outerHTML">
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="kpi">
-            <div class="kpi-valor">{{ kpi.total }}</div>
-            <div class="kpi-titulo">Tareas totales</div>
-        </div>
-        <div class="kpi kpi-indigo">
-            <div class="kpi-valor">{{ kpi.cumplimiento }}%</div>
-            <div class="kpi-titulo">Cumplimiento</div>
-        </div>
-        <div class="kpi kpi-teal">
-            <div class="kpi-valor">{% if kpi.horas_medias is not none %}{{ kpi.horas_medias }}h{% else %}—{% endif %}</div>
-            <div class="kpi-titulo">Tiempo medio de cierre</div>
-        </div>
-        <div class="kpi kpi-rose">
-            <div class="kpi-valor">{{ kpi.vencidas }}</div>
-            <div class="kpi-titulo">Vencidas sin cerrar</div>
-        </div>
+    <div class="tb-kpis">
+        {% for k in tarjetas %}
+        <article class="tb-kpi {% if k.alerta %}tb-kpi--alerta{% endif %}">
+            <span class="tb-kpi-titulo">{{ k.titulo }} {{ info(k.ayuda) }}</span>
+            <span class="tb-kpi-valor tb-num">{{ k.valor }}</span>
+            <div class="tb-kpi-pie">
+                <div style="display:flex;flex-direction:column;gap:.3rem">
+                    {% if k.texto %}
+                    <span class="tb-delta {% if k.favorable is none %}tb-delta--neutro{% elif k.favorable %}tb-delta--sube{% else %}tb-delta--baja{% endif %}">
+                        {{ '▲' if k.variacion >= 0 else '▼' }} {{ k.texto }}
+                    </span>
+                    <span class="tb-kpi-comparado">últimas 4 semanas vs 4 previas</span>
+                    {% elif k.nota %}
+                    <span class="tb-delta {{ 'tb-delta--baja' if k.alerta else 'tb-delta--neutro' }}">{{ k.nota }}</span>
+                    {% else %}
+                    <span class="tb-delta tb-delta--neutro">sin comparativo</span>
+                    {% endif %}
+                </div>
+                {{ k.spark | safe }}
+            </div>
+        </article>
+        {% endfor %}
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-5">
-        <div class="panel lg:col-span-2">
-            <h2 class="panel-titulo">Creadas frente a completadas</h2>
-            <p class="panel-nota">Serie semanal de las últimas 12 semanas.</p>
-            {{ grafico_evolucion | safe }}
-        </div>
+    {% if hallazgos %}
+    <section class="tb-hallazgos" aria-label="Hallazgos principales">
+        {% for h in hallazgos %}
+        <p class="tb-hallazgo" style="margin:0"><span class="tb-hallazgo-num">{{ loop.index }}</span><span>{{ h | safe }}</span></p>
+        {% endfor %}
+    </section>
+    {% endif %}
 
-        <div class="panel">
-            <h2 class="panel-titulo">Distribución por estado</h2>
-            {{ grafico_estados | safe }}
-        </div>
+    <div class="tb-rejilla">
+        <article class="tb-tarjeta tb-col-12">
+            <div class="tb-tarjeta-cabeza">
+                <div>
+                    <h2 class="tb-tarjeta-titulo">Creadas frente a completadas</h2>
+                    <p class="tb-tarjeta-nota">Tareas por semana en las últimas 12 semanas completas (lunes a domingo).</p>
+                </div>
+                {{ ayuda(
+                    "Cuántas tareas se crearon (azul, discontinua) y cuántas se completaron (verde) cada semana.",
+                    "Si la verde va por encima de la azul, estás cerrando más de lo que entra y la lista se reduce. Si la azul va por encima, se acumula trabajo pendiente. Pasa el cursor sobre una semana para ver las dos cifras.",
+                    "¿Estoy al día o se me está acumulando trabajo?") }}
+            </div>
+            <div class="tb-tarjeta-cuerpo">{{ grafico_evolucion | safe }}</div>
+        </article>
 
-        <div class="panel">
-            <h2 class="panel-titulo">Estado por prioridad</h2>
-            {{ grafico_prioridades | safe }}
-        </div>
+        <article class="tb-tarjeta tb-col-6">
+            <div class="tb-tarjeta-cabeza">
+                <div>
+                    <h2 class="tb-tarjeta-titulo">Distribución por estado</h2>
+                    <p class="tb-tarjeta-nota">Cuántas tareas hay en cada estado y su peso.</p>
+                </div>
+                {{ ayuda(
+                    "Las tareas agrupadas en completadas, en progreso y pendientes.",
+                    "Cada barra muestra la cantidad y el porcentaje del total. Una barra naranja (pendiente) muy larga indica trabajo sin empezar.",
+                    "¿Cuánto del trabajo está terminado, en marcha o sin empezar?") }}
+            </div>
+            <div class="tb-tarjeta-cuerpo">{{ grafico_estados | safe }}</div>
+        </article>
 
-        <div class="panel lg:col-span-2">
-            <h2 class="panel-titulo">Categorías</h2>
-            <p class="panel-nota">Volumen por categoría y porcentaje completado.</p>
-            {{ grafico_categorias | safe }}
-        </div>
+        <article class="tb-tarjeta tb-col-6">
+            <div class="tb-tarjeta-cabeza">
+                <div>
+                    <h2 class="tb-tarjeta-titulo">Estado por prioridad</h2>
+                    <p class="tb-tarjeta-nota">Alta, media y baja, divididas por estado.</p>
+                </div>
+                {{ ayuda(
+                    "Para cada prioridad, cuántas tareas están completadas, en progreso o pendientes, con los mismos colores del gráfico de estados.",
+                    "Lo ideal es que la barra de prioridad alta sea casi toda verde. Mucho naranja en «Alta» es una alerta: lo urgente está esperando.",
+                    "¿Estoy atendiendo primero lo importante?") }}
+            </div>
+            <div class="tb-tarjeta-cuerpo">{{ grafico_prioridades | safe }}</div>
+        </article>
+
+        <article class="tb-tarjeta tb-col-12">
+            <div class="tb-tarjeta-cabeza">
+                <div>
+                    <h2 class="tb-tarjeta-titulo">Categorías</h2>
+                    <p class="tb-tarjeta-nota">Volumen por categoría, completadas frente a abiertas, y porcentaje completado.</p>
+                </div>
+                {{ ayuda(
+                    "Las diez categorías con más tareas. El tramo verde son las completadas y el gris las que siguen abiertas.",
+                    "El largo total de la barra es el volumen de la categoría; el porcentaje al final dice qué parte está terminada.",
+                    "¿Dónde se concentra el trabajo y qué área va más atrasada?") }}
+            </div>
+            <div class="tb-tarjeta-cuerpo">{{ grafico_categorias | safe }}</div>
+        </article>
     </div>
 </div>
