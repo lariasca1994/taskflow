@@ -248,6 +248,8 @@ def _contexto_analitica(
 
     return {
         "kpi": analitica.indicadores(df),
+        "tarjetas": analitica.tarjetas(df),
+        "hallazgos": analitica.hallazgos(df),
         "grafico_estados": analitica.grafico_estados(df),
         "grafico_categorias": analitica.grafico_categorias(df),
         "grafico_evolucion": analitica.grafico_evolucion(df),

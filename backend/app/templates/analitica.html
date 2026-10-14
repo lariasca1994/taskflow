@@ -1,51 +1,86 @@
 {% extends "base.html" %}
 {% block titulo %}Analítica · TaskFlow{% endblock %}
+{% block clase_body %}tablero h-full antialiased flex flex-col{% endblock %}
 
 {% block cabeza %}
+<link rel="stylesheet" href="/static/tablero.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="/static/js/tablero.js" defer></script>
 {% endblock %}
 
 {% block contenido %}
-<header class="mb-7">
-    <h1 class="text-3xl font-bold tracking-tight">Analítica</h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-1">Cálculos con pandas sobre tus tareas. Los filtros actualizan sin recargar.</p>
+<header class="tb-cabecera">
+    <div style="min-width:0;flex:1 1 28rem">
+        <p class="tb-antetitulo" style="margin-top:0">Analítica de tareas</p>
+        <h1 class="tb-titulo">Informe de productividad</h1>
+        <p class="tb-meta">
+            <span>Calculado con pandas sobre tus tareas</span>
+            <span>· se actualiza solo cuando creas, completas o eliminas una tarea</span>
+        </p>
+    </div>
+    <div class="tb-acciones">
+        <a class="tb-boton" href="/tareas">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            Ir a mis tareas
+        </a>
+        <button type="button" class="tb-boton tb-boton--primario" data-tb-imprimir>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg>
+            Imprimir / PDF
+        </button>
+    </div>
 </header>
 
-<form id="filtros-analitica"
-      hx-get="/analitica/panel"
-      hx-target="#panel-analitica"
-      hx-swap="outerHTML"
-      hx-trigger="change"
-      class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 mb-6 shadow-sm">
+<details class="tb-guia" id="tb-guia" open>
+    <summary>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+        Cómo leer este panel
+        <span class="tb-guia-sub">· 3 pasos</span>
+    </summary>
+    <div class="tb-guia-pasos">
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">1</span><div><b>Acota el periodo</b>Elige fechas, categoría o prioridad. Todo el panel se recalcula sin recargar.</div></div>
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">2</span><div><b>Mira los indicadores</b>La etiqueta compara las últimas 4 semanas con las 4 anteriores. Pasa el cursor por la «i» para ver qué mide cada uno.</div></div>
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">3</span><div><b>Busca el porqué</b>Los gráficos muestran el ritmo semanal, los estados, las prioridades y las categorías. «¿Cómo leerlo?» explica cada uno.</div></div>
+    </div>
+    <div class="tb-guia-leyenda">
+        <span><i class="tb-punto" style="background:#0a8a64"></i> Completada</span>
+        <span><i class="tb-punto" style="background:#2a78d6"></i> En progreso</span>
+        <span><i class="tb-punto" style="background:#eb6834"></i> Pendiente</span>
+        <span class="tb-delta tb-delta--sube">▲ mejora</span>
+        <span class="tb-delta tb-delta--baja">▼ empeora</span>
+    </div>
+</details>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-        <div>
-            <label for="desde" class="etiqueta">Desde</label>
-            <input type="date" id="desde" name="desde" value="{{ filtros.desde }}" class="campo">
-        </div>
-        <div>
-            <label for="hasta" class="etiqueta">Hasta</label>
-            <input type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}" class="campo">
-        </div>
-        <div>
-            <label for="categoria" class="etiqueta">Categoría</label>
-            <select id="categoria" name="categoria" class="campo">
-                <option value="">Todas</option>
-                {% for c in categorias %}
-                <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>{{ c }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label for="prioridad" class="etiqueta">Prioridad</label>
-            <select id="prioridad" name="prioridad" class="campo">
-                <option value="">Todas</option>
-                <option value="alta"  {% if filtros.prioridad == 'alta'  %}selected{% endif %}>Alta</option>
-                <option value="media" {% if filtros.prioridad == 'media' %}selected{% endif %}>Media</option>
-                <option value="baja"  {% if filtros.prioridad == 'baja'  %}selected{% endif %}>Baja</option>
-            </select>
-        </div>
-        <a href="/analitica" class="boton-secundario text-center">Limpiar filtros</a>
+<form id="filtros-analitica" class="tb-filtros"
+      hx-get="/analitica/panel" hx-target="#panel-analitica" hx-swap="outerHTML"
+      hx-trigger="change" onsubmit="return false">
+    <div class="tb-filtro">
+        <label for="desde">Desde</label>
+        <input type="date" id="desde" name="desde" value="{{ filtros.desde }}" class="tb-campo {% if filtros.desde %}activo{% endif %}">
+    </div>
+    <div class="tb-filtro">
+        <label for="hasta">Hasta</label>
+        <input type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}" class="tb-campo {% if filtros.hasta %}activo{% endif %}">
+    </div>
+    <div class="tb-filtro">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria" class="tb-campo {% if filtros.categoria %}activo{% endif %}">
+            <option value="">Todas</option>
+            {% for c in categorias %}
+            <option value="{{ c }}" {% if filtros.categoria == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="tb-filtro">
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad" class="tb-campo {% if filtros.prioridad %}activo{% endif %}">
+            <option value="">Todas</option>
+            <option value="alta"  {% if filtros.prioridad == 'alta'  %}selected{% endif %}>Alta</option>
+            <option value="media" {% if filtros.prioridad == 'media' %}selected{% endif %}>Media</option>
+            <option value="baja"  {% if filtros.prioridad == 'baja'  %}selected{% endif %}>Baja</option>
+        </select>
+    </div>
+    <div class="tb-filtros-fin">
+        <a href="/analitica" class="tb-limpiar">Limpiar filtros</a>
     </div>
 </form>
 

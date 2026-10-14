@@ -190,6 +190,7 @@
     }
 
     document.addEventListener("change", function (e) {
+        if (e.target.closest(".tb-filtros")) e.target.classList.toggle("activo", !!e.target.value);
         if (e.target.closest("#tb-filtros")) contarFiltros();
     });
 

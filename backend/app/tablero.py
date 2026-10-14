@@ -142,6 +142,12 @@ def detectar(df: pd.DataFrame, nombre_archivo: str) -> Modelo:
     )
 
 
+def nombre_medida(modelo: Modelo) -> str:
+    """«Total venta» y no «Total total venta» cuando la columna ya lo dice."""
+    legible = (modelo.medida or "registros").replace("_", " ")
+    return legible.capitalize() if legible.lower().startswith("total") else f"Total {legible}"
+
+
 def filtrar(df: pd.DataFrame, modelo: Modelo, desde: str | None, hasta: str | None,
             segmentos: dict[str, str]) -> pd.DataFrame:
     if modelo.fecha:
@@ -428,9 +434,7 @@ def indicadores(df: pd.DataFrame, modelo: Modelo) -> list[dict]:
         })
 
     if modelo.medida:
-        legible = modelo.medida.replace("_", " ")
-        titulo = legible.capitalize() if legible.lower().startswith("total") else f"Total {legible}"
-        tarjeta(titulo, "Total", "cifra",
+        tarjeta(nombre_medida(modelo), "Total", "cifra",
                 _serie_mensual(df, modelo, modelo.medida),
                 ayuda=f"Suma de {modelo.medida} en el periodo y filtros elegidos. La línea muestra su evolución mes a mes.")
     tarjeta("Registros", "Registros", "entero", _serie_mensual(df, modelo),
@@ -505,7 +509,7 @@ def tendencia(df: pd.DataFrame, modelo: Modelo) -> str:
         ))
 
     figura.add_trace(go.Scatter(
-        x=x, y=serie, name=f"Total {modelo.medida.replace('_', ' ')}", mode="lines+markers",
+        x=x, y=serie, name=nombre_medida(modelo), mode="lines+markers",
         line=dict(color=CATEGORICOS[0], width=2.5, shape="spline", smoothing=0.4),
         marker=dict(size=7, color=CATEGORICOS[0], line=dict(width=2, color="#ffffff")),
         fill="tozeroy", fillcolor="rgba(10,138,100,0.08)",
