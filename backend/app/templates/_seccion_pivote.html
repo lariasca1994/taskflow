@@ -1,0 +1,108 @@
+{% from "_ayuda.html" import ayuda %}
+<div class="tb-rejilla">
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Tabla dinámica</h2>
+                <p class="tb-tarjeta-nota">Igual que en Excel o Power BI: elige filas, columnas y el valor a resumir. Respeta los filtros de arriba.</p>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:flex-start">
+            {{ ayuda(
+                "Un resumen cruzado: cada fila es un valor del campo «Filas», cada columna un valor del campo «Columnas», y cada celda resume el campo «Valores» para ese cruce.",
+                "Cuanto más verde la celda, mayor el valor. La última fila y la última columna son los totales. Con «Mostrar como» cambias a porcentajes del total, de la fila o de la columna; «Exportar» descarga lo que ves en CSV para Excel.",
+                "¿Cómo se reparte el resultado entre dos dimensiones a la vez?") }}
+            <a class="tb-boton" href="/datos/{{ dataset._id }}/pivote.csv?{{ exportar }}">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                Exportar
+            </a>
+            </div>
+        </div>
+
+        <form id="tb-pivote-form" class="tb-controles"
+              hx-get="/datos/{{ dataset._id }}/seccion" hx-target="#tb-contenido" hx-swap="innerHTML"
+              hx-trigger="change" hx-include="#tb-filtros" onsubmit="return false">
+            <div class="tb-filtro">
+                <label for="p-filas">Filas</label>
+                <select id="p-filas" name="filas" class="tb-campo">
+                    {% for clave, nombre in campos.items() %}
+                    <option value="{{ clave }}" {% if sel.filas == clave %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="p-columnas">Columnas</label>
+                <select id="p-columnas" name="columnas" class="tb-campo">
+                    <option value="">(ninguna)</option>
+                    {% for clave, nombre in campos.items() %}
+                    <option value="{{ clave }}" {% if sel.columnas == clave %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="p-valores">Valores</label>
+                <select id="p-valores" name="valores" class="tb-campo">
+                    <option value="">(contar registros)</option>
+                    {% for c in numericas %}
+                    <option value="{{ c }}" {% if sel.valores == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="p-funcion">Resumir con</label>
+                <select id="p-funcion" name="funcion" class="tb-campo">
+                    {% for clave, nombre in funciones.items() %}
+                    <option value="{{ clave }}" {% if sel.funcion == clave %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="p-mostrar">Mostrar como</label>
+                <select id="p-mostrar" name="mostrar" class="tb-campo">
+                    {% for clave, nombre in mostrar_como.items() %}
+                    <option value="{{ clave }}" {% if sel.mostrar == clave %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        {% if pivote.error %}
+        <div class="tb-error">{{ pivote.error }}</div>
+        {% else %}
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem">
+            <p style="margin:0;font-size:.85rem;font-weight:600">{{ pivote.descripcion }}{% if pivote.mostrar != "Valor" %} · {{ pivote.mostrar }}{% endif %}</p>
+            <span class="tb-leyenda-calor">menor <i></i> mayor</span>
+        </div>
+
+        <div class="tb-tabla-envoltura">
+            <table class="tb-pivote">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ campos[sel.filas] if sel.filas in campos else sel.filas }}</th>
+                        {% for c in pivote.columnas %}
+                        <th scope="col" class="{{ 'tb-total' if c == 'Total' }}">{{ c }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in pivote.filas %}
+                    <tr class="{{ 'tb-fila-total' if fila.total }}">
+                        <th scope="row" title="{{ fila.etiqueta }}">{{ fila.etiqueta }}</th>
+                        {% for celda in fila.celdas %}
+                        <td class="{{ 'tb-total' if loop.last }}" style="--i: {{ celda.intensidad }}">{{ celda.texto }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if pivote.recortada %}
+        <p class="tb-tarjeta-nota" style="margin-top:.5rem">Se muestran las 40 filas y 24 columnas mayores; el total incluye todo.</p>
+        {% endif %}
+
+        <details style="margin-top:1rem">
+            <summary style="cursor:pointer;font-size:.84rem;font-weight:600;color:var(--t-enlace)">Ver la consulta DAX equivalente</summary>
+            <pre class="tb-codigo" style="margin-top:.6rem">{{ pivote.dax | dax }}</pre>
+        </details>
+        {% endif %}
+    </article>
+</div>

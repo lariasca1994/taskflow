@@ -1,122 +1,178 @@
 {% extends "base.html" %}
-{% block titulo %}{{ dataset.nombre }} · TaskFlow{% endblock %}
+{% block titulo %}{{ dataset.nombre }} · Informe · TaskFlow{% endblock %}
+{% block clase_body %}tablero h-full antialiased flex flex-col{% endblock %}
 
 {% block cabeza %}
+<link rel="stylesheet" href="/static/tablero.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="/static/js/tablero.js" defer></script>
 {% endblock %}
 
 {% block contenido %}
-<div class="flex items-start justify-between gap-4 mb-7 flex-wrap">
-    <div>
-        <a href="/datos" class="text-sm text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">&larr; Volver a datos</a>
-        <h1 class="text-3xl font-bold tracking-tight mt-1">{{ dataset.nombre }}</h1>
-        <p class="text-slate-500 dark:text-slate-400 mt-1">
-            {{ "{:,}".format(perfil.filas) }} filas · {{ perfil.columnas }} columnas · {{ perfil.memoria_kb }} KB en memoria
-        </p>
+{% set m = modelo %}
+
+<header class="tb-cabecera">
+    <div style="min-width:0;flex:1 1 28rem">
+        <a href="/datos" class="tb-volver">&larr; Fuentes de datos</a>
+        <p class="tb-antetitulo">Informe gerencial</p>
+        <h1 class="tb-titulo">{{ dataset.nombre }}</h1>
+        <div class="tb-meta">
+            <span class="tb-insignia tb-insignia--{{ origen.tipo }}">
+                {% if origen.tipo == "generado" %}Datos simulados · semilla {{ origen.semilla }}{% else %}Archivo subido por el usuario{% endif %}
+            </span>
+            {% if rango_fechas %}
+            <span>
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                {{ rango_fechas[0] }} → {{ rango_fechas[1] }}
+            </span>
+            {% endif %}
+            <span class="tb-num">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5"/></svg>
+                {{ perfil.filas | miles }} filas · {{ perfil.columnas }} columnas
+            </span>
+        </div>
     </div>
-</div>
+    <div class="tb-acciones">
+        <a class="tb-boton" href="/datos/{{ dataset._id }}/descargar">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            Descargar CSV
+        </a>
+        <button type="button" class="tb-boton tb-boton--primario" data-tb-imprimir>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg>
+            Imprimir / PDF
+        </button>
+    </div>
+</header>
 
-<div class="grid lg:grid-cols-3 gap-6">
-
-    <section class="lg:col-span-2 space-y-6">
-
-        <div class="panel">
-            <h2 class="panel-titulo">Explorador de gráficos</h2>
-            <p class="panel-nota">Cada cambio recalcula en el servidor con pandas.</p>
-
-            <form id="controles"
-                  hx-get="/datos/{{ dataset._id }}/grafico"
-                  hx-target="#lienzo" hx-swap="innerHTML"
-                  hx-trigger="load, change"
-                  class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-
-                <div>
-                    <label for="tipo" class="etiqueta">Gráfico</label>
-                    <select id="tipo" name="tipo" class="campo">
-                        {% for clave, nombre in tipos.items() %}
-                        <option value="{{ clave }}">{{ nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label for="dimension" class="etiqueta">Agrupar por</label>
-                    <select id="dimension" name="dimension" class="campo">
-                        {% for c in columnas %}
-                        <option value="{{ c }}">{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label for="medida" class="etiqueta">Medida</label>
-                    <select id="medida" name="medida" class="campo">
-                        <option value="">Ninguna</option>
-                        {% for c in numericas %}
-                        <option value="{{ c }}">{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label for="funcion" class="etiqueta">Función</label>
-                    <select id="funcion" name="funcion" class="campo">
-                        {% for clave, nombre in agregaciones.items() %}
-                        <option value="{{ clave }}">{{ nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </form>
-
-            <div id="lienzo" class="min-h-[380px]">
-                <div class="flex items-center justify-center h-[380px] text-sm text-slate-400 dark:text-slate-500">
-                    <span class="girando mr-2"></span> Preparando el gráfico…
-                </div>
-            </div>
+{# Linaje: de donde vienen los datos y que se hizo con ellos. #}
+<section class="tb-linaje" aria-label="Origen y recorrido de los datos">
+    <div class="tb-paso">
+        <span class="tb-paso-icono"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></span>
+        <div style="min-width:0">
+            <div class="tb-paso-titulo">1 · Fuente</div>
+            <div class="tb-paso-valor" title="{{ dataset.nombre }}">{% if origen.tipo == "generado" %}Simulador TaskFlow{% else %}{{ dataset.extension[1:] | upper }} subido{% endif %}</div>
+            <div class="tb-paso-nota">{% if origen.tipo == "generado" %}semilla {{ origen.semilla }}{% else %}{{ dataset.subido_en.strftime("%d/%m/%Y %H:%M") }} UTC{% endif %}</div>
         </div>
-
-        <div class="panel">
-            <h2 class="panel-titulo">Vista previa</h2>
-            <div hx-get="/datos/{{ dataset._id }}/vista" hx-trigger="load" hx-swap="innerHTML"
-                 class="text-sm text-slate-400 dark:text-slate-500 py-6">
-                Cargando filas…
-            </div>
+    </div>
+    <div class="tb-paso">
+        <span class="tb-paso-icono"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg></span>
+        <div style="min-width:0">
+            <div class="tb-paso-titulo">2 · Lectura</div>
+            <div class="tb-paso-valor">pandas</div>
+            <div class="tb-paso-nota">tipos y fechas detectados</div>
         </div>
-    </section>
-
-    <aside>
-        <div class="panel">
-            <h2 class="panel-titulo">Perfil de columnas</h2>
-            <p class="panel-nota">Detectado automáticamente al subir el archivo.</p>
-
-            <div class="space-y-3 max-h-[640px] overflow-y-auto pr-1">
-                {% for c in perfil.detalle %}
-                <div class="columna-perfil">
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="font-medium text-sm truncate" title="{{ c.nombre }}">{{ c.nombre }}</span>
-                        <span class="pastilla tipo-{{ c.tipo }}">{{ c.tipo }}</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        <span>Únicos</span><span class="text-right font-medium">{{ "{:,}".format(c.unicos) }}</span>
-                        <span>Nulos</span><span class="text-right font-medium">{{ c.porcentaje_nulos }}%</span>
-                        {% if c.tipo == 'numerica' and c.media is defined %}
-                        <span>Media</span><span class="text-right font-medium">{{ c.media }}</span>
-                        <span>Mediana</span><span class="text-right font-medium">{{ c.mediana }}</span>
-                        <span>Mínimo</span><span class="text-right font-medium">{{ c.minimo }}</span>
-                        <span>Máximo</span><span class="text-right font-medium">{{ c.maximo }}</span>
-                        {% endif %}
-                    </div>
-
-                    {% if c.porcentaje_nulos > 0 %}
-                    <div class="barra-nulos mt-2">
-                        <span style="width: {{ c.porcentaje_nulos }}%"></span>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
+    </div>
+    <div class="tb-paso">
+        <span class="tb-paso-icono"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg></span>
+        <div style="min-width:0">
+            <div class="tb-paso-titulo">3 · Almacén</div>
+            <div class="tb-paso-valor">Parquet en MongoDB</div>
+            <div class="tb-paso-nota">GridFS · caduca en {{ horas_vida }} h sin uso</div>
         </div>
-    </aside>
+    </div>
+    <div class="tb-paso">
+        <span class="tb-paso-icono"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.745 3A23.933 23.933 0 003 12c0 3.183.62 6.22 1.745 9M19.5 3c.967 2.78 1.5 5.817 1.5 9s-.533 6.22-1.5 9M8.25 8.885l1.444-.89a.75.75 0 011.105.402l2.402 7.206a.75.75 0 001.104.401l1.445-.889m-8.25.75l.213.09a1.687 1.687 0 002.062-.617l4.45-6.676a1.688 1.688 0 012.062-.618l.213.09"/></svg></span>
+        <div style="min-width:0">
+            <div class="tb-paso-titulo">4 · Modelo</div>
+            <div class="tb-paso-valor" title="Medida principal">{{ m.medida or "sin medida" }}</div>
+            <div class="tb-paso-nota">{{ m.dimensiones | length }} dimensiones{% if m.fecha %} · fecha: {{ m.fecha }}{% endif %}</div>
+        </div>
+    </div>
+    <div class="tb-paso">
+        <span class="tb-paso-icono"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></span>
+        <div style="min-width:0">
+            <div class="tb-paso-titulo">5 · Informe</div>
+            <div class="tb-paso-valor">Medidas DAX + visuales</div>
+            <div class="tb-paso-nota">calculado al momento</div>
+        </div>
+    </div>
+</section>
+
+{# Guia de lectura: el informe se entiende sin saber de analitica. #}
+<details class="tb-guia" id="tb-guia" open>
+    <summary>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+        Cómo leer este informe
+        <span class="tb-guia-sub">· 4 pasos, 1 minuto</span>
+    </summary>
+    <div class="tb-guia-pasos">
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">1</span><div><b>Elige qué mirar</b>Usa los filtros de fechas y categorías. Todo el informe se recalcula al instante.</div></div>
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">2</span><div><b>Lee los indicadores</b>Las tarjetas resumen el periodo. La etiqueta compara el último mes completo con el anterior.</div></div>
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">3</span><div><b>Explora los gráficos</b>Pasa el cursor para ver cifras exactas y haz clic en una barra para filtrar por ella. El botón «¿Cómo leerlo?» explica cada gráfico.</div></div>
+        <div class="tb-guia-paso"><span class="tb-hallazgo-num">4</span><div><b>Profundiza</b>«Tabla dinámica» cruza cualquier dato, «Medidas DAX» muestra cada fórmula y «Origen y calidad» dice de dónde vienen los datos.</div></div>
+    </div>
+    <div class="tb-guia-leyenda">
+        <span class="tb-delta tb-delta--sube">▲ mejora</span>
+        <span class="tb-delta tb-delta--baja">▼ empeora</span>
+        <span class="tb-delta tb-delta--neutro">sin comparativo</span>
+        <span>«—» = no hay datos del periodo con que comparar</span>
+        <span>Cifras: <b>M</b> = millones · <b>mil M</b> = miles de millones</span>
+    </div>
+</details>
+
+{# Segmentadores: aplican a todas las pestañas. #}
+<form id="tb-filtros" class="tb-filtros"
+      hx-get="/datos/{{ dataset._id }}/seccion" hx-target="#tb-contenido" hx-swap="innerHTML"
+      hx-trigger="change, cambio" hx-include="#tb-pivote-form" hx-indicator="#tb-contenido"
+      onsubmit="return false">
+    <input type="hidden" name="nombre" value="{{ seccion }}">
+    {% if rango_fechas %}
+    <div class="tb-filtro">
+        <label for="desde">Desde</label>
+        <input type="date" id="desde" name="desde" class="tb-campo {% if filtros.desde %}activo{% endif %}"
+               value="{{ filtros.desde }}" min="{{ rango_fechas[0] }}" max="{{ rango_fechas[1] }}">
+    </div>
+    <div class="tb-filtro">
+        <label for="hasta">Hasta</label>
+        <input type="date" id="hasta" name="hasta" class="tb-campo {% if filtros.hasta %}activo{% endif %}"
+               value="{{ filtros.hasta }}" min="{{ rango_fechas[0] }}" max="{{ rango_fechas[1] }}">
+    </div>
+    {% endif %}
+    {% for dim, valores in opciones.items() %}
+    <div class="tb-filtro">
+        <label for="s_{{ loop.index }}">{{ dim | replace("_", " ") }}</label>
+        <select id="s_{{ loop.index }}" name="s_{{ dim }}" class="tb-campo {% if filtros.segmentos[dim] %}activo{% endif %}">
+            <option value="">Todos</option>
+            {% for v in valores %}
+            <option value="{{ v }}" {% if filtros.segmentos[dim] == v %}selected{% endif %}>{{ v }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endfor %}
+    {# Filtros que llegaron con un clic en un grafico (dimension sin selector). #}
+    <span class="tb-extra" id="tb-extra">
+        {% for dim, valor in filtros.segmentos.items() if valor and dim not in opciones %}
+        <span class="tb-chip-filtro">{{ dim | replace("_", " ") }}: {{ valor }}
+            <input type="hidden" name="s_{{ dim }}" value="{{ valor }}">
+            <button type="button" data-tb-quitar aria-label="Quitar filtro {{ dim }}">×</button>
+        </span>
+        {% endfor %}
+    </span>
+    <div class="tb-filtros-fin">
+        <span class="tb-contador" id="tb-contador">{% if activos %}{{ activos }} filtro{{ "s" if activos > 1 }} activo{{ "s" if activos > 1 }}{% endif %}</span>
+        <button type="button" class="tb-limpiar" data-tb-limpiar>Limpiar filtros</button>
+    </div>
+</form>
+
+{% set iconos = {
+    "resumen": "M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6.75",
+    "pivote": "M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 0c0-.621.504-1.125 1.125-1.125h17.25c.621 0 1.125.504 1.125 1.125m-19.5 0v12.75m19.5-12.75v12.75c0 .621-.504 1.125-1.125 1.125m1.125-13.875H2.25M12 4.5v15",
+    "medidas": "M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z",
+    "explorador": "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z",
+    "origen": "M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+} %}
+<nav class="tb-pestanas" role="tablist" aria-label="Secciones del informe">
+    {% for clave, nombre in secciones.items() %}
+    <button type="button" role="tab" class="tb-pestana" data-seccion="{{ clave }}"
+            aria-selected="{{ 'true' if clave == seccion else 'false' }}" aria-controls="tb-contenido">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ iconos[clave] }}"/></svg>
+        {{ nombre }}
+    </button>
+    {% endfor %}
+</nav>
+
+<div id="tb-contenido" role="tabpanel"
+     hx-get="/datos/{{ dataset._id }}/seccion" hx-trigger="load" hx-include="#tb-filtros" hx-swap="innerHTML">
+    <div class="tb-cargando"><span class="girando"></span> Calculando el informe…</div>
 </div>
 {% endblock %}

@@ -1,0 +1,125 @@
+{% from "_ayuda.html" import ayuda, info, pista_clic %}
+{% set m = modelo %}
+{% set medida = (m.medida or "registros") | replace("_", " ") %}
+{% macro fuente(texto) %}
+<p class="tb-fuente">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+    Fuente: {{ dataset.nombre }} · {{ df | length | miles }} filas filtradas · {{ texto }}
+</p>
+{% endmacro %}
+
+<div class="tb-kpis">
+    {% for k in tarjetas %}
+    <article class="tb-kpi">
+        <span class="tb-kpi-titulo">{{ k.titulo }} {% if k.ayuda %}{{ info(k.ayuda) }}{% endif %}</span>
+        <span class="tb-kpi-valor tb-num">{{ k.valor }}</span>
+        <div class="tb-kpi-pie">
+            <div style="display:flex;flex-direction:column;gap:.3rem">
+                {% if k.variacion_texto %}
+                <span class="tb-delta {{ 'tb-delta--sube' if k.favorable else 'tb-delta--baja' }}"
+                      title="{{ 'Mejora' if k.favorable else 'Empeora' }} frente al mes anterior">
+                    {{ '▲' if k.variacion >= 0 else '▼' }} {{ k.variacion_texto }}
+                </span>
+                <span class="tb-kpi-comparado">{{ mes_cierre }} vs {{ mes_previo }}</span>
+                {% else %}
+                <span class="tb-delta tb-delta--neutro">sin comparativo</span>
+                {% endif %}
+            </div>
+            {{ k.spark | safe }}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+
+{% if hallazgos %}
+<section class="tb-hallazgos" aria-label="Hallazgos principales">
+    {% for h in hallazgos %}
+    <p class="tb-hallazgo" style="margin:0"><span class="tb-hallazgo-num">{{ loop.index }}</span><span>{{ h | safe }}</span></p>
+    {% endfor %}
+</section>
+{% endif %}
+
+<div class="tb-rejilla">
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Evolución mensual de {{ medida }}</h2>
+                <p class="tb-tarjeta-nota">Total por mes, promedio móvil de 3 meses y, cuando hay historia, el mismo mes del año anterior.</p>
+            </div>
+            {{ ayuda(
+                "El total de " ~ medida ~ " de cada mes (línea verde con área), su promedio de los últimos tres meses (línea azul discontinua) y, si el archivo tiene más de un año, el mismo mes del año anterior (línea gris punteada).",
+                "Si la línea verde está por encima de la azul, el negocio va mejor que su tendencia reciente; por debajo, se está enfriando. Pasa el cursor sobre un mes para ver las tres cifras juntas. Una franja gris marca el último mes si todavía no está completo.",
+                "¿Estamos creciendo, estancados o cayendo, y hay temporadas que se repiten?") }}
+        </div>
+        <div class="tb-tarjeta-cuerpo">{{ g_tendencia | safe }}</div>
+        {{ fuente("agrupado por mes de " ~ (m.fecha or "fecha")) }}
+    </article>
+
+    {% if g_ranking %}
+    <article class="tb-tarjeta tb-col-5">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Participación por {{ principal | replace("_", " ") }}</h2>
+                <p class="tb-tarjeta-nota">Total y peso sobre el total del periodo filtrado.</p>
+            </div>
+            {{ ayuda(
+                "Cuánto aporta cada " ~ (principal | replace('_', ' ')) ~ " al total, ordenado de mayor a menor. Si hay más de diez, el resto se suma en «Otros» (gris).",
+                "La barra más larga es la que más pesa. El porcentaje al final de cada barra dice qué parte del total representa.",
+                "¿De dónde sale la mayor parte del negocio y qué tan concentrado está?") }}
+        </div>
+        <div class="tb-tarjeta-cuerpo" data-filtro-dim="{{ principal }}">{{ g_ranking | safe }}</div>
+        <div class="tb-pie-tarjeta">{{ pista_clic(principal) }}{{ fuente("agrupado por " ~ principal) }}</div>
+    </article>
+    {% endif %}
+
+    {% if g_variacion %}
+    <article class="tb-tarjeta tb-col-7">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">¿Quién crece y quién cae? · {{ detalle_dim | replace("_", " ") }}</h2>
+                <p class="tb-tarjeta-nota">Cambio de {{ mes_cierre or "el último mes" }} frente a {{ mes_previo or "el anterior" }}, en valor y porcentaje.</p>
+            </div>
+            {{ ayuda(
+                "La diferencia de " ~ medida ~ " entre " ~ (mes_cierre or "el último mes") ~ " y " ~ (mes_previo or "el mes anterior") ~ " para cada " ~ (detalle_dim | replace('_', ' ')) ~ ". Con muchos valores se muestran los seis que más suben y los seis que más bajan.",
+                "Verde con ▲ hacia la derecha: creció. Rojo con ▼ hacia la izquierda: cayó. El largo de la barra es el tamaño del cambio en dinero; entre paréntesis, el cambio en porcentaje.",
+                "¿Qué explica la variación del mes y dónde hay que actuar primero?") }}
+        </div>
+        <div class="tb-tarjeta-cuerpo" data-filtro-dim="{{ detalle_dim }}">{{ g_variacion | safe }}</div>
+        <div class="tb-pie-tarjeta">{{ pista_clic(detalle_dim) }}{{ fuente("mes de cierre vs mes anterior") }}</div>
+    </article>
+    {% endif %}
+
+    {% if g_composicion %}
+    <article class="tb-tarjeta tb-col-6">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Mezcla mensual por {{ segunda | replace("_", " ") }}</h2>
+                <p class="tb-tarjeta-nota">Cómo cambia el peso de cada {{ segunda | replace("_", " ") }} mes a mes (100 %).</p>
+            </div>
+            {{ ayuda(
+                "Cada columna es un mes y siempre suma 100 %. Los colores son los distintos valores de " ~ (segunda | replace('_', ' ')) ~ ".",
+                "Si un color gana altura con los meses, ese " ~ (segunda | replace('_', ' ')) ~ " gana participación aunque el total no cambie. Pasa el cursor para ver los porcentajes del mes.",
+                "¿Está cambiando la forma en que vendemos?") }}
+        </div>
+        <div class="tb-tarjeta-cuerpo" data-filtro-dim="{{ segunda }}" data-filtro-por="serie">{{ g_composicion | safe }}</div>
+        <div class="tb-pie-tarjeta">{{ pista_clic(segunda) }}{{ fuente("% del total de cada mes") }}</div>
+    </article>
+    {% endif %}
+
+    {% if g_calor %}
+    <article class="tb-tarjeta tb-col-6">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Mapa de calor · {{ principal | replace("_", " ") }} por mes</h2>
+                <p class="tb-tarjeta-nota">Más oscuro, mayor {{ medida }}. Últimos 18 meses.</p>
+            </div>
+            {{ ayuda(
+                "Una cuadrícula con cada " ~ (principal | replace('_', ' ')) ~ " en las filas y los meses en las columnas. El color indica cuánto se vendió.",
+                "Verde oscuro = mucho, verde claro = poco. Lee una fila de izquierda a derecha para ver la temporada de ese " ~ (principal | replace('_', ' ')) ~ "; una columna de arriba abajo para comparar en un mismo mes.",
+                "¿Hay meses fuertes o débiles que se repiten, y afectan a todos por igual?") }}
+        </div>
+        <div class="tb-tarjeta-cuerpo" data-filtro-dim="{{ principal }}">{{ g_calor | safe }}</div>
+        <div class="tb-pie-tarjeta">{{ pista_clic(principal) }}{{ fuente(principal ~ " × mes") }}</div>
+    </article>
+    {% endif %}
+</div>

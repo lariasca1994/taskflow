@@ -9,7 +9,19 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-COLORES = ["#4f46e5", "#0ea5e9", "#14b8a6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
+# Paleta categorica del proyecto: abre con el verde de la marca y sigue un
+# orden validado para daltonismo (protan, deutan y tritan) sobre fondo
+# blanco. El rojo no entra como serie: queda reservado para las caidas, y
+# el gris para "Otros". En tema oscuro tablero.js cambia cada tono por su
+# par de la lista OSCUROS (mismo orden, validado sobre #0f172a).
+CATEGORICOS = ["#0a8a64", "#2a78d6", "#eb6834", "#6250d6", "#eda100", "#e87ba4"]
+OSCUROS = ["#16a87b", "#3987e5", "#d95926", "#9085e9", "#c98500", "#d55181"]
+NEGATIVO = "#d03b3b"
+OTROS = "#94a3b8"
+# Rampa secuencial de un solo tono (verde), de casi blanco a oscuro.
+SECUENCIAL = [[0, "#e6f4ef"], [0.25, "#a9dcc9"], [0.5, "#5fb99a"], [0.75, "#1f8f6c"], [1, "#0b5a45"]]
+
+COLORES = CATEGORICOS
 
 AGREGACIONES = {
     "conteo": "Cantidad de registros",
@@ -31,18 +43,32 @@ TIPOS = {
 
 
 def _terminar(figura, alto: int = 380) -> str:
-    figura.update_layout(
+    # Los valores explicitos de la figura mandan sobre estos: update_layout
+    # mezcla, no reemplaza, asi que solo se rellena lo que falte.
+    base = go.Layout(
         template="plotly_white",
         margin=dict(t=30, b=40, l=50, r=25),
         height=alto,
-        font=dict(family="Inter, system-ui, sans-serif", size=12, color="#475569"),
+        font=dict(family="Inter, system-ui, sans-serif", size=12, color="#5b6b66"),
         colorway=COLORES,
+        separators=",.",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(gridcolor="#f1f5f9"),
-        yaxis=dict(gridcolor="#f1f5f9"),
+        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#dce7e2", font=dict(color="#0f172a", size=12)),
+        xaxis=dict(gridcolor="rgba(100,116,139,0.14)", linecolor="rgba(100,116,139,0.35)",
+                   zerolinecolor="rgba(100,116,139,0.35)", automargin=True),
+        yaxis=dict(gridcolor="rgba(100,116,139,0.14)", linecolor="rgba(100,116,139,0.35)",
+                   zerolinecolor="rgba(100,116,139,0.35)", automargin=True),
+        legend=dict(font=dict(size=12), bgcolor="rgba(0,0,0,0)"),
     )
-    return figura.to_html(full_html=False, include_plotlyjs=False, config={"displayModeBar": False})
+    propio = figura.layout.to_plotly_json()
+    propio.pop("template", None)  # plotly.express trae el suyo; se usa el de aqui
+    figura.layout = base
+    figura.update_layout(propio)
+    return figura.to_html(
+        full_html=False, include_plotlyjs=False,
+        config={"displayModeBar": False, "responsive": True, "locale": "es"},
+    )
 
 
 def vacio(mensaje: str, alto: int = 320) -> str:

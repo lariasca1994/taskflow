@@ -19,6 +19,7 @@ from app.config import (
     ARCHIVO_MAX_FILAS,
     ARCHIVOS_POR_USUARIO,
 )
+from app import tablero
 from app.database import archivos, datasets
 
 
@@ -130,8 +131,19 @@ def perfilar(df: pd.DataFrame) -> dict:
 # ──────────────────────────────── guardado ─────────────────────────────
 
 
-def registrar(usuario_id: str, nombre: str, contenido: bytes, extension: str) -> dict:
-    """Valida, convierte y almacena. Devuelve el documento del dataset."""
+def registrar(
+    usuario_id: str,
+    nombre: str,
+    contenido: bytes,
+    extension: str,
+    origen: dict | None = None,
+) -> dict:
+    """Valida, convierte y almacena. Devuelve el documento del dataset.
+
+    `origen` describe de donde salieron los datos (archivo subido o lote
+    generado con su semilla y escenario); el tablero lo muestra para que
+    quien lea el informe sepa que esta mirando.
+    """
     if datasets.count_documents({"usuario_id": ObjectId(usuario_id)}) >= ARCHIVOS_POR_USUARIO:
         raise ErrorDeArchivo(
             f"Alcanzaste el limite de {ARCHIVOS_POR_USUARIO} archivos. "
@@ -151,6 +163,10 @@ def registrar(usuario_id: str, nombre: str, contenido: bytes, extension: str) ->
     # Nombres de columna limpios: evita duplicados y espacios sobrantes
     df.columns = [str(c).strip() or f"columna_{i}" for i, c in enumerate(df.columns)]
 
+    # Un CSV no distingue fechas de texto: se convierten aqui una sola vez
+    # para que el Parquet ya las guarde como fecha.
+    df = tablero.preparar(df)
+
     perfil = perfilar(df)
 
     buffer = io.BytesIO()
@@ -165,6 +181,8 @@ def registrar(usuario_id: str, nombre: str, contenido: bytes, extension: str) ->
         "extension": extension,
         "archivo_id": id_archivo,
         "perfil": perfil,
+        "bytes": len(contenido),
+        "origen": origen or {"tipo": "subido"},
         "subido_en": _ahora(),
         "ultimo_uso": _ahora(),
     }
