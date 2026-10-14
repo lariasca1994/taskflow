@@ -1,0 +1,55 @@
+<div class="tb-rejilla">
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Explorador libre</h2>
+                <p class="tb-tarjeta-nota">Cruza cualquier columna con cualquier medida. Usa el archivo completo y se recalcula en el servidor con pandas.</p>
+            </div>
+        </div>
+
+        <form hx-get="/datos/{{ dataset._id }}/grafico" hx-target="#lienzo" hx-swap="innerHTML"
+              hx-trigger="load, change" class="tb-controles" onsubmit="return false">
+            <div class="tb-filtro">
+                <label for="tipo">Gráfico</label>
+                <select id="tipo" name="tipo" class="tb-campo">
+                    {% for clave, nombre in tipos.items() %}<option value="{{ clave }}">{{ nombre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="dimension">Agrupar por</label>
+                <select id="dimension" name="dimension" class="tb-campo">
+                    {% for c in columnas %}<option value="{{ c }}" {% if modelo.dimensiones and c == modelo.dimensiones[0] %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="medida">Medida</label>
+                <select id="medida" name="medida" class="tb-campo">
+                    <option value="">Ninguna</option>
+                    {% for c in numericas %}<option value="{{ c }}" {% if c == modelo.medida %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="tb-filtro">
+                <label for="funcion">Función</label>
+                <select id="funcion" name="funcion" class="tb-campo">
+                    {% for clave, nombre in agregaciones.items() %}<option value="{{ clave }}" {% if modelo.medida and clave == 'suma' %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <div id="lienzo" style="min-height:380px">
+            <div class="tb-cargando"><span class="girando"></span> Preparando el gráfico…</div>
+        </div>
+    </article>
+
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Vista previa del archivo</h2>
+                <p class="tb-tarjeta-nota">Las primeras 20 filas, tal como quedaron guardadas.</p>
+            </div>
+        </div>
+        <div hx-get="/datos/{{ dataset._id }}/vista" hx-trigger="load" hx-swap="innerHTML">
+            <div class="tb-cargando" style="min-height:6rem"><span class="girando"></span> Cargando filas…</div>
+        </div>
+    </article>
+</div>
