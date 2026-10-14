@@ -1,0 +1,99 @@
+{% from "_ayuda.html" import ayuda %}
+{% set m = modelo %}
+<div class="tb-rejilla">
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Medidas del modelo</h2>
+                <p class="tb-tarjeta-nota">
+                    Escritas en DAX y evaluadas sobre tu archivo con pandas: la fórmula que ves es la que produce la cifra.
+                    Tabla del modelo: <code>'{{ m.tabla }}'</code>.
+                </p>
+            </div>
+            {{ ayuda(
+                "Las cifras clave del informe con la fórmula DAX que las calcula, la misma que escribirías en Power BI.",
+                "«Rango filtrado» usa todo el periodo y filtros elegidos; la última columna usa solo el último mes completo. Las medidas entre corchetes, como [Total], reutilizan otras medidas de la tabla.",
+                "¿De dónde sale exactamente cada número del informe?") }}
+        </div>
+        <div style="overflow-x:auto">
+            <table class="tb-medidas">
+                <thead>
+                    <tr>
+                        <th>Medida</th>
+                        <th>Fórmula DAX</th>
+                        <th style="text-align:right">Rango filtrado</th>
+                        <th style="text-align:right">{{ medidas.mes or "Mes de cierre" }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in medidas.filas %}
+                    <tr>
+                        <td>
+                            <div class="tb-nombre-medida">{{ f.nombre }}</div>
+                            <div class="tb-desc">{{ f.descripcion }}</div>
+                        </td>
+                        <td><code>{{ f.nombre }} = {{ f.dax | dax }}</code></td>
+                        <td class="tb-valor">{{ f.rango }}</td>
+                        <td class="tb-valor">{{ f.mes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="tb-fuente">Un «—» significa BLANK: el periodo de comparación cae fuera de los datos disponibles.</p>
+    </article>
+
+    <article class="tb-tarjeta tb-col-12">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Nueva medida</h2>
+                <p class="tb-tarjeta-nota">
+                    Escribe una fórmula DAX; puedes usar las medidas de arriba entre corchetes. Funciones: SUM, AVERAGE, MIN, MAX,
+                    MEDIAN, COUNT, COUNTROWS, DISTINCTCOUNT, DIVIDE, CALCULATE, ALL, DATEADD, SAMEPERIODLASTYEAR, DATESYTD,
+                    DATESMTD, DATESINPERIOD, TOTALYTD, TOTALMTD, IF, ROUND, ABS.
+                </p>
+            </div>
+        </div>
+
+        {% set t = "'" ~ m.tabla ~ "'" %}
+        <div class="tb-chips">
+            {% if m.medida and m.dimensiones %}
+            {% set d = m.dimensiones[0] %}
+            <button type="button" class="tb-chip" data-formula='Participación = DIVIDE([Total], CALCULATE([Total], ALL({{ t }}[{{ d }}])))'>% del total por {{ d }}</button>
+            {% endif %}
+            {% if m.medida and m.fecha %}
+            <button type="button" class="tb-chip" data-formula="Total trimestre anterior = CALCULATE([Total], DATEADD({{ t }}[{{ m.fecha }}], -1, QUARTER))">Trimestre anterior</button>
+            {% endif %}
+            {% if m.cantidad and m.medida %}
+            <button type="button" class="tb-chip" data-formula="Precio medio = DIVIDE([Total], SUM({{ t }}[{{ m.cantidad }}]))">Precio medio por unidad</button>
+            {% endif %}
+            {% if m.medida %}
+            <button type="button" class="tb-chip" data-formula="Venta máxima = MAX({{ t }}[{{ m.medida }}])">Registro más alto</button>
+            {% endif %}
+        </div>
+
+        <form hx-post="/datos/{{ dataset._id }}/medida" hx-target="#medida-resultado" hx-swap="innerHTML"
+              hx-include="#tb-filtros" hx-indicator="#medida-calculando">
+            <label for="formula" class="sr-only">Fórmula DAX</label>
+            <textarea id="formula" name="formula" rows="3" class="tb-campo" spellcheck="false"
+                      placeholder="Ticket alto = CALCULATE([Registros], {{ t }}[{{ m.medida or 'columna' }}] > 500000)">{% if m.medida and m.dimensiones %}Participación = DIVIDE([Total], CALCULATE([Total], ALL({{ t }}[{{ m.dimensiones[0] }}]))){% elif m.medida %}Ticket promedio = DIVIDE([Total], [Registros]){% endif %}</textarea>
+            <div style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-end;margin-top:.75rem">
+                <div class="tb-filtro" style="max-width:16rem">
+                    <label for="desglose">Desglosar por</label>
+                    <select id="desglose" name="dimension" class="tb-campo">
+                        <option value="">(sin desglose)</option>
+                        {% for d in m.dimensiones %}
+                        <option value="{{ d }}" {% if loop.first %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="tb-boton tb-boton--primario">Calcular medida</button>
+                <span id="medida-calculando" class="htmx-indicator" style="align-items:center;gap:.5rem;font-size:.82rem;color:var(--t-suave)">
+                    <span class="girando"></span> Evaluando…
+                </span>
+            </div>
+        </form>
+
+        <div id="medida-resultado" style="margin-top:1rem"></div>
+    </article>
+</div>

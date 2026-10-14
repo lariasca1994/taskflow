@@ -1,0 +1,78 @@
+{% from "_ayuda.html" import ayuda %}
+{% set m = modelo %}
+<div class="tb-rejilla">
+    <article class="tb-tarjeta tb-col-6">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Ficha de origen</h2>
+                <p class="tb-tarjeta-nota">De dónde salieron los datos de este informe.</p>
+            </div>
+            <span class="tb-insignia tb-insignia--{{ origen.tipo }}">{{ "Simulado" if origen.tipo == "generado" else "Subido" }}</span>
+        </div>
+        <dl class="tb-ficha">
+            <dt>Archivo</dt><dd>{{ dataset.nombre }}</dd>
+            <dt>Formato original</dt><dd>{{ dataset.extension[1:] | upper }}{% if dataset.bytes %} · {{ "%.1f" | format(dataset.bytes / 1024) }} KB{% endif %}</dd>
+            <dt>Cargado</dt><dd>{{ dataset.subido_en.strftime("%d/%m/%Y %H:%M") }} UTC</dd>
+            <dt>Almacenamiento</dt><dd>Parquet (snappy) en GridFS · {{ perfil.memoria_kb }} KB en memoria</dd>
+            <dt>Vigencia</dt><dd>Se elimina tras {{ horas_vida }} h sin uso o al cerrar sesión</dd>
+            {% if origen.tipo == "generado" %}
+            <dt>Generador</dt><dd>Simulador de ventas TaskFlow · semilla <code>{{ origen.semilla }}</code></dd>
+            <dt>Volumen</dt><dd>{{ origen.filas | miles }} filas ({{ origen.volumen }})</dd>
+            <dt>Periodo</dt><dd>{{ origen.desde }} → {{ origen.hasta }} ({{ origen.meses }} meses)</dd>
+            <dt>Tendencia</dt><dd>{{ ("%+.1f" | format(origen.crecimiento)) | replace(".", ",") }} % en el periodo</dd>
+            <dt>Estacionalidad</dt><dd>±{{ origen.estacionalidad | string | replace(".", ",") }} % · pico en {{ origen.mes_pico }}</dd>
+            <dt>Canal digital</dt><dd>{{ ("%+.1f" | format(origen.giro_digital)) | replace(".", ",") }} % de peso relativo</dd>
+            <dt>Región líder</dt><dd>{{ origen.region_lider }}</dd>
+            <dt>Evento</dt><dd>{% if origen.evento %}{{ "Promoción" if origen.evento.tipo == "promocion" else "Desabastecimiento" }} desde {{ origen.evento.desde }} · {{ origen.evento.dias }} días · ×{{ origen.evento.factor | string | replace(".", ",") }}{% else %}Ninguno{% endif %}</dd>
+            <dt>Huecos simulados</dt><dd>{{ origen.nulos | string | replace(".", ",") }} % en satisfacción y vendedor</dd>
+            {% endif %}
+        </dl>
+        {% if origen.tipo == "generado" %}
+        <p class="tb-fuente">Los datos son ficticios; con la misma semilla se reproduce exactamente el mismo lote.</p>
+        {% endif %}
+    </article>
+
+    <article class="tb-tarjeta tb-col-6">
+        <div class="tb-tarjeta-cabeza">
+            <div>
+                <h2 class="tb-tarjeta-titulo">Calidad de los datos</h2>
+                <p class="tb-tarjeta-nota">Revisión automática del archivo completo, sin filtros.</p>
+            </div>
+            {{ ayuda(
+                "Qué tan completo está el archivo y cómo entendió el sistema cada columna.",
+                "Completitud es el porcentaje de celdas con dato. La tabla indica qué columna se usó como medida principal, cuál como eje de tiempo y cuáles como dimensiones para filtrar y agrupar; los vacíos en ámbar merecen revisión.",
+                "¿Puedo confiar en estos datos para decidir?") }}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem">
+            <div><div class="tb-kpi-titulo">Completitud</div><div class="tb-kpi-valor tb-num" style="font-size:1.4rem">{{ calidad.completitud | string | replace(".", ",") }} %</div></div>
+            <div><div class="tb-kpi-titulo">Celdas vacías</div><div class="tb-kpi-valor tb-num" style="font-size:1.4rem">{{ calidad.nulos | miles }}</div></div>
+            <div><div class="tb-kpi-titulo">Filas duplicadas</div><div class="tb-kpi-valor tb-num" style="font-size:1.4rem">{{ calidad.duplicadas | miles }}</div></div>
+        </div>
+        <div class="tb-medidor" role="img" aria-label="Completitud {{ calidad.completitud }} %"><span style="width: {{ calidad.completitud }}%"></span></div>
+
+        <h3 style="font-size:.85rem;font-weight:650;margin:1.25rem 0 .5rem">Cómo se interpretó cada columna</h3>
+        <div style="overflow:auto;max-height:22rem">
+            <table class="tb-columnas">
+                <thead><tr><th>Columna</th><th>Tipo</th><th>Rol en el informe</th><th style="text-align:right">Únicos</th><th style="text-align:right">Vacíos</th></tr></thead>
+                <tbody>
+                {% for c in perfil.detalle %}
+                    <tr>
+                        <td style="font-weight:600">{{ c.nombre }}</td>
+                        <td>{{ "fecha" if c.nombre == m.fecha else c.tipo }}</td>
+                        <td>
+                            {% if c.nombre == m.medida %}<span class="tb-rol">Medida principal</span>
+                            {% elif c.nombre == m.fecha %}<span class="tb-rol tb-rol--fecha">Eje de tiempo</span>
+                            {% elif c.nombre in m.dimensiones %}<span class="tb-rol tb-rol--dim">Dimensión</span>
+                            {% elif c.nombre in [m.cantidad, m.margen, m.costo] %}<span class="tb-rol">Medida</span>
+                            {% elif c.nombre in m.numericas %}<span style="color:var(--t-tenue)">Numérica</span>
+                            {% else %}<span style="color:var(--t-tenue)">Descriptiva</span>{% endif %}
+                        </td>
+                        <td class="tb-num">{{ c.unicos | miles }}</td>
+                        <td class="tb-num" {% if c.porcentaje_nulos > 0 %}style="color:var(--t-aviso);font-weight:600"{% endif %}>{{ c.porcentaje_nulos | string | replace(".", ",") }} %</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</div>

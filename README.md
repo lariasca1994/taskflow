@@ -360,11 +360,24 @@ Tras crear una cuenta:
 
 ```bash
 cd backend
-python -m app.comandos.generar_ejemplo tu@correo.com 180
+python -m app.comandos.generar_ejemplo tu@correo.com        # volumen al azar
+python -m app.comandos.generar_ejemplo tu@correo.com 180    # volumen fijo
 ```
 
 Genera tareas repartidas en varios meses, con sesgo hacia fechas recientes y
-tiempos de cierre verosímiles.
+tiempos de cierre verosímiles. Cada corrida arma un perfil distinto (volumen,
+categorías dominantes, ritmo de cierre), así que dos ejecuciones dejan paneles
+diferentes.
+
+Para el módulo de datos, la página **Datos** tiene el botón **Generar lote**:
+cada clic simula ventas con una semilla nueva (otro volumen, periodo, tendencia,
+temporada y mezcla de regiones y canales). Desde consola, el mismo simulador
+escribe tres archivos de muestra de distinto tamaño en `files/`:
+
+```bash
+python -m app.comandos.generar_ventas                 # semillas nuevas
+python -m app.comandos.generar_ventas --semilla 4821  # reproduce un lote
+```
 
 ### Despliegue
 

@@ -1,0 +1,26 @@
+{% if error %}
+<div class="tb-error" role="alert"><b>No se pudo evaluar.</b> {{ error }}</div>
+{% elif resultado %}
+<div class="tb-rejilla">
+    <div class="tb-col-4" style="display:flex;flex-direction:column;gap:.5rem">
+        <span class="tb-kpi-titulo">Resultado en el rango filtrado</span>
+        <span class="tb-resultado-valor tb-num">{{ resultado.total }}</span>
+        <pre class="tb-codigo" style="white-space:pre-wrap">{{ formula | dax }}</pre>
+        {% if resultado.desglose %}
+        <div style="overflow:auto;max-height:18rem">
+            <table class="tb-columnas">
+                <thead><tr><th>{{ dimension }}</th><th style="text-align:right">Valor</th></tr></thead>
+                <tbody>
+                    {% for etiqueta, valor in resultado.desglose %}
+                    <tr><td>{{ etiqueta }}</td><td class="tb-num">{{ valor }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    <div class="tb-col-8">
+        {% if resultado.grafico %}{{ resultado.grafico | safe }}{% endif %}
+    </div>
+</div>
+{% endif %}
