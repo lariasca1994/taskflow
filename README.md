@@ -31,16 +31,20 @@ Aplicación web de gestión de tareas personales con un módulo de análisis de
 datos. Construida enteramente en Python: FastAPI en el servidor, Jinja2 con
 HTMX en la interfaz, pandas para el análisis y MongoDB como única base de datos.
 
-No hay JavaScript propio más allá del canal de eventos: la interactividad la
-resuelve HTMX pidiendo fragmentos de HTML al servidor.
+La interactividad la resuelve HTMX pidiendo fragmentos de HTML al servidor. El
+JavaScript propio se limita a lo que no puede hacer el servidor: el canal de
+eventos, el cambio de tema y, en el informe de datos, las pestañas, el clic
+para filtrar y adaptar los gráficos al tema oscuro.
 
 ### En pocas palabras
 
 - **Qué hace:** es una lista de tareas con fechas, prioridades y categorías, más
   un panel que muestra cómo vas: cuántas cumples, cuánto tardas en cerrarlas y
   cuáles están vencidas. Los números se actualizan solos, sin recargar.
-- **Extra:** puedes subir un CSV, Excel o JSON y la app lo describe
-  automáticamente (tipos de dato, vacíos, estadísticas) y te deja graficarlo.
+- **Extra:** subes un CSV, Excel o JSON —o generas un lote de ventas
+  simulado— y la app lo convierte en un **informe gerencial**: indicadores con
+  variación, gráficos explicados, medidas DAX, tabla dinámica y la trazabilidad
+  del origen de los datos.
 - **Cómo probarlo:** entra a la [demo](https://taskflow-812302804238.us-central1.run.app/),
   crea una cuenta y agrega un par de tareas. Para correrlo en tu equipo, ve a
   [Instalación para pruebas](#6-instalación-para-pruebas).
@@ -66,11 +70,31 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 - Distribución por estado, prioridad y categoría
 - Filtros por rango de fechas, categoría y prioridad que recalculan sin recargar
 
-**Análisis de archivos**
-- Carga de CSV, Excel y JSON
-- Perfilado automático: tipos, nulos, valores únicos y estadísticas descriptivas
-- Explorador de gráficos con siete tipos y cinco funciones de agregación
-- Vista previa de las primeras filas
+**Análisis de archivos: informe gerencial**
+- Carga de CSV, Excel y JSON, o **generación de un lote de ventas simulado**:
+  cada lote usa una semilla nueva, así que cambian el volumen (de 500 a 20.000
+  filas), el periodo, la tendencia, la temporada, la mezcla de regiones y
+  canales y los eventos (promociones, desabastecimientos)
+- Detección automática de la fecha, la medida principal y las dimensiones
+- **Origen visible**: linaje de cinco pasos (fuente → lectura → almacén →
+  modelo → informe), ficha de origen con la semilla y el escenario, y revisión
+  de calidad (completitud, vacíos, duplicados, rol de cada columna)
+- **Resumen ejecutivo**: indicadores con variación frente al mes anterior y
+  minitendencia, tres hallazgos escritos, evolución mensual con promedio móvil
+  y año anterior, participación, quién crece y quién cae, mezcla mensual y mapa
+  de calor
+- **Medidas DAX**: catálogo de medidas escritas en DAX (mes anterior, año
+  anterior, acumulado del año, promedio móvil…) evaluadas sobre el archivo, y
+  un editor para escribir medidas propias con desglose por dimensión
+- **Tabla dinámica**: filas, columnas, valor, función y «mostrar como %», con
+  totales, escala de calor, consulta DAX equivalente y exportación a CSV
+- **Pensado para leerse de un vistazo**: guía de lectura, botón «¿Cómo leerlo?»
+  en cada gráfico, ayuda en cada indicador y clic en un gráfico para filtrar
+  todo el informe
+- Segmentadores por fecha y categoría que aplican a todas las pestañas
+- Explorador libre con siete tipos de gráfico, vista previa, descarga del CSV
+  completo e impresión a PDF
+- Tema claro y oscuro con la paleta del proyecto, validada para daltonismo
 
 **Tiempo real**
 - Los indicadores se actualizan solos cuando cambia algo, sin recargar
@@ -86,6 +110,7 @@ resuelve HTMX pidiendo fragmentos de HTML al servidor.
 | Análisis | pandas |
 | Formato interno | Parquet |
 | Gráficos | Plotly, renderizado en el servidor |
+| Medidas | Intérprete propio de un subconjunto de DAX sobre pandas |
 | Sesiones | JWT en cookie httponly |
 | Contraseñas | bcrypt con pimiento |
 
@@ -106,16 +131,19 @@ backend/
     ├── repositorio.py       Acceso a datos de tareas
     ├── analitica.py         Cálculos sobre tareas con pandas
     ├── datos.py             Carga, perfilado y almacenamiento de archivos
-    ├── graficos.py          Construcción de gráficos
+    ├── generador.py         Simulador de ventas con semilla y escenario
+    ├── tablero.py           Informe gerencial: modelo, indicadores, gráficos y pivote
+    ├── dax.py               Intérprete de medidas DAX sobre pandas
+    ├── graficos.py          Paleta y construcción de gráficos
     ├── eventos.py           Canal de eventos en vivo
-    ├── comandos/            Generador de datos de ejemplo
+    ├── comandos/            Generadores de tareas y de ventas de ejemplo
     ├── routers/
     │   ├── api.py           API REST
     │   ├── web.py           Páginas de tareas y analítica
     │   ├── datasets.py      Módulo de análisis de archivos
     │   └── eventos.py       Canal SSE
-    ├── templates/           Plantillas Jinja2
-    └── static/              Hoja de estilos
+    ├── templates/           Plantillas Jinja2 (una por sección del informe)
+    └── static/              Estilos (tablero.css para el informe) y scripts
 ```
 
 ---
@@ -152,7 +180,23 @@ reducido, y trabajar sobre un DataFrame permite operaciones de series de tiempo
 y difíciles de leer.
 
 **Los gráficos se renderizan en el servidor** y viajan como HTML. El navegador
-solo los dibuja.
+solo los dibuja; en tema oscuro, un script cambia cada color por su par de la
+paleta oscura, validada aparte sobre el fondo oscuro.
+
+**Las medidas se escriben en DAX y se evalúan con pandas.** El catálogo del
+informe está escrito en DAX, así que la fórmula que se muestra es la que produce
+la cifra. Un parser propio interpreta el subconjunto que se usa en un informe
+gerencial (agregaciones, `DIVIDE`, `CALCULATE` con filtros, `ALL` e inteligencia
+de tiempo). Cuando un desplazamiento de fechas cae fuera de los datos, la medida
+devuelve vacío, en lugar de comparar contra un periodo a medias.
+
+**El mes de cierre es el último mes completo.** Si el archivo termina a mitad de
+mes, comparar ese mes con el anterior haría parecer que las ventas se
+desplomaron; los indicadores comparan el último mes completo y la tendencia
+omite los meses parciales.
+
+**Datos simulados reproducibles.** Cada lote guarda su semilla en la ficha de
+origen: con la misma semilla se obtiene exactamente el mismo archivo.
 
 **Server-Sent Events y no WebSockets.** El flujo va en un solo sentido y SSE
 reconecta por su cuenta. Además, `EventSource` no admite cabeceras propias, de
@@ -194,6 +238,9 @@ ingreso, sin obligar a nadie a restablecer su contraseña.
 - Formatos que ejecutan código al deserializar, como pickle, rechazados
 - Cuota de archivos por cuenta
 - Búsquedas con la entrada escapada antes de construir la expresión regular
+- Las fórmulas DAX nunca pasan por `eval`: un parser propio solo ejecuta las
+  funciones permitidas
+- Los nombres que vienen del archivo se escapan antes de mezclarse con HTML
 - Cabeceras `X-Content-Type-Options`, `X-Frame-Options` y `Referrer-Policy`
 
 ### Limitación conocida
@@ -263,14 +310,28 @@ horas.
 
 ### 5.5 Analizar un archivo
 
-1. Abre **Datos** y pulsa **Selecciona un archivo** (CSV, Excel o JSON).
-2. La app lo procesa y lo agrega a tu lista con su número de filas y columnas.
-3. Ábrelo para ver la **Vista previa** y el **Perfil de columnas** (tipos, nulos,
-   valores únicos y estadísticas).
-4. En el **Explorador de gráficos** elige:
-   - **Gráfico:** barras, líneas, área, torta, dispersión, caja o histograma.
-   - **Agrupar por** y **Medida:** las columnas a cruzar.
-   - **Función:** cantidad de registros, suma, promedio, máximo o mínimo.
+1. Abre **Datos** y elige una fuente:
+   - **Generar lote**: escoge un volumen (Aleatorio, Pequeño, Mediano o Grande)
+     y pulsa **Generar lote**. Cada clic produce datos distintos.
+   - **Sube tu propio archivo**: arrástralo a la zona de carga o haz clic para
+     elegirlo (CSV, Excel o JSON).
+2. Cada fuente aparece como una tarjeta con filas, columnas, tamaño y, si es
+   simulada, su escenario. Pulsa **Abrir informe**.
+3. Arriba verás el origen de los datos y la guía **Cómo leer este informe**.
+   Usa la barra de filtros (**Desde**, **Hasta** y las categorías) para acotar
+   todo el informe.
+4. Recorre las pestañas:
+
+   | Pestaña | Qué contiene |
+   |---|---|
+   | Resumen ejecutivo | Indicadores con variación, hallazgos y cinco gráficos. Haz clic en una barra para filtrar por ella y usa **¿Cómo leerlo?** en cada gráfico |
+   | Tabla dinámica | Elige **Filas**, **Columnas**, **Valores**, **Resumir con** y **Mostrar como**. **Exportar** descarga la tabla |
+   | Medidas DAX | Cada medida con su fórmula y su valor en el rango y en el mes de cierre. En **Nueva medida** escribes tu propia fórmula y la desglosas por una dimensión |
+   | Explorador | Gráfico libre con siete tipos y cinco funciones, y vista previa de las filas |
+   | Origen y calidad | Ficha de origen, completitud y cómo se interpretó cada columna |
+
+5. **Descargar CSV** baja el archivo completo e **Imprimir / PDF** genera el
+   informe sin los controles.
 
 Límites del módulo de análisis:
 
