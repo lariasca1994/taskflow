@@ -7,17 +7,18 @@ protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
 
 ## Contenido
 
-1. [En pocas palabras](#1-en-pocas-palabras)
-2. [Antes de empezar](#2-antes-de-empezar)
-3. [Paso a paso](#3-paso-a-paso)
-4. [Qué información ingresas y dónde queda](#4-qué-información-ingresas-y-dónde-queda)
-5. [Seguridad: qué se garantiza](#5-seguridad-qué-se-garantiza)
-6. [Límites y recomendaciones](#6-límites-y-recomendaciones)
-7. [Preguntas frecuentes](#7-preguntas-frecuentes)
+1. [Proyecto: objetivos y alcances](#1-proyecto-objetivos-y-alcances)
+2. [Glosario](#2-glosario)
+3. [Plataformas, base de datos y servicios](#3-plataformas-base-de-datos-y-servicios)
+4. [Paso a paso](#4-paso-a-paso)
+5. [Seguridad: tu información protegida](#5-seguridad-tu-información-protegida)
+6. [Agradecimientos](#6-agradecimientos)
 
 ---
 
-## 1. En pocas palabras
+## 1. Proyecto: objetivos y alcances
+
+### Objetivo
 
 Una lista de tareas con fechas, prioridades y categorías, más un **informe de productividad** que
 muestra cómo vas (cumplimiento, tiempo de cierre, vencidas). También puedes subir un CSV, Excel o
@@ -25,21 +26,68 @@ JSON —o generar un lote de ventas simulado— y la app lo convierte en un **in
 indicadores, gráficos explicados, medidas DAX, tabla dinámica y el origen de los datos. Los números
 se actualizan en vivo, sin recargar.
 
-## 2. Antes de empezar
+### Alcance: qué necesitas y qué esperar
 
 - Solo necesitas un navegador.
 - El indicador **● en vivo** (arriba a la derecha) muestra que la página recibe cambios en tiempo
   real.
 
-## 3. Paso a paso
+### Límites
 
-### 3.1 Inicio
+Es una demo de portafolio:
+
+- No hay recuperación de contraseña ni bloqueo por intentos fallidos.
+- La cookie de sesión no lleva la marca `Secure` (el sitio se sirve igual solo por HTTPS en Cloud
+  Run).
+- **No subas archivos con datos personales o confidenciales**: usa datos de ejemplo.
+
+## 2. Glosario
+
+Palabras técnicas que aparecen en este manual, explicadas en lenguaje simple.
+
+| Término | Qué significa |
+|---|---|
+| **Administrador** | Cuenta con permisos para gestionar usuarios y configuraciones de la aplicación. |
+| **API** | Puerta de entrada de un programa para que otros programas le pidan o le envíen datos. |
+| **Backend** | La parte de la aplicación que trabaja "detrás": procesa lo que envías y habla con la base de datos. |
+| **Base de datos** | Lugar donde la aplicación guarda la información de forma ordenada y permanente. |
+| **Cifrado / TLS / HTTPS** | Protección que codifica la información mientras viaja, para que nadie en el camino pueda leerla. |
+| **Contraseña cifrada (hash)** | La contraseña no se guarda tal cual, sino como una "huella" de la que no se puede recuperar el texto original. |
+| **Cookie** | Pequeño dato que el navegador guarda para recordar tu sesión en ese sitio. |
+| **CSV** | Archivo de texto con datos en columnas, que se abre en Excel o Google Sheets. |
+| **Excel / XLSX** | Formato de hoja de cálculo de Microsoft Excel. |
+| **JWT** | Tipo de token firmado digitalmente: si alguien lo altera, el servidor lo rechaza. |
+| **Modo mantenimiento** | Pantalla que aparece cuando el servicio o su base de datos no responden; se recupera sola cuando vuelven. |
+| **Navegador** | Programa con el que abres páginas web: Chrome, Edge, Firefox, Safari. |
+| **Nube** | Servidores de una empresa (Amazon, Microsoft, Google, Oracle…) donde la aplicación funciona sin depender de un computador propio. |
+| **Pandas / análisis de datos** | Herramienta de Python para leer, limpiar y resumir tablas de datos. |
+| **PDF** | Formato de documento que se ve igual en cualquier equipo. |
+| **Rate limit (límite de intentos)** | Tope de intentos en poco tiempo, para frenar a quien intenta adivinar contraseñas. |
+| **Recurrencia (RRULE)** | Regla que indica cada cuánto se repite un evento (diario, semanal, días laborables…). |
+| **REST** | Forma estándar de organizar una API usando direcciones web y métodos como GET o POST. |
+| **Rol** | Tipo de cuenta que define qué puede hacer cada persona (por ejemplo, usuario o administrador). |
+| **Sesión** | El tiempo en que la aplicación te reconoce después de iniciar sesión, sin pedirte la contraseña de nuevo. |
+| **Variables de entorno / secretos** | Claves y contraseñas internas de la aplicación, guardadas fuera del código para que no queden expuestas. |
+
+## 3. Plataformas, base de datos y servicios
+
+Qué servicio de nube, base de datos o API usa el proyecto y para qué sirve cada uno.
+
+| Plataforma | Tipo | Qué hace en el proyecto |
+|---|---|---|
+| ![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white) | Nube | Corre la app FastAPI: páginas Jinja2 + HTMX, API REST y canal de eventos en vivo. |
+| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | Base de datos | MongoDB Atlas guarda usuarios, tareas y archivos (estos últimos en GridFS). Es el único servicio externo: no requiere otra cuenta ni clave de API. |
+| ![qa-evidencia](https://img.shields.io/badge/qa--evidencia-2EAD33?style=for-the-badge&logo=playwright&logoColor=white) | Pruebas automatizadas | Prueba la demo automáticamente dos veces al día y publica la evidencia. |
+
+## 4. Paso a paso
+
+### 4.1 Inicio
 
 ![Página de inicio](img/manual/01-inicio.png)
 
 Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 
-### 3.2 Crear una cuenta
+### 4.2 Crear una cuenta
 
 ![Formulario de registro](img/manual/02-registro.png)
 
@@ -50,7 +98,7 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 | 3 | Contraseña | Tu contraseña | Entre **10 y 128 caracteres** |
 | 4 | Crear cuenta | Botón | Crea la cuenta y te deja con la sesión iniciada |
 
-### 3.3 Ingresar
+### 4.3 Ingresar
 
 ![Formulario de ingreso](img/manual/03-ingresar.png)
 
@@ -62,7 +110,7 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 
 La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
 
-### 3.4 Tus tareas
+### 4.4 Tus tareas
 
 ![Lista de tareas con el formulario y los filtros numerados](img/manual/04-tareas.png)
 
@@ -80,7 +128,7 @@ La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a l
 Pulsa **Aplicar** para filtrar o **Limpiar** para quitar los filtros. En cada tarea, la casilla la
 marca como completada (o la devuelve a pendiente) y el botón de eliminar la borra.
 
-### 3.5 Analítica: informe de productividad
+### 4.5 Analítica: informe de productividad
 
 ![Informe de productividad con filtros numerados](img/manual/05-analitica.png)
 
@@ -121,7 +169,7 @@ qué pregunta responde.
 
 **Imprimir / PDF** genera el informe sin los controles.
 
-### 3.6 Datos: elegir una fuente
+### 4.6 Datos: elegir una fuente
 
 ![Página de datos con el generador, la carga y las fuentes](img/manual/06-datos.png)
 
@@ -140,7 +188,7 @@ temporada alta, región líder y evento.
 Cada cuenta conserva hasta **5 fuentes**, que se borran tras **24 horas sin uso** o al cerrar
 sesión.
 
-### 3.7 Informe gerencial: resumen ejecutivo
+### 4.7 Informe gerencial: resumen ejecutivo
 
 ![Resumen ejecutivo del informe con sus controles numerados](img/manual/07-informe.png)
 
@@ -173,7 +221,7 @@ mes completo con el anterior. Debajo, tres **hallazgos** resumen lo más importa
 
 Al pie de cada gráfico se indica la **fuente**: el archivo, las filas filtradas y cómo se agrupó.
 
-### 3.8 Tabla dinámica
+### 4.8 Tabla dinámica
 
 ![Tabla dinámica con sus campos numerados](img/manual/08-pivote.png)
 
@@ -189,7 +237,7 @@ Al pie de cada gráfico se indica la **fuente**: el archivo, las filas filtradas
 
 La última fila y la última columna son los **totales**. Cuanto más verde la celda, mayor el valor.
 
-### 3.9 Medidas DAX
+### 4.9 Medidas DAX
 
 ![Medidas DAX y editor de nueva medida](img/manual/09-medidas.png)
 
@@ -206,7 +254,7 @@ disponibles: SUM, AVERAGE, MIN, MAX, MEDIAN, COUNT, COUNTROWS, DISTINCTCOUNT, DI
 ALL, DATEADD, SAMEPERIODLASTYEAR, DATESYTD, DATESMTD, DATESINPERIOD, TOTALYTD, TOTALMTD, IF,
 ROUND y ABS. Si la fórmula tiene un error, se muestra un mensaje que dice qué corregir.
 
-### 3.10 Origen y calidad
+### 4.10 Origen y calidad
 
 ![Ficha de origen y calidad de los datos](img/manual/10-origen.png)
 
@@ -216,7 +264,7 @@ ROUND y ABS. Si la fórmula tiene un error, se muestra un mensaje que dice qué 
 | 2 | Completitud | Porcentaje de celdas con dato, celdas vacías y filas duplicadas |
 | 3 | Cómo se interpretó cada columna | El rol que el informe le dio a cada columna: medida principal, eje de tiempo, dimensión o medida |
 
-### 3.11 Explorador
+### 4.11 Explorador
 
 La pestaña **Explorador** permite un gráfico libre:
 
@@ -229,55 +277,11 @@ La pestaña **Explorador** permite un gráfico libre:
 
 Debajo, la **Vista previa** muestra las primeras 20 filas de la fuente.
 
-### 3.12 API
+### 4.12 API
 
 **API ↗** abre la documentación interactiva de la API REST (`/docs`), con tu misma sesión.
 
-## 4. Qué información ingresas y dónde queda
-
-| Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
-|---|---|---|---|
-| Nombre y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
-| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** (bcrypt con pimienta) | Nadie: no se puede leer ni recuperar |
-| Tareas | Tu lista y tu analítica | MongoDB Atlas, marcadas con tu cuenta | Tú y el administrador |
-| Archivos que subes | Análisis | MongoDB (GridFS, convertidos a Parquet) | Solo tú; se borran a las 24 h sin uso o al salir |
-| Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
-| Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
-| Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
-
-## 5. Seguridad: qué se garantiza
-
-Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.py`,
-`repositorio.py`, `datos.py`, `main.py`):
-
-- **Contraseñas con bcrypt (coste 12) más una "pimienta" HMAC-SHA256** guardada fuera de la base:
-  aunque se filtrara la base, las huellas no sirven sin esa clave. Las huellas antiguas se
-  actualizan solas al siguiente ingreso.
-- **Sesión con doble límite:** 30 minutos de inactividad (se renueva con el uso) y 12 horas como
-  máximo absoluto. Cookie `HttpOnly` y `SameSite=Lax`.
-- **Cada quien ve solo lo suyo:** la pertenencia de tareas y archivos se verifica dentro de la
-  propia consulta a la base, también en la API.
-- **Archivos acotados:** formato, tamaño (10 MB), filas (500.000) y cantidad (5) limitados, con
-  caducidad automática.
-- **Cabeceras de seguridad** en todas las respuestas: `X-Content-Type-Options: nosniff`,
-  `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy`.
-- **Plantillas con escape automático** (Jinja2). Los nombres que vienen de tus archivos también se
-  escapan en los hallazgos escritos.
-- **Las fórmulas DAX no ejecutan código:** un intérprete propio solo admite las funciones de la
-  lista; el texto nunca se pasa a `eval`.
-- **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
-  entorno de Cloud Run.
-
-## 6. Límites y recomendaciones
-
-Es una demo de portafolio:
-
-- No hay recuperación de contraseña ni bloqueo por intentos fallidos.
-- La cookie de sesión no lleva la marca `Secure` (el sitio se sirve igual solo por HTTPS en Cloud
-  Run).
-- **No subas archivos con datos personales o confidenciales**: usa datos de ejemplo.
-
-## 7. Preguntas frecuentes
+### 4.13 Preguntas frecuentes
 
 **¿Por qué desapareció mi archivo?** Los archivos se borran tras 24 horas sin uso o al cerrar
 sesión. Vuelve a subirlo.
@@ -306,3 +310,48 @@ pandas sobre tu archivo. Las fórmulas se pueden copiar a Power BI.
 la barra de filtros, o **Limpiar filtros**.
 
 **¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus tareas y tus datos siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
+
+## 5. Seguridad: tu información protegida
+
+Tu confianza es lo primero: la plataforma solo pide los datos necesarios para funcionar, los protege y no los comparte con terceros. Esto es lo que se guarda y cómo se protege.
+
+### Qué datos se guardan y dónde
+
+| Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
+|---|---|---|---|
+| Nombre y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
+| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** (bcrypt con pimienta) | Nadie: no se puede leer ni recuperar |
+| Tareas | Tu lista y tu analítica | MongoDB Atlas, marcadas con tu cuenta | Tú y el administrador |
+| Archivos que subes | Análisis | MongoDB (GridFS, convertidos a Parquet) | Solo tú; se borran a las 24 h sin uso o al salir |
+| Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
+| Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
+| Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
+
+### Cómo se protege tu información
+
+Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.py`,
+`repositorio.py`, `datos.py`, `main.py`):
+
+- **Contraseñas con bcrypt (coste 12) más una "pimienta" HMAC-SHA256** guardada fuera de la base:
+  aunque se filtrara la base, las huellas no sirven sin esa clave. Las huellas antiguas se
+  actualizan solas al siguiente ingreso.
+- **Sesión con doble límite:** 30 minutos de inactividad (se renueva con el uso) y 12 horas como
+  máximo absoluto. Cookie `HttpOnly` y `SameSite=Lax`.
+- **Cada quien ve solo lo suyo:** la pertenencia de tareas y archivos se verifica dentro de la
+  propia consulta a la base, también en la API.
+- **Archivos acotados:** formato, tamaño (10 MB), filas (500.000) y cantidad (5) limitados, con
+  caducidad automática.
+- **Cabeceras de seguridad** en todas las respuestas: `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy`.
+- **Plantillas con escape automático** (Jinja2). Los nombres que vienen de tus archivos también se
+  escapan en los hallazgos escritos.
+- **Las fórmulas DAX no ejecutan código:** un intérprete propio solo admite las funciones de la
+  lista; el texto nunca se pasa a `eval`.
+- **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
+  entorno de Cloud Run.
+
+## 6. Agradecimientos
+
+A mi familia, por su apoyo incondicional, su paciencia y por creer en cada proyecto incluso cuando apenas era una idea. Este trabajo también es de ustedes.
+
+Y a ti, que usas esta plataforma: cada prueba, comentario y sugerencia ayuda a que siga mejorando.
