@@ -5,8 +5,10 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
 from app import datos
 from app.config import COOKIE_SESION, SESION_MAXIMA_HORAS
@@ -36,7 +38,12 @@ async def _barrido_periodico() -> None:
 
 @asynccontextmanager
 async def ciclo_de_vida(app: FastAPI):
-    preparar_indices()
+    # Si MongoDB no responde al arrancar, la app arranca igual: las peticiones
+    # muestran la pantalla de mantenimiento en vez de un error de la plataforma.
+    try:
+        preparar_indices()
+    except (ServerSelectionTimeoutError, ConnectionFailure) as error:
+        registro.warning("MongoDB no disponible al arrancar: %s", type(error).__name__)
     tarea = asyncio.create_task(_barrido_periodico())
 
     yield
@@ -59,6 +66,21 @@ app.include_router(api.router)
 app.include_router(datasets.router)
 app.include_router(eventos.router)
 app.include_router(web.router)
+
+
+plantillas = Jinja2Templates(directory="app/templates")
+
+
+@app.exception_handler(ServerSelectionTimeoutError)
+@app.exception_handler(ConnectionFailure)
+async def base_no_disponible(request: Request, exc: Exception):
+    """MongoDB apagado o inalcanzable: 503. Las páginas muestran la pantalla de
+    mantenimiento; la API responde JSON."""
+    registro.warning("MongoDB no disponible: %s", type(exc).__name__)
+    cabeceras = {"Retry-After": "300"}
+    if request.url.path.startswith("/api"):
+        return JSONResponse({"detail": "servicio en mantenimiento"}, status_code=503, headers=cabeceras)
+    return plantillas.TemplateResponse(request, "mantenimiento.html", status_code=503, headers=cabeceras)
 
 
 @app.exception_handler(RedirigirAlLogin)
