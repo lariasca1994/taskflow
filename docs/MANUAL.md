@@ -304,3 +304,5 @@ pandas sobre tu archivo. Las fórmulas se pueden copiar a Power BI.
 
 **¿Cómo quito un filtro que puse con un clic en un gráfico?** Pulsa la **×** del chip que aparece en
 la barra de filtros, o **Limpiar filtros**.
+
+**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus tareas y tus datos siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.

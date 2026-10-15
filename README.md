@@ -362,6 +362,14 @@ un aviso: no existe una forma única de convertirlas a tabla.
 **API ↗** abre la documentación interactiva de la API REST (`/docs`), con la
 misma sesión de la interfaz.
 
+### Si el servicio no responde
+
+Si la API o la base de datos (MongoDB Atlas) no responden, la aplicación muestra una **pantalla de mantenimiento** con los colores del proyecto, en lugar de un error genérico o de una página que no carga.
+
+- **Servidor:** Si MongoDB no responde, las páginas devuelven `app/templates/mantenimiento.html` con **503** y `Retry-After`; la API (`/api/...`) responde JSON 503. Si la base está caída al arrancar, el contenedor arranca igual.
+- **Pantalla:** Es una página independiente (no depende de la base, de `base.html` ni de Tailwind por CDN) y respeta el tema guardado.
+- **Recuperación:** Se recarga sola cada 30 s; cuando la base vuelve aparece la página normal. No reintenta acciones del usuario, para no duplicarlas.
+
 ---
 
 ## 6. Instalación para pruebas
