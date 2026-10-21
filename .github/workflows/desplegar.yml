@@ -28,9 +28,9 @@ concurrency:
 
 env:
   PROYECTO: taskflow-luis-2026
-  REGION: us-central1
+  REGION: us-east4
   SERVICIO: taskflow
-  IMAGEN: us-central1-docker.pkg.dev/taskflow-luis-2026/cloud-run-source-deploy/taskflow
+  IMAGEN: us-east4-docker.pkg.dev/taskflow-luis-2026/cloud-run-source-deploy/taskflow
 
 jobs:
   desplegar:
