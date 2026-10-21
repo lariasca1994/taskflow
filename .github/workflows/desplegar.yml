@@ -52,9 +52,16 @@ jobs:
           docker build -t "$IMAGEN:${{ github.sha }}" .
           docker push "$IMAGEN:${{ github.sha }}"
 
+      # El correo de recuperación de cuenta (Brevo) y la URL pública vienen de los
+      # secretos y variables del repositorio: la configuración también sale de GitHub.
       - name: Actualizar el servicio
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_REMITENTE: ${{ secrets.BREVO_REMITENTE }}
+          URL_PUBLICA: ${{ vars.URL_PUBLICA }}
         run: |
           gcloud run deploy "$SERVICIO" \
             --image "$IMAGEN:${{ github.sha }}" \
+            --update-env-vars "BREVO_API_KEY=$BREVO_API_KEY,BREVO_REMITENTE=$BREVO_REMITENTE,URL_PUBLICA=$URL_PUBLICA" \
             --region "$REGION" --project "$PROYECTO" --quiet \
             --format "value(status.url)"
