@@ -1,0 +1,20 @@
+{% extends "acceso_base.html" %}
+{% block titulo %}Nueva contraseña · TaskFlow{% endblock %}
+{% block paso %}Acceso{% endblock %}
+{% block titulo_form %}Crea una nueva contraseña{% endblock %}
+{% block subtitulo %}Mínimo 10 caracteres.{% endblock %}
+{% block formulario %}
+<form method="post" action="/restablecer">
+    <input type="hidden" name="token" value="{{ token }}">
+    <div>
+        <label for="password" class="etiqueta">Nueva contraseña</label>
+        <input type="password" id="password" name="password" required minlength="10" autocomplete="new-password" class="campo">
+    </div>
+    <div>
+        <label for="confirmacion" class="etiqueta">Confirma la nueva contraseña</label>
+        <input type="password" id="confirmacion" name="confirmacion" required minlength="10" autocomplete="new-password" class="campo">
+    </div>
+    <button type="submit" class="boton-primario">Guardar contraseña</button>
+</form>
+{% endblock %}
+{% block alterno %}<a href="/recuperar">Pedir otro enlace</a>{% endblock %}
