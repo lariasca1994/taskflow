@@ -1,7 +1,7 @@
 # TaskFlow
 
 <p>
-  <a href="https://taskflow-812302804238.us-central1.run.app/"><img src="docs/demo-badge.svg" alt="Abrir la demo en vivo" height="32"></a>
+  <a href="https://taskflow-812302804238.us-east4.run.app/"><img src="docs/demo-badge.svg" alt="Abrir la demo en vivo" height="32"></a>
   <a href="https://frontend-nine-topaz-99.vercel.app"><img src="https://portafolio-status.onrender.com/api/status/taskflow/badge.svg" alt="Estado en vivo del proyecto" height="32"></a>
   <a href="https://d4i3vsgw7xwmh.cloudfront.net"><img src="https://portafolio-status.onrender.com/api/status/taskflow/qa-badge.svg" alt="Fecha y resultado de la última prueba E2E" height="32"></a>
 </p>
@@ -45,13 +45,13 @@ para filtrar y adaptar los gráficos al tema oscuro.
   simulado— y la app lo convierte en un **informe gerencial**: indicadores con
   variación, gráficos explicados, medidas DAX, tabla dinámica y la trazabilidad
   del origen de los datos.
-- **Cómo probarlo:** entra a la [demo](https://taskflow-812302804238.us-central1.run.app/),
+- **Cómo probarlo:** entra a la [demo](https://taskflow-812302804238.us-east4.run.app/),
   crea una cuenta y agrega un par de tareas. Para correrlo en tu equipo, ve a
   [Instalación para pruebas](#6-instalación-para-pruebas).
 
 ### Demo en vivo
 
-**Aplicación:** [abrir la demo en vivo](https://taskflow-812302804238.us-central1.run.app/)
+**Aplicación:** [abrir la demo en vivo](https://taskflow-812302804238.us-east4.run.app/)
 
 ### Funcionalidades
 

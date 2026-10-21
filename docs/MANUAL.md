@@ -3,7 +3,7 @@
 Guía para usar la plataforma paso a paso: qué significa cada campo, qué datos se ingresan y qué
 protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
 
-**Demo:** [TaskFlow (Google Cloud Run)](https://taskflow-812302804238.us-central1.run.app/)
+**Demo:** [TaskFlow (Google Cloud Run)](https://taskflow-812302804238.us-east4.run.app/)
 
 ## Contenido
 
