@@ -54,6 +54,7 @@
                 <a href="/admin/tareas" class="nav-enlace {% if activo == 'admin' %}nav-activo{% endif %}">Admin</a>
                 <a href="/admin/usuarios" class="nav-enlace {% if activo == 'admin_usuarios' %}nav-activo{% endif %}">Usuarios</a>
                 {% endif %}
+                <a href="/cuenta/contrasena" class="nav-enlace {% if activo == 'cuenta' %}nav-activo{% endif %}">Contraseña</a>
                 <a href="/docs" class="nav-enlace" target="_blank" rel="noopener">API ↗</a>
             </div>
             {% endif %}
@@ -91,7 +92,8 @@
         <a href="/admin/tareas" class="nav-enlace {% if activo == 'admin' %}nav-activo{% endif %}">Admin</a>
         <a href="/admin/usuarios" class="nav-enlace {% if activo == 'admin_usuarios' %}nav-activo{% endif %}">Usuarios</a>
         {% endif %}
-        <a href="/docs" class="nav-enlace" target="_blank" rel="noopener">API ↗</a>
+        <a href="/cuenta/contrasena" class="nav-enlace {% if activo == 'cuenta' %}nav-activo{% endif %}">Contraseña</a>
+                <a href="/docs" class="nav-enlace" target="_blank" rel="noopener">API ↗</a>
     </div>
     {% endif %}
 </nav>

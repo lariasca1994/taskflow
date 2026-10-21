@@ -27,6 +27,13 @@ ARCHIVO_HORAS_VIDA = int(os.getenv("ARCHIVO_HORAS_VIDA", "24"))
 
 EXTENSIONES = {".csv", ".xlsx", ".json"}
 
+# Correo de recuperación de cuenta (API de Brevo). Sin clave, el enlace solo se
+# escribe en el log (desarrollo). URL_PUBLICA arma el enlace del correo.
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
+BREVO_REMITENTE = os.getenv("BREVO_REMITENTE", "").strip()
+URL_PUBLICA = os.getenv("URL_PUBLICA", "http://127.0.0.1:8000").rstrip("/")
+RECUPERAR_MINUTOS = 30
+
 if not MONGO_URI:
     raise RuntimeError("Falta MONGO_URI en el archivo .env de la raiz del proyecto.")
 

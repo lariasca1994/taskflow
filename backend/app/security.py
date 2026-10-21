@@ -152,6 +152,44 @@ def renovar(carga: dict) -> str:
     return crear_token(carga["sub"], carga["email"], inicio)
 
 
+# ─────────────────────────── recuperación de cuenta ───────────────────────────
+
+_AUDIENCIA_RECUPERAR = "recuperar"
+
+
+def _huella(hash_password: str) -> str:
+    """Huella de la contraseña actual: al cambiarla, el enlace anterior deja de servir."""
+    return hashlib.sha256((hash_password or "").encode()).hexdigest()[:24]
+
+
+def crear_token_recuperacion(usuario_id: str, hash_password: str, minutos: int) -> str:
+    """Enlace de "Olvidé mi contraseña": firmado, con vencimiento y de un solo uso.
+    Lleva audiencia propia, así que leer_token (sesiones) lo rechaza."""
+    return jwt.encode(
+        {
+            "sub": usuario_id,
+            "h": _huella(hash_password),
+            "aud": _AUDIENCIA_RECUPERAR,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=minutos),
+        },
+        JWT_SECRET,
+        algorithm=JWT_ALGORITMO,
+    )
+
+
+def leer_token_recuperacion(token: str) -> tuple[str, str] | None:
+    """(usuario_id, huella) si el enlace es válido y no venció."""
+    try:
+        carga = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITMO], audience=_AUDIENCIA_RECUPERAR)
+        return str(carga["sub"]), str(carga["h"])
+    except (jwt.PyJWTError, KeyError):
+        return None
+
+
+def huella_coincide(hash_password: str, huella: str) -> bool:
+    return hmac.compare_digest(_huella(hash_password), huella)
+
+
 __all__ = [
     "cifrar",
     "verificar",

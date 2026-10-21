@@ -110,6 +110,16 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 
 La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
 
+### 4.3.1 Olvidé mi contraseña
+
+En **Ingresar**, pulsa **¿Olvidaste tu contraseña?** y escribe tu correo. Si la cuenta existe y está
+activa, te llega un enlace para crear una contraseña nueva (mínimo 10 caracteres). El enlace vence en
+30 minutos y sirve una sola vez. La pantalla muestra el mismo mensaje exista o no la cuenta.
+
+### 4.3.2 Cambiar la contraseña
+
+Con la sesión iniciada, abre **Contraseña** en el menú, escribe la actual y la nueva dos veces.
+
 ### 4.4 Tus tareas
 
 ![Lista de tareas con el formulario y los filtros numerados](img/manual/04-tareas.png)

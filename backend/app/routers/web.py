@@ -5,16 +5,28 @@ inserta en su sitio. Es lo que permite tener una interfaz reactiva sin
 escribir JavaScript propio.
 """
 
+import html
+import threading
+import time
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app import analitica, datos, eventos, repositorio
+from app import analitica, correo, datos, eventos, repositorio
+from app.config import RECUPERAR_MINUTOS, URL_PUBLICA
 from app.dependencias import usuario_opcional, usuario_web
 from app.esquemas import Estado
-from app.security import COOKIE_SESION, cifrar, crear_token, verificar_y_migrar
+from app.security import (
+    COOKIE_SESION,
+    cifrar,
+    crear_token,
+    crear_token_recuperacion,
+    huella_coincide,
+    leer_token_recuperacion,
+    verificar_y_migrar,
+)
 
 router = APIRouter()
 plantillas = Jinja2Templates(directory="app/templates")
@@ -105,6 +117,118 @@ def procesar_registro(
     respuesta = RedirectResponse("/tareas", status_code=303)
     _sesion(respuesta, usuario)
     return respuesta
+
+
+# ─────────────────────── recuperar y cambiar contraseña ───────────────────────
+
+_RESPUESTA_RECUPERAR = (
+    "Si el correo pertenece a una cuenta, te enviamos un enlace para crear una contraseña nueva. "
+    "Revisa tu bandeja (y la carpeta de spam)."
+)
+_ENVIOS_RECUPERAR: dict[str, list[float]] = {}
+_CANDADO_RECUPERAR = threading.Lock()
+
+
+def _puede_enviar(email: str) -> bool:
+    """Máximo 3 enlaces cada 15 minutos por correo (no bloquea el ingreso)."""
+    ahora = time.time()
+    with _CANDADO_RECUPERAR:
+        recientes = [t for t in _ENVIOS_RECUPERAR.get(email, []) if ahora - t < 15 * 60]
+        if len(recientes) >= 3:
+            _ENVIOS_RECUPERAR[email] = recientes
+            return False
+        _ENVIOS_RECUPERAR[email] = recientes + [ahora]
+        return True
+
+
+@router.get("/recuperar", response_class=HTMLResponse)
+def form_recuperar(request: Request):
+    return plantillas.TemplateResponse(request, "recuperar.html", {})
+
+
+@router.post("/recuperar", response_class=HTMLResponse)
+def procesar_recuperar(request: Request, email: str = Form(...)):
+    email = email.strip().lower()
+    usuario = repositorio.buscar_usuario_por_email(email)
+    if usuario and usuario.get("activo", True) and _puede_enviar(email):
+        token = crear_token_recuperacion(str(usuario["_id"]), usuario["password"], RECUPERAR_MINUTOS)
+        enlace = f"{URL_PUBLICA}/restablecer?token={token}"
+        nombre = usuario.get("nombre", "")
+        correo.enviar(
+            usuario["email"], nombre, "Restablece tu contraseña · TaskFlow",
+            f"Hola {nombre},\n\nPara crear una contraseña nueva abre este enlace (vence en "
+            f"{RECUPERAR_MINUTOS} minutos y sirve una vez):\n\n{enlace}\n\n"
+            "Si no fuiste tú, ignora este correo: tu contraseña no cambia.",
+            f"<p>Hola {html.escape(nombre)},</p><p>Para crear una contraseña nueva en <strong>TaskFlow</strong>:</p>"
+            f'<p><a href="{enlace}" style="background:#0e6b45;color:#fff;padding:10px 18px;border-radius:6px;'
+            f'text-decoration:none">Crear contraseña nueva</a></p><p>El enlace vence en {RECUPERAR_MINUTOS} '
+            "minutos y sirve una sola vez. Si no fuiste tú, ignora este correo.</p>",
+        )
+    return plantillas.TemplateResponse(request, "recuperar.html", {"exito": _RESPUESTA_RECUPERAR})
+
+
+@router.get("/restablecer", response_class=HTMLResponse)
+def form_restablecer(request: Request, token: str = ""):
+    contexto = {"token": token}
+    if not leer_token_recuperacion(token):
+        contexto["error"] = "El enlace no es válido o ya venció. Pide uno nuevo."
+    return plantillas.TemplateResponse(request, "restablecer.html", contexto)
+
+
+@router.post("/restablecer", response_class=HTMLResponse)
+def procesar_restablecer(
+    request: Request,
+    token: str = Form(...),
+    password: str = Form(...),
+    confirmacion: str = Form(...),
+):
+    error = None
+    leido = leer_token_recuperacion(token)
+    usuario = repositorio.buscar_usuario(leido[0]) if leido else None
+    if not usuario or not usuario.get("activo", True) or not huella_coincide(usuario["password"], leido[1]):
+        error = "El enlace no es válido o ya venció. Pide uno nuevo."
+    elif len(password) < 10:
+        error = "La contraseña debe tener al menos 10 caracteres"
+    elif password != confirmacion:
+        error = "La confirmación no coincide"
+    if error:
+        return plantillas.TemplateResponse(
+            request, "restablecer.html", {"token": token, "error": error}, status_code=400
+        )
+    repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
+    return plantillas.TemplateResponse(
+        request, "login.html", {"exito": "Tu contraseña quedó actualizada. Ya puedes ingresar.", "email": usuario["email"]}
+    )
+
+
+@router.get("/cuenta/contrasena", response_class=HTMLResponse)
+def form_cambiar_contrasena(request: Request, usuario: dict = Depends(usuario_web)):
+    return plantillas.TemplateResponse(request, "cuenta_contrasena.html", {"usuario": usuario, "activo": "cuenta"})
+
+
+@router.post("/cuenta/contrasena", response_class=HTMLResponse)
+def cambiar_contrasena(
+    request: Request,
+    actual: str = Form(...),
+    password: str = Form(...),
+    confirmacion: str = Form(...),
+    usuario: dict = Depends(usuario_web),
+):
+    contexto = {"usuario": usuario, "activo": "cuenta"}
+    valido, _ = verificar_y_migrar(actual, usuario["password"])
+    if not valido:
+        contexto["error"] = "La contraseña actual no es correcta"
+    elif len(password) < 10:
+        contexto["error"] = "La contraseña nueva debe tener al menos 10 caracteres"
+    elif password != confirmacion:
+        contexto["error"] = "La confirmación no coincide"
+    elif password == actual:
+        contexto["error"] = "La contraseña nueva debe ser distinta de la actual"
+    if "error" in contexto:
+        return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto, status_code=400)
+    repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
+    contexto["exito"] = "Tu contraseña quedó actualizada."
+    return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto)
 
 
 @router.post("/salir")

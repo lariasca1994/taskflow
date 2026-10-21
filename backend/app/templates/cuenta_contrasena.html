@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set activo = 'cuenta' %}
+{% block titulo %}Cambiar contraseña · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight">Cambiar contraseña</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">Escribe tu contraseña actual y la nueva (mínimo 10 caracteres).</p>
+</header>
+
+<section class="panel max-w-md space-y-4">
+    {% if error %}<div class="rounded-lg border border-rose-200 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 px-4 py-3 text-sm" role="alert">{{ error }}</div>{% endif %}
+    {% if exito %}<div class="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300 px-4 py-3 text-sm" role="status">{{ exito }}</div>{% endif %}
+    <form method="post" action="/cuenta/contrasena" class="space-y-4">
+        <div>
+            <label for="actual" class="etiqueta">Contraseña actual</label>
+            <input type="password" id="actual" name="actual" required autocomplete="current-password" class="campo">
+        </div>
+        <div>
+            <label for="password" class="etiqueta">Nueva contraseña</label>
+            <input type="password" id="password" name="password" required minlength="10" autocomplete="new-password" class="campo">
+        </div>
+        <div>
+            <label for="confirmacion" class="etiqueta">Confirma la nueva contraseña</label>
+            <input type="password" id="confirmacion" name="confirmacion" required minlength="10" autocomplete="new-password" class="campo">
+        </div>
+        <button type="submit" class="boton-primario">Guardar contraseña</button>
+    </form>
+</section>
+{% endblock %}

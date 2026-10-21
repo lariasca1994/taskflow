@@ -56,6 +56,8 @@
 
             {% if error %}
             <div class="alerta" role="alert">{{ error }}</div>
+            {% elif exito %}
+            <div class="alerta alerta--info" role="status">{{ exito }}</div>
             {% elif request.query_params.get("expirada") %}
             <div class="alerta alerta--info" role="status">Tu sesión expiró por inactividad. Vuelve a ingresar.</div>
             {% endif %}
