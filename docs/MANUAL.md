@@ -96,7 +96,7 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 | 1 | Nombre | Cómo quieres que te salude la app | Entre 2 y 80 caracteres |
 | 2 | Correo electrónico | El correo con el que vas a entrar | Formato válido y único |
 | 3 | Contraseña | Tu contraseña | Entre **10 y 128 caracteres** |
-| 4 | Crear cuenta | Botón | Crea la cuenta y te deja con la sesión iniciada |
+| 4 | Crear cuenta | Botón | Crea la cuenta y te lleva a elegir tu verificación en dos pasos |
 
 ### 4.3 Ingresar
 
@@ -106,7 +106,10 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 |:-:|---|---|
 | 1 | Correo electrónico | El correo de tu cuenta |
 | 2 | Contraseña | Tu contraseña |
-| 3 | Ingresar | Abre **Tus tareas** |
+| 3 | Ingresar | Pide el código de tu verificación en dos pasos |
+
+Después de la contraseña escribe el **código de 6 dígitos** de tu método (ver 4.3.3) y pulsa
+**Verificar**. Si tienes los dos métodos activos, puedes cambiar al otro desde la misma pantalla.
 
 La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
 
@@ -119,6 +122,20 @@ activa, te llega un enlace para crear una contraseña nueva (mínimo 10 caracter
 ### 4.3.2 Cambiar la contraseña
 
 Con la sesión iniciada, abre **Contraseña** en el menú, escribe la actual y la nueva dos veces.
+
+### 4.3.3 Verificación en dos pasos (obligatoria)
+
+Cada ingreso pide, además de la contraseña, un código. La primera vez que ingresas (o al crear la
+cuenta) eliges cómo recibirlo:
+
+| Método | Cómo funciona |
+|---|---|
+| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. |
+| **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
+
+Confirma el método escribiendo el primer código. Desde **Seguridad** (menú superior) puedes
+**agregar el método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te
+permite entrar aunque no tengas el teléfono a mano.
 
 ### 4.4 Tus tareas
 
@@ -290,6 +307,8 @@ Debajo, la **Vista previa** muestra las primeras 20 filas de la fuente.
 ### 4.12 API
 
 **API ↗** abre la documentación interactiva de la API REST (`/docs`), con tu misma sesión.
+Para ingresar por la API, `POST /api/auth/login` exige además el campo `codigo` (el de tu app o
+del correo; si tu método es el correo y no lo envías, la API te manda uno).
 
 ### 4.13 Preguntas frecuentes
 
@@ -336,6 +355,7 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
 | Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
 | Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
+| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** (AES-GCM) y código del correo **solo como huella** | Nadie: no se puede leer desde la base |
 
 ### Cómo se protege tu información
 
@@ -345,6 +365,9 @@ Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.p
 - **Contraseñas con bcrypt (coste 12) más una "pimienta" HMAC-SHA256** guardada fuera de la base:
   aunque se filtrara la base, las huellas no sirven sin esa clave. Las huellas antiguas se
   actualizan solas al siguiente ingreso.
+- **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
+  la clave de la app se guarda cifrada, un código no se acepta dos veces, y el código del correo
+  vence en 10 minutos, admite 5 intentos y se pueden pedir 3 cada 10 minutos.
 - **Sesión con doble límite:** 30 minutos de inactividad (se renueva con el uso) y 12 horas como
   máximo absoluto. Cookie `HttpOnly` y `SameSite=Lax`.
 - **Cada quien ve solo lo suyo:** la pertenencia de tareas y archivos se verifica dentro de la

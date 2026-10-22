@@ -57,6 +57,8 @@ para filtrar y adaptar los gráficos al tema oscuro.
 
 **Cuentas**
 - Registro e ingreso con contraseñas hasheadas
+- Verificación en dos pasos obligatoria: app autenticadora o código por correo, a elección; el otro
+  método se puede agregar desde **Seguridad**
 - Sesión con inactividad deslizante de 30 minutos y duración máxima de 12 horas
 - Cada usuario ve únicamente lo suyo: la pertenencia se verifica en la consulta
 
@@ -239,6 +241,8 @@ ingreso, sin obligar a nadie a restablecer su contraseña.
 
 #### Resto
 
+- Verificación en dos pasos obligatoria (TOTP o código por correo): la clave TOTP se guarda
+  cifrada con AES-GCM, los códigos no se reutilizan y el del correo se guarda solo como huella
 - Sesión en cookie `httponly`: JavaScript no puede leer el token
 - Inactividad deslizante de 30 minutos y expiración absoluta de 12 horas
 - Pertenencia verificada en el filtro de la consulta, no en la vista
@@ -277,13 +281,16 @@ dependencia externa a un proyecto que debe levantarse con un solo comando.
 
 1. En la página de inicio, pulsa **Crear cuenta**.
 2. Completa **Nombre**, **Correo electrónico** y **Contraseña**.
-3. Pulsa **Crear cuenta**. La cuenta queda lista para usar de inmediato.
+3. Pulsa **Crear cuenta** y elige tu verificación en dos pasos: **App autenticadora** (escanea el
+   QR y escribe el primer código) o **Código por correo**.
 
 ### 5.2 Iniciar sesión
 
 1. Pulsa **Ya tengo cuenta** o **Ingresar** en el menú.
 2. Escribe **Correo electrónico** y **Contraseña** y pulsa **Ingresar**.
-3. El menú superior muestra **Tareas**, **Analítica**, **Datos**, **API ↗** y
+3. Escribe el código de 6 dígitos de tu app o de tu correo y pulsa **Verificar**. En **Seguridad**
+   puedes agregar el otro método y elegir cuál se pide por defecto.
+4. El menú superior muestra **Tareas**, **Analítica**, **Datos**, **API ↗** y
    **Salir**.
 
 La sesión se cierra tras 30 minutos sin actividad y, en cualquier caso, a las 12
@@ -360,7 +367,8 @@ un aviso: no existe una forma única de convertirlas a tabla.
 ### 5.6 Usar la API
 
 **API ↗** abre la documentación interactiva de la API REST (`/docs`), con la
-misma sesión de la interfaz.
+misma sesión de la interfaz. `POST /api/auth/login` exige también el código de la
+verificación en dos pasos (`codigo`).
 
 ### Si el servicio no responde
 
