@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from app import analitica, repositorio
+from app import analitica, mfa, repositorio
 from app.dependencias import usuario_api
 from app.esquemas import (
     Estado,
@@ -29,7 +29,7 @@ def registro(datos: RegistroEntrada, respuesta: Response):
     if not usuario:
         raise HTTPException(status_code=409, detail="Ese correo ya esta registrado")
 
-    _abrir_sesion(respuesta, usuario)
+    # Sin sesion hasta configurar la verificacion en dos pasos (se hace en la web).
     return _usuario_salida(usuario)
 
 
@@ -50,6 +50,20 @@ def login(datos: LoginEntrada, respuesta: Response):
 
     if hash_nuevo:
         repositorio.actualizar_password(str(usuario["_id"]), hash_nuevo)
+
+    if not usuario.get("activo", True):
+        raise HTTPException(status_code=403, detail="Esta cuenta está suspendida")
+
+    # Segundo paso obligatorio en la misma petición.
+    if not mfa.configurado(usuario):
+        raise HTTPException(status_code=403, detail="Configura la verificación en dos pasos ingresando por la web")
+    metodo = datos.metodo or mfa.preferido(usuario)
+    if not datos.codigo:
+        if metodo == "correo" and mfa.enviar_codigo(usuario):
+            raise HTTPException(status_code=401, detail="Te enviamos un código por correo: repite la petición con 'codigo'")
+        raise HTTPException(status_code=401, detail="Falta el código de verificación ('codigo')")
+    if not mfa.verificar(usuario, metodo, datos.codigo):
+        raise HTTPException(status_code=401, detail="El código no es correcto o ya venció")
 
     _abrir_sesion(respuesta, usuario)
     return _usuario_salida(usuario)

@@ -14,16 +14,20 @@ from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app import analitica, correo, datos, eventos, repositorio
+from app import analitica, correo, datos, eventos, mfa, repositorio
 from app.config import RECUPERAR_MINUTOS, URL_PUBLICA
 from app.dependencias import usuario_opcional, usuario_web
 from app.esquemas import Estado
 from app.security import (
+    COOKIE_MFA,
     COOKIE_SESION,
+    MFA_MINUTOS,
     cifrar,
     crear_token,
+    crear_token_mfa,
     crear_token_recuperacion,
     huella_coincide,
+    leer_token_mfa,
     leer_token_recuperacion,
     verificar_y_migrar,
 )
@@ -75,9 +79,14 @@ def procesar_login(
     if hash_nuevo:
         repositorio.actualizar_password(str(usuario["_id"]), hash_nuevo)
 
-    respuesta = RedirectResponse("/tareas", status_code=303)
-    _sesion(respuesta, usuario)
-    return respuesta
+    if not usuario.get("activo", True):
+        return plantillas.TemplateResponse(
+            request, "login.html", {"error": "Esta cuenta está suspendida", "email": email}, status_code=403
+        )
+    # La contraseña sola no abre sesion: falta el segundo paso.
+    if mfa.preferido(usuario) == "correo":
+        mfa.enviar_codigo(usuario)
+    return _pase_mfa(usuario)
 
 
 @router.get("/registro", response_class=HTMLResponse)
@@ -114,9 +123,152 @@ def procesar_registro(
             status_code=409,
         )
 
+    # La cuenta nueva elige su segundo paso antes de entrar.
+    return _pase_mfa(usuario)
+
+
+# ─────────────────────── verificación en dos pasos ───────────────────────
+
+
+def _pase_mfa(usuario: dict) -> RedirectResponse:
+    respuesta = RedirectResponse("/verificacion", status_code=303)
+    respuesta.set_cookie(
+        COOKIE_MFA, crear_token_mfa(str(usuario["_id"])),
+        httponly=True, samesite="lax", secure=False, max_age=MFA_MINUTOS * 60,
+    )
+    return respuesta
+
+
+def _usuario_en_verificacion(request: Request) -> dict | None:
+    usuario_id = leer_token_mfa(request.cookies.get(COOKIE_MFA))
+    usuario = repositorio.buscar_usuario(usuario_id) if usuario_id else None
+    return usuario if usuario and usuario.get("activo", True) else None
+
+
+def _pantalla_mfa(request: Request, usuario: dict, metodo: str | None = None, status_code: int = 200, **contexto):
+    if not mfa.configurado(usuario):
+        return plantillas.TemplateResponse(request, "mfa_elegir.html", {"metodos": mfa.METODOS, **contexto},
+                                           status_code=status_code)
+    metodo = metodo if metodo in mfa.metodos_activos(usuario) else mfa.preferido(usuario)
+    otros = [m for m in mfa.metodos_activos(usuario) if m != metodo]
+    return plantillas.TemplateResponse(
+        request, "mfa_verificar.html",
+        {"metodo": metodo, "otro": otros[0] if otros else None, "metodos": mfa.METODOS,
+         "email": usuario["email"], **contexto},
+        status_code=status_code,
+    )
+
+
+def _vencido() -> RedirectResponse:
+    return RedirectResponse("/ingresar", status_code=303)
+
+
+@router.get("/verificacion", response_class=HTMLResponse)
+def form_verificacion(request: Request, metodo: str | None = None):
+    usuario = _usuario_en_verificacion(request)
+    return _pantalla_mfa(request, usuario, metodo) if usuario else _vencido()
+
+
+@router.post("/verificacion", response_class=HTMLResponse)
+def procesar_verificacion(request: Request, metodo: str = Form(...), codigo: str = Form(...)):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if not mfa.verificar(usuario, metodo, codigo):
+        return _pantalla_mfa(request, usuario, metodo, error="El código no es correcto o ya venció.", status_code=401)
     respuesta = RedirectResponse("/tareas", status_code=303)
+    respuesta.delete_cookie(COOKIE_MFA)
     _sesion(respuesta, usuario)
     return respuesta
+
+
+@router.post("/verificacion/correo", response_class=HTMLResponse)
+def reenviar_codigo(request: Request):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if not mfa.enviar_codigo(usuario):
+        return _pantalla_mfa(request, usuario, "correo", error="Pediste varios códigos seguidos. Espera unos minutos.")
+    return _pantalla_mfa(request, usuario, "correo", exito=f"Te enviamos un código a {usuario['email']}.")
+
+
+@router.post("/verificacion/configurar", response_class=HTMLResponse)
+def configurar_metodo(request: Request, metodo: str = Form(...)):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    return _iniciar_metodo(request, usuario, metodo, "/verificacion/activar", "acceso")
+
+
+@router.post("/verificacion/activar", response_class=HTMLResponse)
+def activar_metodo(request: Request, metodo: str = Form(...), codigo: str = Form(...)):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if mfa.configurado(usuario):  # ya tiene uno: este paso es solo para la primera vez
+        return _pantalla_mfa(request, usuario)
+    activado = mfa.activar_totp(usuario, codigo) if metodo == "totp" else mfa.activar_correo(usuario, codigo)
+    if not activado:
+        return _confirmar_metodo(request, usuario, metodo, "/verificacion/activar", "acceso",
+                                 error="El código no es correcto o ya venció.")
+    respuesta = RedirectResponse("/tareas", status_code=303)
+    respuesta.delete_cookie(COOKIE_MFA)
+    _sesion(respuesta, usuario)
+    return respuesta
+
+
+def _iniciar_metodo(request: Request, usuario: dict, metodo: str, accion: str, vista: str, **contexto):
+    if metodo == "totp":
+        return _confirmar_metodo(request, usuario, metodo, accion, vista, app=mfa.iniciar_totp(usuario), **contexto)
+    if not mfa.enviar_codigo(usuario):
+        contexto["error"] = "Pediste varios códigos seguidos. Espera unos minutos."
+    return _confirmar_metodo(request, usuario, "correo", accion, vista, **contexto)
+
+
+def _confirmar_metodo(request: Request, usuario: dict, metodo: str, accion: str, vista: str, **contexto):
+    plantilla = "mfa_confirmar.html" if vista == "acceso" else "cuenta_seguridad.html"
+    base = {"metodo": metodo, "accion": accion, "metodos": mfa.METODOS, "email": usuario["email"]}
+    if vista != "acceso":
+        base.update(_contexto_seguridad(usuario))
+    return plantillas.TemplateResponse(request, plantilla, {**base, **contexto},
+                                       status_code=401 if "error" in contexto else 200)
+
+
+def _contexto_seguridad(usuario: dict) -> dict:
+    return {"usuario": usuario, "activo": "cuenta", "activos": mfa.metodos_activos(usuario),
+            "preferido": mfa.preferido(usuario)}
+
+
+@router.get("/cuenta/seguridad", response_class=HTMLResponse)
+def form_seguridad(request: Request, usuario: dict = Depends(usuario_web)):
+    return plantillas.TemplateResponse(request, "cuenta_seguridad.html",
+                                       {"metodos": mfa.METODOS, **_contexto_seguridad(usuario)})
+
+
+@router.post("/cuenta/seguridad/agregar", response_class=HTMLResponse)
+def agregar_metodo(request: Request, metodo: str = Form(...), usuario: dict = Depends(usuario_web)):
+    if metodo not in mfa.METODOS or metodo in mfa.metodos_activos(usuario):
+        return RedirectResponse("/cuenta/seguridad", status_code=303)
+    return _iniciar_metodo(request, usuario, metodo, "/cuenta/seguridad/activar", "cuenta")
+
+
+@router.post("/cuenta/seguridad/activar", response_class=HTMLResponse)
+def activar_en_perfil(request: Request, metodo: str = Form(...), codigo: str = Form(...),
+                      usuario: dict = Depends(usuario_web)):
+    activado = mfa.activar_totp(usuario, codigo) if metodo == "totp" else mfa.activar_correo(usuario, codigo)
+    if not activado:
+        return _confirmar_metodo(request, usuario, metodo, "/cuenta/seguridad/activar", "cuenta",
+                                 error="El código no es correcto o ya venció.")
+    return plantillas.TemplateResponse(request, "cuenta_seguridad.html", {
+        "metodos": mfa.METODOS, **_contexto_seguridad(usuario),
+        "exito": f"{mfa.METODOS[metodo]} quedó activada como segundo paso.",
+    })
+
+
+@router.post("/cuenta/seguridad/preferido", response_class=HTMLResponse)
+def cambiar_preferido(request: Request, metodo: str = Form(...), usuario: dict = Depends(usuario_web)):
+    mfa.elegir_preferido(usuario, metodo)
+    return RedirectResponse("/cuenta/seguridad", status_code=303)
 
 
 # ─────────────────────── recuperar y cambiar contraseña ───────────────────────
