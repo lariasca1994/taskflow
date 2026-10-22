@@ -64,6 +64,11 @@ def actualizar_password(usuario_id: str, nuevo_hash: str) -> None:
     )
 
 
+def actualizar_mfa(usuario_id: str, cambios: dict) -> None:
+    """Guarda campos de la verificacion en dos pasos ("mfa.<campo>": valor)."""
+    usuarios.update_one({"_id": ObjectId(usuario_id)}, {"$set": cambios})
+
+
 def buscar_usuario(usuario_id: str) -> dict | None:
     if not ObjectId.is_valid(usuario_id):
         return None

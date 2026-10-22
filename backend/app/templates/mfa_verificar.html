@@ -1,0 +1,25 @@
+{% extends "acceso_base.html" %}
+{% block titulo %}Verificación en dos pasos · TaskFlow{% endblock %}
+{% block paso %}Un paso más{% endblock %}
+{% block titulo_form %}Escribe tu código{% endblock %}
+{% block subtitulo %}{% if metodo == 'totp' %}Abre tu app autenticadora y escribe el código de 6 dígitos.{% else %}Te enviamos un código de 6 dígitos a {{ email }}. Vence en 10 minutos.{% endif %}{% endblock %}
+{% block formulario %}
+<form method="post" action="/verificacion">
+    <input type="hidden" name="metodo" value="{{ metodo }}">
+    <div>
+        <label for="codigo" class="etiqueta">Código de 6 dígitos</label>
+        <input type="text" id="codigo" name="codigo" required inputmode="numeric" pattern="[0-9 ]{6,7}" maxlength="7"
+               autocomplete="one-time-code" autofocus class="campo">
+    </div>
+    <button type="submit" class="boton-primario">Verificar</button>
+</form>
+{% if metodo == 'correo' %}
+<form method="post" action="/verificacion/correo"><button type="submit" class="enlace-boton">Enviar otro código</button></form>
+{% endif %}
+{% if otro == 'correo' %}
+<form method="post" action="/verificacion/correo"><button type="submit" class="enlace-boton">Usar un código por correo</button></form>
+{% elif otro == 'totp' %}
+<p class="alterno"><a href="/verificacion?metodo=totp">Usar la app autenticadora</a></p>
+{% endif %}
+{% endblock %}
+{% block alterno %}<a href="/ingresar">Volver a ingresar</a>{% endblock %}
