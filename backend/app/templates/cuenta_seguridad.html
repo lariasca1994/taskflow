@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% set activo = 'seguridad' %}
+{% block titulo %}Seguridad · TaskFlow{% endblock %}
+
+{% block contenido %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight">Verificación en dos pasos</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">Cada ingreso pide, además de la contraseña, un código de uno de tus métodos.</p>
+</header>
+
+<section class="panel max-w-xl space-y-5">
+    {% if error %}<div class="rounded-lg border border-rose-200 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 px-4 py-3 text-sm" role="alert">{{ error }}</div>{% endif %}
+    {% if exito %}<div class="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300 px-4 py-3 text-sm" role="status">{{ exito }}</div>{% endif %}
+
+    <ul class="space-y-3">
+        {% for clave, nombre in metodos.items() %}
+        <li class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3">
+            <div>
+                <p class="font-semibold">{{ nombre }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {% if clave in activos %}Activa{% if clave == preferido %} · se pide por defecto{% endif %}{% else %}Sin configurar{% endif %}
+                </p>
+            </div>
+            {% if clave not in activos %}
+            <form method="post" action="/cuenta/seguridad/agregar">
+                <button type="submit" name="metodo" value="{{ clave }}" class="boton-primario">Agregar</button>
+            </form>
+            {% elif clave != preferido %}
+            <form method="post" action="/cuenta/seguridad/preferido">
+                <button type="submit" name="metodo" value="{{ clave }}" class="boton-secundario">Pedir este por defecto</button>
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if accion %}
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-5 space-y-4">
+        <h2 class="text-lg font-semibold">Agregar: {{ metodos[metodo] }}</h2>
+        {% include "_mfa_activar.html" %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "acceso_base.html" %}
+{% block titulo %}Verificación en dos pasos · TaskFlow{% endblock %}
+{% block paso %}Un paso más{% endblock %}
+{% block titulo_form %}Protege tu cuenta{% endblock %}
+{% block subtitulo %}Además de la contraseña, cada ingreso pedirá un código. Elige cómo recibirlo; después puedes agregar el otro desde tu perfil.{% endblock %}
+{% block formulario %}
+<form method="post" action="/verificacion/configurar">
+    <button type="submit" name="metodo" value="totp" class="boton-primario">App autenticadora (recomendado)</button>
+    <p class="ayuda">Google Authenticator, Microsoft Authenticator u otra: funciona sin internet.</p>
+    <button type="submit" name="metodo" value="correo" class="boton-primario">Código por correo</button>
+    <p class="ayuda">Te enviamos un código de 6 dígitos cada vez que ingreses.</p>
+</form>
+{% endblock %}
+{% block alterno %}<a href="/ingresar">Volver a ingresar</a>{% endblock %}

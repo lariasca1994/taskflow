@@ -27,6 +27,9 @@ class RegistroEntrada(BaseModel):
 class LoginEntrada(BaseModel):
     email: EmailStr
     password: str
+    # Segundo paso obligatorio: código de la app autenticadora o del correo.
+    codigo: str | None = None
+    metodo: str | None = None
 
 
 class UsuarioSalida(BaseModel):

@@ -1,0 +1,14 @@
+{% extends "acceso_base.html" %}
+{% block titulo %}Verificación en dos pasos · TaskFlow{% endblock %}
+{% block paso %}Un paso más{% endblock %}
+{% block titulo_form %}{{ metodos[metodo] }}{% endblock %}
+{% block subtitulo %}Confirma el método con un código para terminar de ingresar.{% endblock %}
+{% block formulario %}
+{% if metodo == 'totp' and not app %}
+<form method="post" action="/verificacion/configurar">
+    <button type="submit" name="metodo" value="totp" class="boton-primario">Mostrar el código QR otra vez</button>
+</form>
+{% endif %}
+{% include "_mfa_activar.html" %}
+{% endblock %}
+{% block alterno %}<a href="/verificacion">Elegir otro método</a>{% endblock %}
