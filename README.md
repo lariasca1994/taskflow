@@ -219,6 +219,8 @@ que nada quede huérfano.
 
 ### Seguridad
 
+- **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
+  parches y se revisan periódicamente.
 #### Contraseñas
 
 Se **hashean**, no se cifran. El cifrado es reversible: en una filtración
@@ -384,7 +386,7 @@ Si la API o la base de datos (MongoDB Atlas) no responden, la aplicación muestr
 
 ### Requisitos
 
-- Python 3.11 o superior
+- Python 3.12 (3.12.15 o posterior, con los parches de seguridad de octubre de 2026)
 - Una base MongoDB accesible
 
 ### Instalación

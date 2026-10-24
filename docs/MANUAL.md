@@ -383,6 +383,8 @@ Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.p
   lista; el texto nunca se pasa a `eval`.
 - **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
   entorno de Cloud Run.
+- **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
+  parches y se revisan periódicamente.
 
 ## 6. Agradecimientos
 
