@@ -383,6 +383,8 @@ Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.p
   lista; el texto nunca se pasa a `eval`.
 - **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
   entorno de Cloud Run.
+- **Runtime con parches de seguridad:** la imagen fija Python 3.12.15 y certifi 2026.10.19 o
+  posterior, que deja de confiar en los certificados intermedios comprometidos de eMudhra.
 
 ## 6. Agradecimientos
 
