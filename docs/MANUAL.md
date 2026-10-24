@@ -384,7 +384,9 @@ Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.p
 - **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
   entorno de Cloud Run.
 - **Runtime con parches de seguridad:** la imagen fija Python 3.12.15 y certifi 2026.10.19 o
-  posterior, que deja de confiar en los certificados intermedios comprometidos de eMudhra.
+  posterior, que deja de confiar en los certificados intermedios comprometidos de eMudhra. La
+  imagen tampoco confía en las raíces emSign ni «AAA Certificate Services» que firmaron esos
+  intermedios comprometidos de eMudhra (la misma mitigación que publicó Red Hat).
 
 ## 6. Agradecimientos
 
