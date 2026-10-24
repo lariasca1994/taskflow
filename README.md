@@ -222,7 +222,9 @@ que nada quede huérfano.
 - **Runtime con parches de seguridad:** la imagen fija Python 3.12.15 y certifi 2026.10.19 o
   posterior, que deja de confiar en los certificados intermedios comprometidos de eMudhra. La
   imagen tampoco confía en las raíces emSign ni «AAA Certificate Services» que firmaron esos
-  intermedios comprometidos de eMudhra (la misma mitigación que publicó Red Hat).
+  intermedios comprometidos de eMudhra (la misma mitigación que publicó Red Hat). Las dependencias
+  se auditan (npm audit, pip-audit o dotnet list package --vulnerable) y quedaron sin
+  vulnerabilidades conocidas altas ni críticas.
 #### Contraseñas
 
 Se **hashean**, no se cifran. El cifrado es reversible: en una filtración
