@@ -14,3 +14,5 @@ plotly==5.24.1
 pydantic[email]==2.10.4
 cryptography==44.0.0
 segno==1.6.6
+# CA de confianza sin los intermedios comprometidos de eMudhra (octubre 2026).
+certifi>=2026.10.19
