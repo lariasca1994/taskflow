@@ -117,7 +117,7 @@ para filtrar y adaptar los gráficos al tema oscuro.
 | Gráficos | Plotly, renderizado en el servidor |
 | Medidas | Intérprete propio de un subconjunto de DAX sobre pandas |
 | Sesiones | JWT en cookie httponly |
-| Contraseñas | bcrypt con pimiento |
+| Contraseñas | Hash con sal y una clave adicional |
 
 ---
 
@@ -226,30 +226,16 @@ que nada quede huérfano.
   parches y se revisan periódicamente.
 #### Contraseñas
 
-Se **hashean**, no se cifran. El cifrado es reversible: en una filtración
-bastaría la clave para recuperarlas en claro. El hash es de una sola vía.
-
-Tres capas:
-
-| Capa | Qué aporta |
-|---|---|
-| Pimiento (HMAC-SHA256) | Un secreto que vive en la configuración, no en la base. Sin él, un volcado robado no sirve ni para probar contraseñas comunes |
-| bcrypt con sal única | Dos usuarios con la misma contraseña producen hashes distintos |
-| Coste 12 | Cada verificación cuesta unos 250 ms: irrelevante para el usuario, prohibitivo para la fuerza bruta |
-
-El pimiento resuelve además el límite de 72 bytes de bcrypt, que trunca en
-silencio las contraseñas más largas: el HMAC produce siempre una entrada de
-longitud fija.
-
-Las cuentas creadas con un esquema anterior se actualizan solas en el siguiente
-ingreso, sin obligar a nadie a restablecer su contraseña.
+Se guardan solo como huella (hash de una sola vía) con sal y una clave adicional que vive
+fuera de la base; las cuentas con un esquema anterior se actualizan solas en el siguiente
+ingreso.
 
 #### Resto
 
 - Verificación en dos pasos obligatoria (TOTP o código por correo): la clave TOTP se guarda
-  cifrada con AES-GCM, los códigos no se reutilizan y el del correo se guarda solo como huella
-- Sesión en cookie `httponly`: JavaScript no puede leer el token
-- Inactividad deslizante de 30 minutos y expiración absoluta de 12 horas
+  cifrada, los códigos no se reutilizan y el del correo se guarda solo como huella
+- Sesión en una cookie que JavaScript no puede leer
+- Vencimiento por inactividad y por tiempo máximo
 - Pertenencia verificada en el filtro de la consulta, no en la vista
 - Validación de archivos por extensión, tamaño y número de filas
 - Formatos que ejecutan código al deserializar, como pickle, rechazados
