@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app import analitica, correo, datos, eventos, mfa, repositorio
-from app.config import RECUPERAR_MINUTOS, URL_PUBLICA
+from app.config import COOKIE_SEGURA, RECUPERAR_MINUTOS, URL_PUBLICA
 from app.dependencias import usuario_opcional, usuario_web
 from app.esquemas import Estado
 from app.security import (
@@ -42,7 +42,7 @@ def _sesion(respuesta: Response, usuario: dict) -> None:
         crear_token(str(usuario["_id"]), usuario["email"]),
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=COOKIE_SEGURA,
         max_age=60 * 60 * 12,
     )
 
@@ -134,7 +134,7 @@ def _pase_mfa(usuario: dict) -> RedirectResponse:
     respuesta = RedirectResponse("/verificacion", status_code=303)
     respuesta.set_cookie(
         COOKIE_MFA, crear_token_mfa(str(usuario["_id"])),
-        httponly=True, samesite="lax", secure=False, max_age=MFA_MINUTOS * 60,
+        httponly=True, samesite="lax", secure=COOKIE_SEGURA, max_age=MFA_MINUTOS * 60,
     )
     return respuesta
 

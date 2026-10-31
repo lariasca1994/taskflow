@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
 from app import datos
-from app.config import COOKIE_SESION, SESION_MAXIMA_HORAS
+from app.config import COOKIE_SEGURA, COOKIE_SESION, SESION_MAXIMA_HORAS
 from app.database import cliente, preparar_indices
 from app.dependencias import RedirigirAlLogin
 from app.routers import admin, api, datasets, eventos, web
@@ -102,7 +102,7 @@ async def sesion_y_cabeceras(request: Request, call_next):
             token,
             httponly=True,
             samesite="lax",
-            secure=False,  # poner en True al servir por HTTPS
+            secure=COOKIE_SEGURA,
             max_age=SESION_MAXIMA_HORAS * 3600,
         )
 

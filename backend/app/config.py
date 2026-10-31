@@ -32,6 +32,8 @@ EXTENSIONES = {".csv", ".xlsx", ".json"}
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 BREVO_REMITENTE = os.getenv("BREVO_REMITENTE", "").strip()
 URL_PUBLICA = os.getenv("URL_PUBLICA", "http://127.0.0.1:8000").rstrip("/")
+# Las cookies solo viajan por HTTPS cuando el sitio se publica por HTTPS (producción).
+COOKIE_SEGURA = URL_PUBLICA.startswith("https://")
 RECUPERAR_MINUTOS = 30
 
 if not MONGO_URI:

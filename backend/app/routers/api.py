@@ -12,6 +12,7 @@ from app.esquemas import (
     TareaSalida,
     UsuarioSalida,
 )
+from app.config import COOKIE_SEGURA
 from app.security import COOKIE_SESION, cifrar, crear_token, verificar_y_migrar
 
 router = APIRouter(prefix="/api")
@@ -138,7 +139,7 @@ def _abrir_sesion(respuesta: Response, usuario: dict) -> None:
         crear_token(str(usuario["_id"]), usuario["email"]),
         httponly=True,
         samesite="lax",
-        secure=False,  # poner en True al servir por HTTPS
+        secure=COOKIE_SEGURA,
         max_age=60 * 60 * 12,
     )
 

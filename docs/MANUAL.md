@@ -36,9 +36,6 @@ se actualizan en vivo, sin recargar.
 
 Es una demo de portafolio:
 
-- No hay recuperación de contraseña ni bloqueo por intentos fallidos.
-- La cookie de sesión no lleva la marca `Secure` (el sitio se sirve igual solo por HTTPS en Cloud
-  Run).
 - **No subas archivos con datos personales o confidenciales**: usa datos de ejemplo.
 
 ## 2. Glosario
@@ -362,15 +359,14 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.py`,
 `repositorio.py`, `datos.py`, `main.py`):
 
-- **Contraseñas con bcrypt (coste 12) más una "pimienta" HMAC-SHA256** guardada fuera de la base:
+- **Contraseñas con hash y una clave adicional** guardada fuera de la base:
   aunque se filtrara la base, las huellas no sirven sin esa clave. Las huellas antiguas se
   actualizan solas al siguiente ingreso.
 - **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
-  la clave de la app se guarda cifrada, un código no se acepta dos veces, 5 códigos errados de la
-  app la bloquean 15 minutos, y el código del correo vence en 10 minutos, admite 5 intentos y se
-  pueden pedir 3 cada 10 minutos.
-- **Sesión con doble límite:** 30 minutos de inactividad (se renueva con el uso) y 12 horas como
-  máximo absoluto. Cookie `HttpOnly` y `SameSite=Lax`.
+  la clave de la app se guarda cifrada, un código no se acepta dos veces, los intentos errados
+  bloquean temporalmente y el código del correo vence en pocos minutos.
+- **Sesión con doble límite:** vence por inactividad (se renueva con el uso) y por tiempo máximo,
+  en una cookie segura.
 - **Cada quien ve solo lo suyo:** la pertenencia de tareas y archivos se verifica dentro de la
   propia consulta a la base, también en la API.
 - **Archivos acotados:** formato, tamaño (10 MB), filas (500.000) y cantidad (5) limitados, con

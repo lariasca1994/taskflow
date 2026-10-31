@@ -17,3 +17,24 @@ venv/
 # Script real de arranque de la VM de OCI: trae la cadena de Mongo, los
 # secretos del servidor y la contrasena del admin. Solo se queda local.
 oci-deploy/cloud-init.sh
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+lanzar-taskflow.ps1
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+route-rules.json
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+security-list-ids.json
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+ingress-rules.json
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+instance-launched.json
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+shape-config.json
+
+# Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
+estado-lanzamiento.txt
