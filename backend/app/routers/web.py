@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, Form, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app import analitica, correo, datos, eventos, mfa, repositorio
+from app import analitica, auditoria, correo, datos, eventos, mfa, repositorio
 from app.config import COOKIE_SEGURA, RECUPERAR_MINUTOS, URL_PUBLICA
 from app.dependencias import usuario_opcional, usuario_web
 from app.esquemas import Estado
@@ -62,12 +62,18 @@ def procesar_login(
     password: str = Form(...),
 ):
     usuario = repositorio.buscar_usuario_por_email(email)
+    if usuario and mfa.clave_bloqueada(usuario):
+        return plantillas.TemplateResponse(
+            request, "login.html", {"error": mfa.MENSAJE_BLOQUEO, "email": email}, status_code=429
+        )
 
     valido, hash_nuevo = (
         verificar_y_migrar(password, usuario["password"]) if usuario else (False, None)
     )
 
     if not valido:
+        if usuario:
+            mfa.fallo_de_clave(usuario)
         return plantillas.TemplateResponse(
             request,
             "login.html",
@@ -75,6 +81,7 @@ def procesar_login(
             status_code=401,
         )
 
+    mfa.clave_correcta(usuario)
     # Si la cuenta venia con el esquema anterior, se actualiza en silencio.
     if hash_nuevo:
         repositorio.actualizar_password(str(usuario["_id"]), hash_nuevo)
@@ -305,6 +312,7 @@ def procesar_recuperar(request: Request, email: str = Form(...)):
     if usuario and usuario.get("activo", True) and _puede_enviar(email):
         token = crear_token_recuperacion(str(usuario["_id"]), usuario["password"], RECUPERAR_MINUTOS)
         enlace = f"{URL_PUBLICA}/restablecer?token={token}"
+        auditoria.registrar(auditoria.RECUPERACION, usuario)
         nombre = usuario.get("nombre", "")
         correo.enviar(
             usuario["email"], nombre, "Restablece tu contraseña · TaskFlow",
@@ -348,6 +356,7 @@ def procesar_restablecer(
             request, "restablecer.html", {"token": token, "error": error}, status_code=400
         )
     repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
+    mfa.clave_restablecida(usuario)
     return plantillas.TemplateResponse(
         request, "login.html", {"exito": "Tu contraseña quedó actualizada. Ya puedes ingresar.", "email": usuario["email"]}
     )
@@ -379,6 +388,7 @@ def cambiar_contrasena(
     if "error" in contexto:
         return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto, status_code=400)
     repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
+    mfa.clave_restablecida(usuario)
     contexto["exito"] = "Tu contraseña quedó actualizada."
     return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto)
 
