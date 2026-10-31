@@ -27,3 +27,7 @@ def preparar_indices() -> None:
 
     datasets.create_index([("usuario_id", ASCENDING), ("subido_en", ASCENDING)])
     datasets.create_index([("ultimo_uso", ASCENDING)])
+
+    # Eventos de seguridad: se borran solos a los 15 dias.
+    base["eventos_seguridad"].create_index([("fecha", ASCENDING)], expireAfterSeconds=15 * 24 * 3600)
+    base["eventos_seguridad"].create_index([("usuario_id", ASCENDING)])

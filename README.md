@@ -219,6 +219,9 @@ que nada quede huérfano.
 
 ### Seguridad
 
+- **Bloqueo temporal** ante intentos fallidos repetidos de contraseña o de código.
+- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos y cambios de
+  contraseña quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
 - **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
   parches y se revisan periódicamente.
 #### Contraseñas

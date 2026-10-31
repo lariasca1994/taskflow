@@ -37,6 +37,8 @@ def registro(datos: RegistroEntrada, respuesta: Response):
 @router.post("/auth/login", response_model=UsuarioSalida)
 def login(datos: LoginEntrada, respuesta: Response):
     usuario = repositorio.buscar_usuario_por_email(datos.email)
+    if usuario and mfa.clave_bloqueada(usuario):
+        raise HTTPException(status_code=429, detail=mfa.MENSAJE_BLOQUEO)
 
     valido, hash_nuevo = (
         verificar_y_migrar(datos.password, usuario["password"])
@@ -47,8 +49,11 @@ def login(datos: LoginEntrada, respuesta: Response):
     # Mismo mensaje exista o no la cuenta: revelar cual de las dos cosas
     # falla permitiria averiguar que correos estan registrados.
     if not valido:
+        if usuario:
+            mfa.fallo_de_clave(usuario)
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
+    mfa.clave_correcta(usuario)
     if hash_nuevo:
         repositorio.actualizar_password(str(usuario["_id"]), hash_nuevo)
 
