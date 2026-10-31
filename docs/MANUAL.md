@@ -346,13 +346,13 @@ Tu confianza es lo primero: la plataforma solo pide los datos necesarios para fu
 | Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
 |---|---|---|---|
 | Nombre y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
-| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** (bcrypt con pimienta) | Nadie: no se puede leer ni recuperar |
+| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** | Nadie: no se puede leer ni recuperar |
 | Tareas | Tu lista y tu analítica | MongoDB Atlas, marcadas con tu cuenta | Tú y el administrador |
 | Archivos que subes | Análisis | MongoDB (GridFS, convertidos a Parquet) | Solo tú; se borran a las 24 h sin uso o al salir |
 | Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
 | Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
 | Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
-| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** (AES-GCM) y código del correo **solo como huella** | Nadie: no se puede leer desde la base |
+| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella** | Nadie: no se puede leer desde la base |
 
 ### Cómo se protege tu información
 
