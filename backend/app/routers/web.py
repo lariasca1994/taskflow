@@ -320,7 +320,7 @@ def procesar_recuperar(request: Request, email: str = Form(...)):
             f"{RECUPERAR_MINUTOS} minutos y sirve una vez):\n\n{enlace}\n\n"
             "Si no fuiste tú, ignora este correo: tu contraseña no cambia.",
             f"<p>Hola {html.escape(nombre)},</p><p>Para crear una contraseña nueva en <strong>TaskFlow</strong>:</p>"
-            f'<p><a href="{enlace}" style="background:#0e6b45;color:#fff;padding:10px 18px;border-radius:6px;'
+            f'<p><a href="{enlace}" style="background:#0B7360;color:#fff;padding:10px 18px;border-radius:6px;'
             f'text-decoration:none">Crear contraseña nueva</a></p><p>El enlace vence en {RECUPERAR_MINUTOS} '
             "minutos y sirve una sola vez. Si no fuiste tú, ignora este correo.</p>",
         )
