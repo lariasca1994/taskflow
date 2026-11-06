@@ -1,5 +1,5 @@
 {% extends "acceso_base.html" %}
-{% block titulo %}Verificación en dos pasos · TaskFlow{% endblock %}
+{% block titulo %}Verificación en dos pasos · Gestor de tareas{% endblock %}
 {% block paso %}Un paso más{% endblock %}
 {% block titulo_form %}Escribe tu código{% endblock %}
 {% block subtitulo %}{% if metodo == 'totp' %}Abre tu app autenticadora y escribe el código de 6 dígitos.{% else %}Te enviamos un código de 6 dígitos a {{ email }}. Vence en 10 minutos.{% endif %}{% endblock %}

@@ -16,7 +16,7 @@
             <dt>Almacenamiento</dt><dd>Parquet (snappy) en GridFS · {{ perfil.memoria_kb | string | replace(".", ",") }} KB en memoria</dd>
             <dt>Vigencia</dt><dd>Se elimina tras {{ horas_vida }} h sin uso o al cerrar sesión</dd>
             {% if origen.tipo == "generado" %}
-            <dt>Generador</dt><dd>Simulador de ventas TaskFlow · semilla <code>{{ origen.semilla }}</code></dd>
+            <dt>Generador</dt><dd>Simulador de ventas · semilla <code>{{ origen.semilla }}</code></dd>
             <dt>Volumen</dt><dd>{{ origen.filas | miles }} filas ({{ origen.volumen }})</dd>
             <dt>Periodo</dt><dd>{{ origen.desde }} → {{ origen.hasta }} ({{ origen.meses }} meses)</dd>
             <dt>Tendencia</dt><dd>{{ ("%+.1f" | format(origen.crecimiento)) | replace(".", ",") }} % en el periodo</dd>
