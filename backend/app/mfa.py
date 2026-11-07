@@ -36,7 +36,9 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from app import auditoria, correo, repositorio
 from app.config import JWT_SECRET
 
-EMISOR = "TaskFlow"
+# Nombre visible en la app autenticadora y en los correos. La derivación de la clave (abajo)
+# conserva su etiqueta interna: cambiarla impediría descifrar los secretos ya guardados.
+EMISOR = correo.NOMBRE_VISIBLE
 METODOS = {"totp": "App autenticadora", "correo": "Código por correo"}
 _PASO = 30
 _CODIGO_MINUTOS = 10
@@ -123,7 +125,8 @@ def _datos_qr(usuario: dict, secreto: str) -> dict:
         f"otpauth://totp/{quote(EMISOR)}:{quote(usuario['email'])}"
         f"?secret={secreto}&issuer={quote(EMISOR)}&digits=6&period={_PASO}"
     )
-    return {"qr": segno.make(uri, error="m").svg_inline(scale=5, dark="#0f172a", light="#ffffff"), "secreto": secreto}
+    return {"qr": segno.make(uri, error="m").svg_inline(scale=5, dark="#0f172a", light="#ffffff"), "secreto": secreto,
+            "uri": uri}
 
 
 def _verificar_totp(usuario: dict, secreto_cifrado: str | None, codigo: str) -> bool:

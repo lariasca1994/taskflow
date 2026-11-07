@@ -374,11 +374,11 @@ def procesar_recuperar(request: Request, email: str = Form(...)):
         auditoria.registrar(auditoria.RECUPERACION, usuario)
         nombre = usuario.get("nombre", "")
         correo.enviar(
-            usuario["email"], nombre, "Restablece tu contraseña · TaskFlow",
-            f"Hola {nombre},\n\nPara crear una contraseña nueva abre este enlace (vence en "
+            usuario["email"], nombre, f"Restablece tu contraseña · {correo.NOMBRE_VISIBLE}",
+            f"Hola {nombre},\n\nPara crear una contraseña nueva en {correo.NOMBRE_VISIBLE} abre este enlace (vence en "
             f"{RECUPERAR_MINUTOS} minutos y sirve una vez):\n\n{enlace}\n\n"
             "Si no fuiste tú, ignora este correo: tu contraseña no cambia.",
-            f"<p>Hola {html.escape(nombre)},</p><p>Para crear una contraseña nueva en <strong>TaskFlow</strong>:</p>"
+            f"<p>Hola {html.escape(nombre)},</p><p>Para crear una contraseña nueva en <strong>{correo.NOMBRE_VISIBLE}</strong>:</p>"
             f'<p><a href="{enlace}" style="background:#0B7360;color:#fff;padding:10px 18px;border-radius:6px;'
             f'text-decoration:none">Crear contraseña nueva</a></p><p>El enlace vence en {RECUPERAR_MINUTOS} '
             "minutos y sirve una sola vez. Si no fuiste tú, ignora este correo.</p>",

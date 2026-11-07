@@ -153,6 +153,10 @@ cuenta) eliges cómo recibirlo:
 | **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. |
 | **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
 
+En la app autenticadora la cuenta aparece como **Gestor de tareas**, y los correos (códigos y
+enlaces) llegan con ese mismo nombre. Si configuraste la app antes de este cambio, puede seguir
+mostrando el nombre anterior: tus códigos siguen funcionando igual.
+
 Confirma el método escribiendo el primer código. Desde **Seguridad** (menú superior) puedes
 **agregar el método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te
 permite entrar aunque no tengas el teléfono a mano.
