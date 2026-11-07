@@ -62,6 +62,8 @@ para filtrar y adaptar los gráficos al tema oscuro.
 - Recuperación: **Olvidé mi contraseña** (enlace por correo de un solo uso; al cambiarla se cierran
   las sesiones abiertas y la verificación en dos pasos sigue activa) y **Perdí mi autenticador**
   (código al correo de la cuenta y QR nuevo que reemplaza la app anterior)
+- Correos (remitente, asunto, encabezado y pie) y app autenticadora con el nombre del portal,
+  **Gestor de tareas**
 - Sesión con inactividad deslizante de 30 minutos y duración máxima de 12 horas
 - Cada usuario ve únicamente lo suyo: la pertenencia se verifica en la consulta
 
@@ -457,7 +459,8 @@ python -m pytest tests
 ```
 
 No necesitan MongoDB ni correo: la base se reemplaza por mongomock y los correos se capturan en
-memoria. Cubren la recuperación de contraseña y la de la app autenticadora.
+memoria. Cubren la recuperación de contraseña y la de la app autenticadora, y que los correos y la
+app autenticadora muestren el nombre del portal.
 
 ### Datos de ejemplo
 
