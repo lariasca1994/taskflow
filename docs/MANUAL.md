@@ -1,9 +1,9 @@
-# 📘 Manual de usuario · TaskFlow
+# 📘 Manual de usuario · Gestor de tareas
 
 Guía para usar la plataforma paso a paso: qué significa cada campo, qué datos se ingresan y qué
 protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
 
-**Demo:** [TaskFlow (Google Cloud Run)](https://taskflow-812302804238.us-east4.run.app/)
+**Demo:** [Gestor de tareas (Google Cloud Run)](https://taskflow-812302804238.us-east4.run.app/)
 
 ## Contenido
 
@@ -104,13 +104,30 @@ Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
 | 1 | Correo electrónico | El correo de tu cuenta |
 | 2 | Contraseña | Tu contraseña |
 | 3 | Ingresar | Pide el código de tu verificación en dos pasos |
+| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación de contraseña (ver 4.3.1) |
 
-Después de la contraseña escribe el **código de 6 dígitos** de tu método (ver 4.3.3) y pulsa
-**Verificar**. Si tienes los dos métodos activos, puedes cambiar al otro desde la misma pantalla.
+Después de la contraseña aparece la pantalla del código:
+
+![Pantalla del código de verificación con sus opciones numeradas](img/manual/12-verificacion.png)
+
+| # | Campo | Qué hacer |
+|:-:|---|---|
+| 1 | Código de 6 dígitos | El código de tu app autenticadora o de tu correo (ver 4.3.3) |
+| 2 | Verificar | Termina de ingresar |
+| 3 | Perdí mi autenticador | Si ya no tienes la app, recupera el acceso por correo (ver 4.3.4) |
+
+Si tienes los dos métodos activos, puedes cambiar al otro desde la misma pantalla.
 
 La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
 
 ### 4.3.1 Olvidé mi contraseña
+
+![Formulario para pedir el enlace de recuperación](img/manual/11-recuperar.png)
+
+| # | Campo | Qué hacer |
+|:-:|---|---|
+| 1 | Correo electrónico | El correo de tu cuenta |
+| 2 | Enviar enlace | Envía el enlace para crear una contraseña nueva |
 
 En **Ingresar**, pulsa **¿Olvidaste tu contraseña?** y escribe tu correo. Si la cuenta existe y está
 activa, te llega un enlace para crear una contraseña nueva. El enlace vence en 30 minutos y sirve una
@@ -143,6 +160,14 @@ permite entrar aunque no tengas el teléfono a mano.
 ### 4.3.4 Perdí mi autenticador
 
 Si cambiaste o perdiste el teléfono con la app autenticadora:
+
+![Pantalla de Perdí mi autenticador con sus campos numerados](img/manual/13-perdi-autenticador.png)
+
+| # | Campo | Qué hacer |
+|:-:|---|---|
+| 1 | Código de 6 dígitos | El código que llegó al correo de tu cuenta |
+| 2 | Continuar | Lleva al código QR para tu app nueva |
+| 3 | Enviar otro código | Pide un código nuevo si no llegó |
 
 1. Ingresa con tu correo y contraseña.
 2. En la pantalla **Escribe tu código**, pulsa **Perdí mi autenticador** (siempre visible).
