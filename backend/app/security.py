@@ -113,7 +113,9 @@ def _marca(momento: datetime) -> int:
     return int(momento.timestamp())
 
 
-def crear_token(usuario_id: str, email: str, inicio: datetime | None = None) -> str:
+def crear_token(usuario_id: str, email: str, hash_password: str, inicio: datetime | None = None) -> str:
+    """La sesion lleva la huella de la contrasena vigente: al cambiarla, todas
+    las sesiones abiertas con la anterior dejan de valer (ver sesion_vigente)."""
     ahora = datetime.now(timezone.utc)
     inicio = inicio or ahora
 
@@ -121,6 +123,7 @@ def crear_token(usuario_id: str, email: str, inicio: datetime | None = None) -> 
         {
             "sub": usuario_id,
             "email": email,
+            "h": _huella(hash_password),                 # contrasena con que se abrio
             "ini": _marca(inicio),                       # ingreso original
             "act": _marca(ahora),                        # ultima actividad
             "exp": inicio + timedelta(hours=SESION_MAXIMA_HORAS),
@@ -146,10 +149,15 @@ def leer_token(token: str) -> dict | None:
     return carga
 
 
-def renovar(carga: dict) -> str:
+def sesion_vigente(carga: dict, hash_password: str) -> bool:
+    """False si la contrasena cambio despues de abrir la sesion (o el token es anterior a esta regla)."""
+    return isinstance(carga.get("h"), str) and huella_coincide(hash_password, carga["h"])
+
+
+def renovar(carga: dict, hash_password: str) -> str:
     """Emite un token nuevo conservando el inicio original de la sesion."""
     inicio = datetime.fromtimestamp(carga["ini"], tz=timezone.utc)
-    return crear_token(carga["sub"], carga["email"], inicio)
+    return crear_token(carga["sub"], carga["email"], hash_password, inicio)
 
 
 # ─────────────────────────── recuperación de cuenta ───────────────────────────
@@ -197,24 +205,35 @@ COOKIE_MFA = "taskflow_mfa"
 MFA_MINUTOS = 10
 
 
-def crear_token_mfa(usuario_id: str) -> str:
+def crear_token_mfa(usuario_id: str, recuperacion: bool = False) -> str:
     """Pase de 10 minutos entre la contraseña y el código. No sirve como sesión:
-    leer_token lo rechaza por llevar audiencia."""
-    return jwt.encode(
-        {"sub": usuario_id, "aud": _AUDIENCIA_MFA,
-         "exp": datetime.now(timezone.utc) + timedelta(minutes=MFA_MINUTOS)},
-        JWT_SECRET,
-        algorithm=JWT_ALGORITMO,
-    )
+    leer_token lo rechaza por llevar audiencia. Con recuperacion=True indica que ya
+    se verificó el código de "Perdí mi autenticador" y solo falta escanear el QR nuevo."""
+    carga = {"sub": usuario_id, "aud": _AUDIENCIA_MFA,
+             "exp": datetime.now(timezone.utc) + timedelta(minutes=MFA_MINUTOS)}
+    if recuperacion:
+        carga["rec"] = True
+    return jwt.encode(carga, JWT_SECRET, algorithm=JWT_ALGORITMO)
 
 
-def leer_token_mfa(token: str | None) -> str | None:
+def _carga_mfa(token: str | None) -> dict | None:
     if not token:
         return None
     try:
-        return str(jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITMO], audience=_AUDIENCIA_MFA)["sub"])
-    except (jwt.PyJWTError, KeyError):
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITMO], audience=_AUDIENCIA_MFA)
+    except jwt.PyJWTError:
         return None
+
+
+def leer_token_mfa(token: str | None) -> str | None:
+    carga = _carga_mfa(token)
+    return str(carga["sub"]) if carga and "sub" in carga else None
+
+
+def pase_de_recuperacion(token: str | None) -> bool:
+    """True si el pase viene de verificar el código de "Perdí mi autenticador"."""
+    carga = _carga_mfa(token)
+    return bool(carga and carga.get("rec") is True)
 
 
 __all__ = [

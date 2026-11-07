@@ -29,6 +29,7 @@ from app.security import (
     huella_coincide,
     leer_token_mfa,
     leer_token_recuperacion,
+    pase_de_recuperacion,
     verificar_y_migrar,
 )
 
@@ -39,7 +40,7 @@ plantillas = Jinja2Templates(directory="app/templates")
 def _sesion(respuesta: Response, usuario: dict) -> None:
     respuesta.set_cookie(
         COOKIE_SESION,
-        crear_token(str(usuario["_id"]), usuario["email"]),
+        crear_token(str(usuario["_id"]), usuario["email"], usuario["password"]),
         httponly=True,
         samesite="lax",
         secure=COOKIE_SEGURA,
@@ -139,11 +140,15 @@ def procesar_registro(
 
 def _pase_mfa(usuario: dict) -> RedirectResponse:
     respuesta = RedirectResponse("/verificacion", status_code=303)
+    _cookie_pase(respuesta, usuario)
+    return respuesta
+
+
+def _cookie_pase(respuesta: Response, usuario: dict, recuperacion: bool = False) -> None:
     respuesta.set_cookie(
-        COOKIE_MFA, crear_token_mfa(str(usuario["_id"])),
+        COOKIE_MFA, crear_token_mfa(str(usuario["_id"]), recuperacion),
         httponly=True, samesite="lax", secure=COOKIE_SEGURA, max_age=MFA_MINUTOS * 60,
     )
-    return respuesta
 
 
 def _usuario_en_verificacion(request: Request) -> dict | None:
@@ -217,6 +222,60 @@ def activar_metodo(request: Request, metodo: str = Form(...), codigo: str = Form
     activado = mfa.activar_totp(usuario, codigo) if metodo == "totp" else mfa.activar_correo(usuario, codigo)
     if not activado:
         return _confirmar_metodo(request, usuario, metodo, "/verificacion/activar", "acceso",
+                                 error="El código no es correcto o ya venció.")
+    respuesta = RedirectResponse("/tareas", status_code=303)
+    respuesta.delete_cookie(COOKIE_MFA)
+    _sesion(respuesta, usuario)
+    return respuesta
+
+
+# "Perdí mi autenticador": código al correo de la cuenta → QR de una app nueva.
+
+
+def _pantalla_recuperar(request: Request, usuario: dict, status_code: int = 200, **contexto):
+    return plantillas.TemplateResponse(request, "mfa_recuperar.html", {"email": usuario["email"], **contexto},
+                                       status_code=status_code)
+
+
+@router.post("/verificacion/perdi-autenticador", response_class=HTMLResponse)
+def perdi_autenticador(request: Request):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if not mfa.configurado(usuario):  # la primera configuración no necesita recuperación
+        return _pantalla_mfa(request, usuario)
+    if mfa.recuperacion_bloqueada(usuario):
+        return _pantalla_recuperar(request, usuario, 429, error=mfa.MENSAJE_BLOQUEO)
+    if not mfa.enviar_codigo_recuperacion(usuario):
+        return _pantalla_recuperar(request, usuario, 429, error=mfa.MENSAJE_REC_LIMITE)
+    return _pantalla_recuperar(request, usuario, exito=f"Te enviamos un código a {usuario['email']}.")
+
+
+@router.post("/verificacion/recuperar", response_class=HTMLResponse)
+def verificar_recuperacion(request: Request, codigo: str = Form(...)):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if not mfa.verificar_recuperacion(usuario, codigo):
+        if mfa.recuperacion_bloqueada(usuario):
+            return _pantalla_recuperar(request, usuario, 429, error=mfa.MENSAJE_BLOQUEO)
+        return _pantalla_recuperar(request, usuario, 401, error="El código no es correcto o ya venció.")
+    respuesta = _confirmar_metodo(request, usuario, "totp", "/verificacion/reemplazar", "acceso",
+                                  app=mfa.iniciar_totp(usuario), recuperando=True)
+    _cookie_pase(respuesta, usuario, recuperacion=True)
+    return respuesta
+
+
+@router.post("/verificacion/reemplazar", response_class=HTMLResponse)
+def reemplazar_autenticador(request: Request, codigo: str = Form(...)):
+    usuario = _usuario_en_verificacion(request)
+    if not usuario:
+        return _vencido()
+    if not pase_de_recuperacion(request.cookies.get(COOKIE_MFA)):
+        return _pantalla_mfa(request, usuario)
+    if not mfa.reemplazar_totp(usuario, codigo):
+        return _confirmar_metodo(request, usuario, "totp", "/verificacion/reemplazar", "acceso",
+                                 app=mfa.totp_pendiente(usuario), recuperando=True,
                                  error="El código no es correcto o ya venció.")
     respuesta = RedirectResponse("/tareas", status_code=303)
     respuesta.delete_cookie(COOKIE_MFA)
@@ -358,7 +417,8 @@ def procesar_restablecer(
     repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
     mfa.clave_restablecida(usuario)
     return plantillas.TemplateResponse(
-        request, "login.html", {"exito": "Tu contraseña quedó actualizada. Ya puedes ingresar.", "email": usuario["email"]}
+        request, "login.html", {"exito": "Tu contraseña quedó actualizada y se cerraron las sesiones abiertas. "
+                                 "Ingresa con la nueva; tu verificación en dos pasos sigue activa.", "email": usuario["email"]}
     )
 
 
@@ -387,9 +447,13 @@ def cambiar_contrasena(
         contexto["error"] = "La contraseña nueva debe ser distinta de la actual"
     if "error" in contexto:
         return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto, status_code=400)
-    repositorio.actualizar_password(str(usuario["_id"]), cifrar(password))
+    usuario["password"] = cifrar(password)
+    repositorio.actualizar_password(str(usuario["_id"]), usuario["password"])
     mfa.clave_restablecida(usuario)
-    contexto["exito"] = "Tu contraseña quedó actualizada."
+    # Las sesiones abiertas con la contraseña anterior se cierran; esta sigue
+    # abierta porque el middleware le entrega una cookie firmada con la nueva.
+    request.state.token_renovado = crear_token(str(usuario["_id"]), usuario["email"], usuario["password"])
+    contexto["exito"] = "Tu contraseña quedó actualizada. Se cerró la sesión en tus otros equipos."
     return plantillas.TemplateResponse(request, "cuenta_contrasena.html", contexto)
 
 

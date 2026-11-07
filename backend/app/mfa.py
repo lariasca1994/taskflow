@@ -11,6 +11,10 @@ Cada cuenta usa al menos uno de dos metodos y puede tener ambos:
     hasta 3 envios cada 10 minutos. Tras 5 codigos de la app errados, la app
     queda bloqueada 15 minutos.
 
+"Perdi mi autenticador": tras la contrasena, un codigo de un solo uso va al
+correo de la cuenta aunque el metodo correo no este activo; al verificarlo se
+escanea un QR nuevo que reemplaza la app anterior.
+
 Todo vive en el campo "mfa" del documento del usuario.
 """
 
@@ -105,6 +109,16 @@ def iniciar_totp(usuario: dict) -> dict:
     """Genera un secreto pendiente y devuelve lo necesario para escanearlo."""
     secreto = base64.b32encode(secrets.token_bytes(20)).decode().rstrip("=")
     _guardar(usuario, {"totp_pendiente": _cifrar(secreto)})
+    return _datos_qr(usuario, secreto)
+
+
+def totp_pendiente(usuario: dict) -> dict | None:
+    """El QR del secreto pendiente, para mostrarlo otra vez tras un código errado."""
+    pendiente = estado(usuario).get("totp_pendiente")
+    return _datos_qr(usuario, _descifrar(pendiente)) if pendiente else None
+
+
+def _datos_qr(usuario: dict, secreto: str) -> dict:
     uri = (
         f"otpauth://totp/{quote(EMISOR)}:{quote(usuario['email'])}"
         f"?secret={secreto}&issuer={quote(EMISOR)}&digits=6&period={_PASO}"
@@ -280,3 +294,90 @@ def clave_restablecida(usuario: dict) -> None:
     """Contraseña nueva (recuperación o cambio): se levanta el bloqueo y queda en la auditoría."""
     _guardar(usuario, {"fallos_clave": 0, "bloqueo_clave_hasta": 0})
     auditoria.registrar(auditoria.CLAVE_CAMBIADA, usuario)
+
+
+# ─────────────────────────── perdí mi autenticador ───────────────────────────
+# Con la contraseña ya validada, se envía un código al correo de la cuenta (aunque
+# el método "correo" no esté activado). Verificarlo solo permite escanear un QR
+# nuevo: la app anterior sigue siendo la registrada hasta confirmar la nueva, así
+# la cuenta nunca queda sin segundo paso si el proceso se abandona.
+
+_REC_MINUTOS = 15
+_REC_MAX_ENVIOS = 3        # por cada 15 minutos
+_REC_MAX_INTENTOS = 5      # códigos errados seguidos antes del bloqueo
+_REC_BLOQUEO_SEG = 15 * 60
+MENSAJE_REC_LIMITE = "Pediste varios códigos seguidos. Espera unos minutos."
+
+
+def recuperacion_bloqueada(usuario: dict) -> bool:
+    return estado(usuario).get("rec_bloqueo_hasta", 0) > time.time()
+
+
+def enviar_codigo_recuperacion(usuario: dict) -> bool:
+    """Envía el código de "Perdí mi autenticador". False si hay bloqueo o demasiados envíos."""
+    if recuperacion_bloqueada(usuario):
+        return False
+    ahora = time.time()
+    envios = [t for t in estado(usuario).get("rec_envios", []) if ahora - t < _REC_MINUTOS * 60]
+    if len(envios) >= _REC_MAX_ENVIOS:
+        return False
+    codigo = f"{secrets.randbelow(1_000_000):06d}"
+    _guardar(usuario, {
+        "recuperacion": {
+            "huella": _huella(codigo),
+            "expira": datetime.now(timezone.utc) + timedelta(minutes=_REC_MINUTOS),
+        },
+        "rec_envios": envios + [ahora],
+    })
+    auditoria.registrar(auditoria.AUTENTICADOR_PERDIDO, usuario)
+    nombre = usuario.get("nombre", "")
+    correo.enviar(
+        usuario["email"], nombre, f"Recupera el acceso a tu cuenta · {EMISOR}",
+        f"Hola {nombre},\n\nPediste recuperar el acceso porque perdiste tu app autenticadora. "
+        f"Tu código es: {codigo}\n\nVence en {_REC_MINUTOS} minutos y sirve una sola vez. Con él "
+        "configurarás una app autenticadora nueva. Si no fuiste tú, cambia tu contraseña de inmediato.",
+        f"<p>Hola {html.escape(nombre)},</p><p>Pediste recuperar el acceso porque perdiste tu app "
+        "autenticadora. Tu código es:</p>"
+        f'<p style="font-size:28px;font-weight:700;letter-spacing:6px">{codigo}</p>'
+        f"<p>Vence en {_REC_MINUTOS} minutos y sirve una sola vez. Con él configurarás una app "
+        "autenticadora nueva. <strong>Si no fuiste tú, cambia tu contraseña de inmediato.</strong></p>",
+    )
+    return True
+
+
+def verificar_recuperacion(usuario: dict, codigo: str) -> bool:
+    """Comprueba el código de recuperación. Cinco errados seguidos bloquean 15 minutos."""
+    if recuperacion_bloqueada(usuario):
+        return False
+    guardado = estado(usuario).get("recuperacion")
+    codigo = _limpiar(codigo)
+    vigente = False
+    if guardado:
+        expira = guardado["expira"]
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+        vigente = expira >= datetime.now(timezone.utc)
+    if vigente and len(codigo) == 6 and hmac.compare_digest(guardado["huella"], _huella(codigo)):
+        _guardar(usuario, {"recuperacion": None, "rec_fallos": 0})
+        return True
+    auditoria.registrar(auditoria.CODIGO_ERRADO, usuario)
+    fallos = estado(usuario).get("rec_fallos", 0) + 1
+    if fallos >= _REC_MAX_INTENTOS:
+        _guardar(usuario, {"rec_fallos": 0, "recuperacion": None, "rec_bloqueo_hasta": time.time() + _REC_BLOQUEO_SEG})
+    else:
+        _guardar(usuario, {"rec_fallos": fallos})
+    return False
+
+
+def reemplazar_totp(usuario: dict, codigo: str) -> bool:
+    """Confirma la app nueva: el secreto pendiente pasa a ser el de la cuenta y la
+    app anterior deja de servir. Los demás métodos y el preferido no cambian."""
+    pendiente = estado(usuario).get("totp_pendiente")
+    if not _verificar_totp(usuario, pendiente, _limpiar(codigo)):
+        return False
+    cambios = {"totp": pendiente, "totp_pendiente": None, "fallos": 0, "bloqueo_hasta": 0}
+    if not estado(usuario).get("preferido"):
+        cambios["preferido"] = "totp"
+    _guardar(usuario, cambios)
+    auditoria.registrar(auditoria.AUTENTICADOR_REEMPLAZADO, usuario)
+    return True

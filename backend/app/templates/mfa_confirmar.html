@@ -1,14 +1,14 @@
 {% extends "acceso_base.html" %}
 {% block titulo %}Verificación en dos pasos · Gestor de tareas{% endblock %}
-{% block paso %}Un paso más{% endblock %}
-{% block titulo_form %}{{ metodos[metodo] }}{% endblock %}
-{% block subtitulo %}Confirma el método con un código para terminar de ingresar.{% endblock %}
+{% block paso %}{% if recuperando %}Recuperar acceso{% else %}Un paso más{% endif %}{% endblock %}
+{% block titulo_form %}{% if recuperando %}Configura tu app autenticadora nueva{% else %}{{ metodos[metodo] }}{% endif %}{% endblock %}
+{% block subtitulo %}{% if recuperando %}Escanea el QR con la app nueva para terminar de ingresar. La app anterior dejará de funcionar.{% else %}Confirma el método con un código para terminar de ingresar.{% endif %}{% endblock %}
 {% block formulario %}
-{% if metodo == 'totp' and not app %}
+{% if metodo == 'totp' and not app and not recuperando %}
 <form method="post" action="/verificacion/configurar">
     <button type="submit" name="metodo" value="totp" class="boton-primario">Mostrar el código QR otra vez</button>
 </form>
 {% endif %}
 {% include "_mfa_activar.html" %}
 {% endblock %}
-{% block alterno %}<a href="/verificacion">Elegir otro método</a>{% endblock %}
+{% block alterno %}{% if recuperando %}<a href="/ingresar">Volver a ingresar</a>{% else %}<a href="/verificacion">Elegir otro método</a>{% endif %}{% endblock %}

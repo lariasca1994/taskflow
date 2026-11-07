@@ -18,6 +18,8 @@ CUENTA_BLOQUEADA = "cuenta_bloqueada"
 CLAVE_CAMBIADA = "clave_cambiada"
 RECUPERACION = "recuperacion_solicitada"
 METODO_ACTIVADO = "metodo_activado"
+AUTENTICADOR_PERDIDO = "autenticador_perdido"
+AUTENTICADOR_REEMPLAZADO = "autenticador_reemplazado"
 
 RETENCION_DIAS = 15
 

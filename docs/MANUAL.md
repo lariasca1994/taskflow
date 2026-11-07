@@ -113,12 +113,18 @@ La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a l
 ### 4.3.1 Olvidé mi contraseña
 
 En **Ingresar**, pulsa **¿Olvidaste tu contraseña?** y escribe tu correo. Si la cuenta existe y está
-activa, te llega un enlace para crear una contraseña nueva (mínimo 10 caracteres). El enlace vence en
-30 minutos y sirve una sola vez. La pantalla muestra el mismo mensaje exista o no la cuenta.
+activa, te llega un enlace para crear una contraseña nueva. El enlace vence en 30 minutos y sirve una
+sola vez. La pantalla muestra el mismo mensaje exista o no la cuenta.
+
+Al abrir el enlace solo escribes la **contraseña nueva** y su **confirmación** (mínimo 10
+caracteres). Al guardarla se **cierran las sesiones abiertas** en todos tus equipos; ingresa de nuevo
+con la contraseña nueva. Tu verificación en dos pasos **sigue activa**: después de la contraseña
+se pide el código como siempre.
 
 ### 4.3.2 Cambiar la contraseña
 
-Con la sesión iniciada, abre **Contraseña** en el menú, escribe la actual y la nueva dos veces.
+Con la sesión iniciada, abre **Contraseña** en el menú, escribe la actual y la nueva dos veces. Tu
+sesión actual sigue abierta y se cierran las de tus otros equipos.
 
 ### 4.3.3 Verificación en dos pasos (obligatoria)
 
@@ -133,6 +139,21 @@ cuenta) eliges cómo recibirlo:
 Confirma el método escribiendo el primer código. Desde **Seguridad** (menú superior) puedes
 **agregar el método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te
 permite entrar aunque no tengas el teléfono a mano.
+
+### 4.3.4 Perdí mi autenticador
+
+Si cambiaste o perdiste el teléfono con la app autenticadora:
+
+1. Ingresa con tu correo y contraseña.
+2. En la pantalla **Escribe tu código**, pulsa **Perdí mi autenticador** (siempre visible).
+3. Te llega un **código de 6 dígitos al correo de tu cuenta**, aunque no tengas activado el código
+   por correo. Vence en 15 minutos y sirve una sola vez; si no llega, pulsa **Enviar otro código**.
+4. Escribe el código y pulsa **Continuar**.
+5. Escanea el **código QR nuevo** con la app autenticadora de tu teléfono nuevo y escribe el
+   código que muestra para terminar de ingresar.
+
+Desde ese momento la app anterior deja de funcionar. Si escribes el código errado varias veces, la
+recuperación se bloquea unos minutos. Si no pediste este código, cambia tu contraseña.
 
 ### 4.4 Tus tareas
 

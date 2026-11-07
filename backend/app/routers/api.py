@@ -56,6 +56,7 @@ def login(datos: LoginEntrada, respuesta: Response):
     mfa.clave_correcta(usuario)
     if hash_nuevo:
         repositorio.actualizar_password(str(usuario["_id"]), hash_nuevo)
+        usuario["password"] = hash_nuevo  # la sesion se firma con la contrasena vigente
 
     if not usuario.get("activo", True):
         raise HTTPException(status_code=403, detail="Esta cuenta está suspendida")
@@ -141,7 +142,7 @@ def _abrir_sesion(respuesta: Response, usuario: dict) -> None:
     """La cookie es httponly: JavaScript no puede leer el token."""
     respuesta.set_cookie(
         COOKIE_SESION,
-        crear_token(str(usuario["_id"]), usuario["email"]),
+        crear_token(str(usuario["_id"]), usuario["email"], usuario["password"]),
         httponly=True,
         samesite="lax",
         secure=COOKIE_SEGURA,

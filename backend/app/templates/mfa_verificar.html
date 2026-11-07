@@ -21,5 +21,6 @@
 {% elif otro == 'totp' %}
 <p class="alterno"><a href="/verificacion?metodo=totp">Usar la app autenticadora</a></p>
 {% endif %}
+<form method="post" action="/verificacion/perdi-autenticador"><button type="submit" class="enlace-boton">Perdí mi autenticador</button></form>
 {% endblock %}
 {% block alterno %}<a href="/ingresar">Volver a ingresar</a>{% endblock %}

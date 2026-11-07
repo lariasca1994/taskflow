@@ -3,7 +3,7 @@
 from fastapi import HTTPException, Request, status
 
 from app import repositorio
-from app.security import COOKIE_SESION, leer_token, renovar
+from app.security import COOKIE_SESION, leer_token, renovar, sesion_vigente
 
 
 class RedirigirAlLogin(Exception):
@@ -29,9 +29,14 @@ def _resolver(request: Request) -> dict | None:
     if not usuario.get("activo", True):
         return None
 
+    # Si la contrasena cambio despues de abrir esta sesion (recuperacion o
+    # cambio desde otro equipo), la sesion queda cerrada.
+    if not sesion_vigente(carga, usuario.get("password", "")):
+        return None
+
     # El middleware recogera este token para refrescar la cookie: es lo
     # que hace que la inactividad sea deslizante.
-    request.state.token_renovado = renovar(carga)
+    request.state.token_renovado = renovar(carga, usuario.get("password", ""))
 
     return usuario
 

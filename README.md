@@ -59,6 +59,9 @@ para filtrar y adaptar los gráficos al tema oscuro.
 - Registro e ingreso con contraseñas hasheadas
 - Verificación en dos pasos obligatoria: app autenticadora o código por correo, a elección; el otro
   método se puede agregar desde **Seguridad**
+- Recuperación: **Olvidé mi contraseña** (enlace por correo de un solo uso; al cambiarla se cierran
+  las sesiones abiertas y la verificación en dos pasos sigue activa) y **Perdí mi autenticador**
+  (código al correo de la cuenta y QR nuevo que reemplaza la app anterior)
 - Sesión con inactividad deslizante de 30 minutos y duración máxima de 12 horas
 - Cada usuario ve únicamente lo suyo: la pertenencia se verifica en la consulta
 
@@ -149,6 +152,7 @@ backend/
     │   └── eventos.py       Canal SSE
     ├── templates/           Plantillas Jinja2 (una por sección del informe)
     └── static/              Estilos (tablero.css para el informe) y scripts
+tests/                       Pruebas de recuperación de cuenta (pytest + mongomock, sin servicios externos)
 ```
 
 ---
@@ -234,7 +238,12 @@ ingreso.
 
 - Verificación en dos pasos obligatoria (TOTP o código por correo): la clave TOTP se guarda
   cifrada, los códigos no se reutilizan y el del correo se guarda solo como huella
-- Sesión en una cookie que JavaScript no puede leer
+- Sesión en una cookie que JavaScript no puede leer, ligada a la contraseña vigente: al
+  restablecerla o cambiarla se cierran las sesiones abiertas en otros equipos
+- Recuperación sin debilitar el segundo paso: el enlace de **Olvidé mi contraseña** es de un solo
+  uso, vence y responde igual exista o no la cuenta; **Perdí mi autenticador** exige la contraseña
+  y un código enviado al correo de la cuenta (con vencimiento, límite de envíos y bloqueo por
+  intentos), y la app anterior solo se reemplaza cuando la nueva queda confirmada
 - Vencimiento por inactividad y por tiempo máximo
 - Pertenencia verificada en el filtro de la consulta, no en la vista
 - Validación de archivos por extensión, tamaño y número de filas
@@ -286,6 +295,14 @@ dependencia externa a un proyecto que debe levantarse con un solo comando.
 
 La sesión se cierra tras 30 minutos sin actividad y, en cualquier caso, a las 12
 horas.
+
+**¿Olvidaste la contraseña?** En **Ingresar**, pulsa **¿Olvidaste tu contraseña?**, abre el enlace
+que llega al correo y escribe la contraseña nueva y su confirmación. Se cierran las sesiones
+abiertas y la verificación en dos pasos sigue activa.
+
+**¿Perdiste la app autenticadora?** Tras la contraseña, pulsa **Perdí mi autenticador**: llega un
+código al correo de la cuenta; al escribirlo escaneas un QR nuevo y confirmas con el código de la
+app nueva.
 
 ### 5.3 Gestionar tareas
 
@@ -431,6 +448,16 @@ resuelven desde ahí.
 | Aplicación | `http://127.0.0.1:8000` |
 | Documentación de la API | `http://127.0.0.1:8000/docs` |
 | Estado del servicio | `http://127.0.0.1:8000/api/health` |
+
+### Pruebas
+
+```bash
+pip install -r tests/requirements.txt
+python -m pytest tests
+```
+
+No necesitan MongoDB ni correo: la base se reemplaza por mongomock y los correos se capturan en
+memoria. Cubren la recuperación de contraseña y la de la app autenticadora.
 
 ### Datos de ejemplo
 
