@@ -28,7 +28,7 @@ def registro(datos: RegistroEntrada, respuesta: Response):
     )
 
     if not usuario:
-        raise HTTPException(status_code=409, detail="Ese correo ya esta registrado")
+        raise HTTPException(status_code=409, detail="Ese correo ya está registrado")
 
     # Sin sesion hasta configurar la verificacion en dos pasos (se hace en la web).
     return _usuario_salida(usuario)

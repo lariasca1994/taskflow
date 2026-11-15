@@ -129,7 +129,7 @@ def procesar_registro(
         return plantillas.TemplateResponse(
             request,
             "registro.html",
-            {"error": "Ese correo ya esta registrado", "nombre": nombre},
+            {"error": "Ese correo ya está registrado", "nombre": nombre},
             status_code=409,
         )
 

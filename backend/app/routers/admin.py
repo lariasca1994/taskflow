@@ -100,7 +100,7 @@ def admin_suspender_usuario(
     if usuario_id == str(usuario["_id"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="No podes suspender tu propia cuenta",
+            detail="No puedes suspender tu propia cuenta",
         )
     repositorio.suspender_usuario(usuario_id)
     return RedirectResponse("/admin/usuarios", status_code=303)
@@ -119,7 +119,7 @@ def admin_eliminar_usuario(usuario_id: str, usuario: dict = Depends(usuario_admi
     if usuario_id == str(usuario["_id"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="No podes eliminar tu propia cuenta",
+            detail="No puedes eliminar tu propia cuenta",
         )
     repositorio.eliminar_usuario(usuario_id)
     return RedirectResponse("/admin/usuarios", status_code=303)
