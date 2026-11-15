@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{# Página independiente a propósito: no consulta la base (sirve aunque MongoDB no responda). #}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#0B7360">
+    <title>Página no encontrada · Gestor de tareas</title>
+    <link rel="icon" href="/static/iconos/icono.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <script>
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem("taskflow-tema"); } catch (e) {}
+            if (tema === "oscuro") document.documentElement.setAttribute("data-tema", "oscuro");
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/estilos.css">
+    <link rel="stylesheet" href="/static/css/efectos.css">
+    <link rel="stylesheet" href="/static/css/estados.css">
+</head>
+<body class="estado">
+    <main class="estado-marco">
+        <div class="estado-corrida" aria-hidden="true">
+            <p class="estado-corrida__cabeza"><span>TAREA · NAVEGACIÓN</span><span>1 pendiente</span></p>
+            <p class="estado-corrida__caso"><span>GET <code>{{ ruta }}</code></span><span class="veredicto-404">404</span></p>
+            <p class="estado-corrida__esperado">Esperado: una página. Obtenido: ninguna tarea con esa dirección.</p>
+            <div class="estado-corrida__pie"><span>Resultado</span><span class="resultado">Sin asignar</span></div>
+        </div>
+        <div class="estado-texto">
+            <p class="estado-etiqueta">Página no encontrada</p>
+            <h1>Esta tarea no está en el tablero</h1>
+            <p>Buscamos <code>{{ ruta }}</code> y no existe. Quizá el enlace es viejo o la tarea se eliminó. Si tenías la sesión abierta, sigue abierta.</p>
+            <div class="estado-acciones">
+                <a class="boton" href="/tareas">Ver tareas</a>
+                <a class="boton boton-secundario" href="/">Volver al inicio</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

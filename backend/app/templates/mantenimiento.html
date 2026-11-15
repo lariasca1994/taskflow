@@ -55,6 +55,13 @@
         .boton { display: inline-block; padding: 10px 22px; border-radius: 10px; background: var(--acento); color: var(--boton-texto); font-weight: 600; text-decoration: none; }
         .boton:focus-visible { outline: 3px solid var(--texto); outline-offset: 3px; }
         @media (prefers-reduced-motion: reduce) { .icono span { animation: none; } }
+        .acciones-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+        .reintento { display: inline-flex; align-items: center; gap: 8px; color: var(--texto-suave, var(--suave)); font-size: .88rem; }
+        .reintento svg { width: 20px; height: 20px; transform: rotate(-90deg); }
+        .reintento circle { fill: none; stroke-width: 3; }
+        .reintento .fondo { stroke: var(--borde); }
+        .reintento .valor { stroke: var(--acento); stroke-dasharray: 1; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+        @media (prefers-reduced-motion: reduce) { .reintento .valor { transition: none; } }
     </style>
 </head>
 <body>
@@ -68,7 +75,11 @@
             <li>Ninguna acción quedó a medias: si no viste la confirmación, no se guardó.</li>
             <li>Esta página se recarga sola cuando el servicio vuelva.</li>
         </ul>
-        <a class="boton" href="/">Reintentar ahora</a>
+        <div class="acciones-estado">
+            <a class="boton" href="/">Reintentar ahora</a>
+            <span class="reintento"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="fondo" cx="12" cy="12" r="9"/><circle id="valor" class="valor" cx="12" cy="12" r="9" pathLength="1"/></svg><span id="texto">Nuevo intento en 30 s</span></span>
+        </div>
     </main>
+    <script src="/static/js/estado.js"></script>
 </body>
 </html>

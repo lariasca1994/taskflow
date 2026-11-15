@@ -964,3 +964,56 @@ textarea.tb-campo { font-family: ui-monospace, "Cascadia Code", Consolas, monosp
 /* Leyenda de estados y tarjeta en alerta (Analitica de tareas) */
 .tb-punto { display: inline-block; width: .6rem; height: .6rem; margin-right: .3rem; border-radius: 50%; vertical-align: middle; }
 .tb-kpi--alerta::before { background: var(--t-baja); }
+
+
+/* ───── Estilo de los tableros de referencia (Ultraleads, Dwisun, Helios) ───── */
+.tb-kpi {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s ease;
+  animation: tb-entrar .5s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+.tb-kpi:nth-child(2) { animation-delay: 60ms; }
+.tb-kpi:nth-child(3) { animation-delay: 120ms; }
+.tb-kpi:nth-child(4) { animation-delay: 180ms; }
+.tb-kpi:nth-child(n + 5) { animation-delay: 240ms; }
+.tb-kpi::after {
+  content: "";
+  position: absolute;
+  right: 1rem;
+  bottom: 0;
+  left: 1rem;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--t-acento);
+  transform-origin: left;
+  animation: tb-llenar .8s .15s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+.tb-kpi--alerta::after { background: var(--t-baja); }
+.tb-kpi-titulo::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: .45rem;
+  border-radius: 50%;
+  background: var(--t-acento);
+  box-shadow: 0 0 0 3px var(--t-acento-suave);
+  vertical-align: 1px;
+}
+.tb-kpi--alerta .tb-kpi-titulo::before { background: var(--t-baja); box-shadow: 0 0 0 3px var(--t-baja-fondo); }
+@media (hover: hover) and (pointer: fine) {
+  .tb-kpi:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -22px rgba(6, 43, 35, .45); }
+}
+.tb-tarjeta { animation: tb-entrar .5s .1s cubic-bezier(.2, .8, .2, 1) backwards; }
+.tb-hallazgo-num { box-shadow: 0 0 0 3px var(--t-acento-suave); }
+@keyframes tb-entrar { from { opacity: 0; transform: translateY(10px); } }
+@keyframes tb-llenar { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .tb-kpi, .tb-kpi::after, .tb-tarjeta { animation: none; } }
+
+/* La barra lateral de cada indicador cede su lugar al punto y la línea de acento. */
+.tb-kpi::before { display: none; }
+
+/* Tablet en vertical: los cuatro indicadores en 2 x 2. */
+@media (min-width: 761px) and (max-width: 1100px) { .tb-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
