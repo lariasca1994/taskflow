@@ -4,8 +4,10 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+from fastapi.exception_handlers import http_exception_handler
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
@@ -69,6 +71,36 @@ app.include_router(web.router)
 
 
 plantillas = Jinja2Templates(directory="app/templates")
+
+
+@app.exception_handler(StarletteHTTPException)
+async def error_http(request: Request, exc: StarletteHTTPException):
+    """404 con página propia (no consulta la base); la API y los demás códigos siguen como siempre."""
+    if exc.status_code == 404 and not request.url.path.startswith(("/api", "/eventos")):
+        return plantillas.TemplateResponse(
+            request, "no_encontrada.html", {"ruta": request.url.path[:80]}, status_code=404
+        )
+    return await http_exception_handler(request, exc)
+
+
+# Aplicación instalable (PWA). El service worker se sirve desde la raíz para controlar todo el
+# sitio; no se guarda en caché del navegador para que cada versión llegue al momento.
+_PWA = "app/static/pwa"
+
+
+@app.get("/sw.js", include_in_schema=False)
+def service_worker():
+    return FileResponse(f"{_PWA}/sw.js", media_type="text/javascript", headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"})
+
+
+@app.get("/manifest.webmanifest", include_in_schema=False)
+def manifiesto():
+    return FileResponse(f"{_PWA}/manifest.webmanifest", media_type="application/manifest+json")
+
+
+@app.get("/offline.html", include_in_schema=False)
+def sin_conexion():
+    return FileResponse(f"{_PWA}/offline.html", media_type="text/html")
 
 
 @app.exception_handler(ServerSelectionTimeoutError)

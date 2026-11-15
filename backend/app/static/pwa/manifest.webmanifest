@@ -1,0 +1,21 @@
+{
+  "name": "Gestor de tareas",
+  "short_name": "Tareas",
+  "description": "Tareas con prioridad y categoría, analítica de productividad y explorador de datos.",
+  "lang": "es",
+  "start_url": "/tareas?origen=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#062B23",
+  "theme_color": "#0B7360",
+  "icons": [
+    { "src": "/static/iconos/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/iconos/icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/static/iconos/icono-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/static/iconos/icono.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Tareas", "url": "/tareas", "icons": [{ "src": "/static/iconos/icono-192.png", "sizes": "192x192" }] },
+    { "name": "Analítica", "url": "/analitica", "icons": [{ "src": "/static/iconos/icono-192.png", "sizes": "192x192" }] }
+  ]
+}
