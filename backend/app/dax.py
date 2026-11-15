@@ -30,7 +30,7 @@ from markupsafe import Markup, escape
 
 
 class ErrorDax(Exception):
-    """Formula invalida o no soportada; el mensaje se muestra al usuario."""
+    """Fórmula inválida o no soportada; el mensaje se muestra al usuario."""
 
 
 # ─────────────────────────────── contexto ──────────────────────────────
@@ -87,7 +87,7 @@ def _tokenizar(texto: str) -> list[tuple[str, str]]:
     while pos < len(texto):
         m = _TOKENS.match(texto, pos)
         if not m:
-            raise ErrorDax(f"Caracter no reconocido cerca de: {texto[pos:pos + 12]!r}")
+            raise ErrorDax(f"Carácter no reconocido cerca de: {texto[pos:pos + 12]!r}")
         pos = m.end()
         if m.lastgroup != "espacio":
             salida.append((m.lastgroup, m.group()))
@@ -110,9 +110,9 @@ class _Parser:
     def tomar(self, valor=None):
         tipo, texto = self.ver()
         if tipo is None:
-            raise ErrorDax("La formula termina antes de tiempo.")
+            raise ErrorDax("La fórmula termina antes de tiempo.")
         if valor is not None and texto.upper() != valor:
-            raise ErrorDax(f"Se esperaba «{valor}» y aparecio «{texto}».")
+            raise ErrorDax(f"Se esperaba «{valor}» y apareció «{texto}».")
         self.i += 1
         return tipo, texto
 
@@ -217,7 +217,7 @@ def analizar(texto: str):
     """Texto DAX -> arbol. Acepta la forma 'Nombre = expresion'."""
     texto = texto.strip()
     if not texto:
-        raise ErrorDax("Escribe una formula.")
+        raise ErrorDax("Escribe una fórmula.")
     m = re.match(r"^\s*([^=\[\]()'\"]+?)\s*=(?![=])\s*(.+)$", texto, re.S)
     if m and not re.search(r"[<>]$", m.group(1)):
         texto = m.group(2)
@@ -248,7 +248,7 @@ class Evaluador:
     def _columna(self, nodo) -> str:
         if nodo[0] in ("col", "ref") and nodo[1] in self.columnas:
             return nodo[1]
-        raise ErrorDax(f"Se esperaba una columna del archivo y llego {_texto(nodo)}.")
+        raise ErrorDax(f"Se esperaba una columna del archivo y llegó {_texto(nodo)}.")
 
     def _escalar(self, nodo, ctx):
         valor = self.evaluar(nodo, ctx)
@@ -270,13 +270,13 @@ class Evaluador:
             if nombre.lower() in self.medidas:
                 return self._medida(nombre, ctx)
             if nombre in self.columnas:
-                raise ErrorDax(f"[{nombre}] es una columna: usala dentro de SUM, AVERAGE, etc.")
+                raise ErrorDax(f"[{nombre}] es una columna: úsala dentro de SUM, AVERAGE, etc.")
             raise ErrorDax(f"No existe la medida ni la columna [{nombre}].")
 
         if tipo == "col":
             if nodo[1] not in self.columnas:
-                raise ErrorDax(f"«{nodo[1]}» no es una columna del archivo ni una funcion soportada.")
-            raise ErrorDax(f"La columna {nodo[1]} debe ir dentro de una agregacion (SUM, AVERAGE…).")
+                raise ErrorDax(f"«{nodo[1]}» no es una columna del archivo ni una función soportada.")
+            raise ErrorDax(f"La columna {nodo[1]} debe ir dentro de una agregación (SUM, AVERAGE…).")
 
         if tipo == "tabla":
             raise ErrorDax(f"La tabla '{nodo[1]}' solo puede usarse dentro de COUNTROWS.")
@@ -287,12 +287,12 @@ class Evaluador:
         if tipo == "fn":
             return self._funcion(nodo[1], nodo[2], ctx)
 
-        raise ErrorDax("Expresion no soportada.")
+        raise ErrorDax("Expresión no soportada.")
 
     def _medida(self, nombre: str, ctx: Contexto):
         clave = nombre.lower()
         if clave in self._pila:
-            raise ErrorDax(f"La medida [{nombre}] se referencia a si misma.")
+            raise ErrorDax(f"La medida [{nombre}] se referencia a sí misma.")
         if clave not in self._arboles:
             self._arboles[clave] = analizar(self.medidas[clave][1])
         self._pila.append(clave)
@@ -310,7 +310,7 @@ class Evaluador:
             x, y = x or 0, y or 0
             if op == "/":
                 if y == 0:
-                    raise ErrorDax("Division por cero: usa DIVIDE(a, b) para evitarla.")
+                    raise ErrorDax("División por cero: usa DIVIDE(a, b) para evitarla.")
                 return x / y
             return {"+": x + y, "-": x - y, "*": x * y}[op]
         if op == "&&":
@@ -362,14 +362,14 @@ class Evaluador:
 
         if nombre == "IF":
             if len(args) not in (2, 3):
-                raise ErrorDax("IF(condicion, si_verdadero [, si_falso]).")
+                raise ErrorDax("IF(condición, si_verdadero [, si_falso]).")
             if self.evaluar(args[0], ctx):
                 return self.evaluar(args[1], ctx)
             return self.evaluar(args[2], ctx) if len(args) == 3 else None
 
         if nombre == "CALCULATE":
             if not args:
-                raise ErrorDax("CALCULATE(expresion, filtro...).")
+                raise ErrorDax("CALCULATE(expresión, filtro...).")
             nuevo = Contexto(ctx.base, ctx.columna_fecha, ctx.inicio, ctx.fin, dict(ctx.filtros), ctx.sin_datos)
             for filtro in args[1:]:
                 self._aplicar_filtro(filtro, nuevo)
@@ -377,7 +377,7 @@ class Evaluador:
 
         if nombre in ("TOTALYTD", "TOTALMTD"):
             if len(args) != 2:
-                raise ErrorDax(f"{nombre}(expresion, Tabla[fecha]).")
+                raise ErrorDax(f"{nombre}(expresión, Tabla[fecha]).")
             interno = "DATESYTD" if nombre == "TOTALYTD" else "DATESMTD"
             return self._funcion("CALCULATE", [args[0], ("fn", interno, [args[1]])], ctx)
 
@@ -385,7 +385,7 @@ class Evaluador:
                       "DATESINPERIOD", "ALL", "LASTDATE"):
             raise ErrorDax(f"{nombre} solo puede usarse como filtro dentro de CALCULATE.")
 
-        raise ErrorDax(f"La funcion {nombre} no esta soportada en este tablero.")
+        raise ErrorDax(f"La función {nombre} no está soportada en este tablero.")
 
     def _aplicar_filtro(self, filtro, ctx: Contexto):
         """Modifica el contexto como lo haria un argumento de CALCULATE."""

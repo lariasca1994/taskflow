@@ -228,7 +228,7 @@ def catalogo(modelo: Modelo) -> list[dict]:
                 "Total menos costo, sobre el total.")
     if m and f:
         agregar("Total mes anterior", f"CALCULATE([Total], DATEADD({t}[{f}], -1, MONTH))", "cifra",
-                "El mismo calculo desplazado un mes hacia atras.")
+                "El mismo cálculo desplazado un mes hacia atrás.")
         agregar("Variación mensual %", "DIVIDE([Total] - [Total mes anterior], [Total mes anterior])",
                 "variacion", "Crecimiento frente al mes anterior.")
         agregar("Total año anterior", f"CALCULATE([Total], SAMEPERIODLASTYEAR({t}[{f}]))", "cifra",
@@ -239,7 +239,7 @@ def catalogo(modelo: Modelo) -> list[dict]:
                 "Desde el 1 de enero hasta el cierre del periodo.")
         agregar("Promedio móvil 3 meses",
                 f"CALCULATE([Total], DATESINPERIOD({t}[{f}], LASTDATE({t}[{f}]), -3, MONTH)) / 3",
-                "cifra", "Promedio mensual de los ultimos tres meses.")
+                "cifra", "Promedio mensual de los últimos tres meses.")
     if modelo.dimensiones:
         d = modelo.dimensiones[0]
         agregar(f"{d.capitalize()} distintos", f"DISTINCTCOUNT({t}[{d}])", "entero",
