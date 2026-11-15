@@ -59,7 +59,7 @@
     <article class="tb-tarjeta tb-col-5">
         <div class="tb-tarjeta-cabeza">
             <div>
-                <h2 class="tb-tarjeta-titulo">Participación por {{ principal | replace("_", " ") }}</h2>
+                <h2 class="tb-tarjeta-titulo">Participación por {{ principal | etiqueta }}</h2>
                 <p class="tb-tarjeta-nota">Total y peso sobre el total del periodo filtrado.</p>
             </div>
             {{ ayuda(
@@ -93,8 +93,8 @@
     <article class="tb-tarjeta tb-col-6">
         <div class="tb-tarjeta-cabeza">
             <div>
-                <h2 class="tb-tarjeta-titulo">Mezcla mensual por {{ segunda | replace("_", " ") }}</h2>
-                <p class="tb-tarjeta-nota">Cómo cambia el peso de cada {{ segunda | replace("_", " ") }} mes a mes (100 %).</p>
+                <h2 class="tb-tarjeta-titulo">Mezcla mensual por {{ segunda | etiqueta }}</h2>
+                <p class="tb-tarjeta-nota">Cómo cambia el peso de cada {{ segunda | etiqueta }} mes a mes (100 %).</p>
             </div>
             {{ ayuda(
                 "Cada columna es un mes y siempre suma 100 %. Los colores son los distintos valores de " ~ (segunda | replace('_', ' ')) ~ ".",
@@ -110,7 +110,7 @@
     <article class="tb-tarjeta tb-col-6">
         <div class="tb-tarjeta-cabeza">
             <div>
-                <h2 class="tb-tarjeta-titulo">Mapa de calor · {{ principal | replace("_", " ") }} por mes</h2>
+                <h2 class="tb-tarjeta-titulo">Mapa de calor · {{ principal | etiqueta }} por mes</h2>
                 <p class="tb-tarjeta-nota">Más oscuro, mayor {{ medida }}. Últimos 18 meses.</p>
             </div>
             {{ ayuda(
