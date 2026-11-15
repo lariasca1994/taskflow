@@ -1,480 +1,328 @@
 # 📘 Manual de usuario · Gestor de tareas
 
-Guía para usar la plataforma paso a paso: qué significa cada campo, qué datos se ingresan y qué
-protege la plataforma. Para la parte técnica vuelve al [README](../README.md).
+## 1. Portada
 
-**Demo:** [Gestor de tareas (Google Cloud Run)](https://taskflow-812302804238.us-east4.run.app/)
+![Portada del Gestor de tareas](img/manual/01-portada.png)
+
+| | |
+|---|---|
+| **Producto** | Gestor de tareas |
+| **Documento** | Manual de usuario |
+| **Versión** | 2.0 · noviembre de 2026 |
+| **Dirigido a** | Personas y equipos que organizan su trabajo, y analistas que convierten archivos de datos en informes |
+| **Dirección** | [Gestor de tareas](https://taskflow-812302804238.us-east4.run.app/) |
+| **Autor** | Luis F. A. |
 
 ## Contenido
 
-1. [Proyecto: objetivos y alcances](#1-proyecto-objetivos-y-alcances)
-2. [Glosario](#2-glosario)
-3. [Plataformas, base de datos y servicios](#3-plataformas-base-de-datos-y-servicios)
-4. [Paso a paso](#4-paso-a-paso)
-5. [Seguridad: tu información protegida](#5-seguridad-tu-información-protegida)
-6. [Agradecimientos](#6-agradecimientos)
+1. [Portada](#1-portada)
+2. [Introducción](#2-introducción)
+3. [Objetivo](#3-objetivo)
+4. [Alcance](#4-alcance)
+5. [Acceso al sistema](#5-acceso-al-sistema)
+6. [Pantalla principal](#6-pantalla-principal)
+7. [Navegación](#7-navegación)
+8. [Funcionalidades](#8-funcionalidades)
+9. [Gestión de perfil](#9-gestión-de-perfil)
+10. [Mensajes frecuentes](#10-mensajes-frecuentes)
+11. [Preguntas frecuentes](#11-preguntas-frecuentes)
+12. [Glosario](#12-glosario)
 
 ---
 
-## 1. Proyecto: objetivos y alcances
+## 2. Introducción
 
-### Objetivo
+El **Gestor de tareas** reúne dos herramientas en un mismo lugar:
 
-Una lista de tareas con fechas, prioridades y categorías, más un **informe de productividad** que
-muestra cómo vas (cumplimiento, tiempo de cierre, vencidas). También puedes subir un CSV, Excel o
-JSON —o generar un lote de ventas simulado— y la app lo convierte en un **informe gerencial**:
-indicadores, gráficos explicados, medidas DAX, tabla dinámica y el origen de los datos. Los números
-se actualizan en vivo, sin recargar.
+- **Tareas:** anota lo que tienes por hacer con categoría, prioridad y fecha límite, márcalo al
+  terminar y mira tu avance en un panel de analítica.
+- **Datos:** sube un archivo (CSV, Excel o JSON) o genera un lote de ventas simulado y obtén un
+  informe gerencial con indicadores, gráficos, tabla dinámica y medidas al estilo de Power BI.
 
-### Alcance: qué necesitas y qué esperar
+Este manual explica cada pantalla, paso a paso y con imágenes.
 
-- Solo necesitas un navegador.
-- El indicador **● en vivo** (arriba a la derecha) muestra que la página recibe cambios en tiempo
-  real.
+![Cómo funciona el Gestor de tareas: personas, aplicación, plataforma e información](img/manual/00-como-funciona.svg)
 
-### Límites
+## 3. Objetivo
 
-Es una demo de portafolio:
+Que cualquier persona pueda, sin conocimientos técnicos:
 
-- **No subas archivos con datos personales o confidenciales**: usa datos de ejemplo.
+- Crear su cuenta e ingresar de forma segura.
+- Organizar sus tareas y seguir su cumplimiento.
+- Convertir un archivo de datos en un informe con indicadores y gráficos.
+- Explorar los datos con una tabla dinámica y medidas, y descargar o imprimir el resultado.
 
-## 2. Glosario
+## 4. Alcance
 
-Palabras técnicas que aparecen en este manual, explicadas en lenguaje simple.
+**Incluye:** registro e ingreso con verificación en dos pasos, tareas con categoría, prioridad,
+fecha y descripción, analítica de tareas, carga de archivos o generación de datos simulados, informe
+gerencial, tabla dinámica, medidas DAX, origen y calidad de los datos, descarga en CSV e impresión
+en PDF.
 
-| Término | Qué significa |
-|---|---|
-| **Administrador** | Cuenta con permisos para gestionar usuarios y configuraciones de la aplicación. |
-| **API** | Puerta de entrada de un programa para que otros programas le pidan o le envíen datos. |
-| **Backend** | La parte de la aplicación que trabaja "detrás": procesa lo que envías y habla con la base de datos. |
-| **Base de datos** | Lugar donde la aplicación guarda la información de forma ordenada y permanente. |
-| **Cifrado / TLS / HTTPS** | Protección que codifica la información mientras viaja, para que nadie en el camino pueda leerla. |
-| **Contraseña cifrada (hash)** | La contraseña no se guarda tal cual, sino como una "huella" de la que no se puede recuperar el texto original. |
-| **Cookie** | Pequeño dato que el navegador guarda para recordar tu sesión en ese sitio. |
-| **CSV** | Archivo de texto con datos en columnas, que se abre en Excel o Google Sheets. |
-| **Excel / XLSX** | Formato de hoja de cálculo de Microsoft Excel. |
-| **JWT** | Tipo de token firmado digitalmente: si alguien lo altera, el servidor lo rechaza. |
-| **Modo mantenimiento** | Pantalla que aparece cuando el servicio o su base de datos no responden; se recupera sola cuando vuelven. |
-| **Navegador** | Programa con el que abres páginas web: Chrome, Edge, Firefox, Safari. |
-| **Nube** | Servidores de una empresa (Amazon, Microsoft, Google, Oracle…) donde la aplicación funciona sin depender de un computador propio. |
-| **Pandas / análisis de datos** | Herramienta de Python para leer, limpiar y resumir tablas de datos. |
-| **PDF** | Formato de documento que se ve igual en cualquier equipo. |
-| **Rate limit (límite de intentos)** | Tope de intentos en poco tiempo, para frenar a quien intenta adivinar contraseñas. |
-| **Recurrencia (RRULE)** | Regla que indica cada cuánto se repite un evento (diario, semanal, días laborables…). |
-| **REST** | Forma estándar de organizar una API usando direcciones web y métodos como GET o POST. |
-| **Rol** | Tipo de cuenta que define qué puede hacer cada persona (por ejemplo, usuario o administrador). |
-| **Sesión** | El tiempo en que la aplicación te reconoce después de iniciar sesión, sin pedirte la contraseña de nuevo. |
-| **Variables de entorno / secretos** | Claves y contraseñas internas de la aplicación, guardadas fuera del código para que no queden expuestas. |
+**No incluye:** tareas compartidas entre cuentas ni archivos permanentes: los archivos de datos se
+borran al cerrar sesión.
 
-## 3. Plataformas, base de datos y servicios
+**Qué necesitas:** un navegador actualizado, conexión a internet, un correo propio y una app
+autenticadora en el celular (o acceso a tu correo para recibir códigos).
 
-Qué servicio de nube, base de datos o API usa el proyecto y para qué sirve cada uno.
+**Buenas prácticas:** no subas archivos con datos personales o confidenciales; usa los lotes
+simulados para probar. Cada cuenta puede tener hasta 5 archivos de hasta 10 MB.
 
-| Plataforma | Tipo | Qué hace en el proyecto |
-|---|---|---|
-| ![Google Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white) | Nube | Corre la app FastAPI: páginas Jinja2 + HTMX, API REST y canal de eventos en vivo. |
-| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | Base de datos | MongoDB Atlas guarda usuarios, tareas y archivos (estos últimos en GridFS). Es el único servicio externo: no requiere otra cuenta ni clave de API. |
-| ![qa-evidencia](https://img.shields.io/badge/qa--evidencia-2EAD33?style=for-the-badge&logo=playwright&logoColor=white) | Pruebas automatizadas | Prueba la demo automáticamente dos veces al día y publica la evidencia. |
+## 5. Acceso al sistema
 
-## 4. Paso a paso
+### 5.1 Crear una cuenta
 
-### 4.1 Inicio
+En la pantalla de ingreso pulsa **Crear una**.
 
-![Página de inicio](img/manual/01-inicio.png)
-
-Desde el inicio eliges **Crear cuenta** o **Ya tengo cuenta**.
-
-### 4.2 Crear una cuenta
-
-![Formulario de registro](img/manual/02-registro.png)
-
-| # | Campo | Qué escribir | Reglas |
-|:-:|---|---|---|
-| 1 | Nombre | Cómo quieres que te salude la app | Entre 2 y 80 caracteres |
-| 2 | Correo electrónico | El correo con el que vas a entrar | Formato válido y único |
-| 3 | Contraseña | Tu contraseña | Entre **10 y 128 caracteres** |
-| 4 | Crear cuenta | Botón | Crea la cuenta y te lleva a elegir tu verificación en dos pasos |
-
-### 4.3 Ingresar
-
-![Formulario de ingreso](img/manual/03-ingresar.png)
+![Formulario de registro con sus campos numerados](img/manual/02-registro.png)
 
 | # | Campo | Qué escribir |
+|:-:|---|---|
+| 1 | Nombre | Tu nombre |
+| 2 | Correo electrónico | Un correo al que tengas acceso |
+| 3 | Contraseña | Mínimo 10 caracteres |
+| 4 | Crear cuenta | Crea tu cuenta y te lleva a configurar la verificación en dos pasos |
+
+### 5.2 Iniciar sesión
+
+![Formulario de inicio de sesión con sus elementos numerados](img/manual/03-ingreso.png)
+
+| # | Elemento | Qué hace |
 |:-:|---|---|
 | 1 | Correo electrónico | El correo de tu cuenta |
 | 2 | Contraseña | Tu contraseña |
-| 3 | Ingresar | Pide el código de tu verificación en dos pasos |
-| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación de contraseña (ver 4.3.1) |
+| 3 | Ingresar | Comprueba tus datos y pasa a la verificación en dos pasos |
+| 4 | ¿Olvidaste tu contraseña? | Abre la recuperación de contraseña (5.4) |
 
-Después de la contraseña aparece la pantalla del código:
+Debajo, **Crear una** abre el registro (5.1).
 
-![Pantalla del código de verificación con sus opciones numeradas](img/manual/12-verificacion.png)
+### 5.3 Verificación en dos pasos
 
-| # | Campo | Qué hacer |
+Cada ingreso pide, además de la contraseña, un código de 6 dígitos. La primera vez eliges cómo
+recibirlo: con una **app autenticadora** (escaneas un código QR y la app muestra un código nuevo
+cada 30 segundos, incluso sin internet) o con un **código por correo**.
+
+![Pantalla del código de verificación con sus elementos numerados](img/manual/04-verificacion.png)
+
+| # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Código de 6 dígitos | El código de tu app autenticadora o de tu correo (ver 4.3.3) |
-| 2 | Verificar | Termina de ingresar |
-| 3 | Perdí mi autenticador | Si ya no tienes la app, recupera el acceso por correo (ver 4.3.4) |
+| 1 | Código de 6 dígitos | El código que muestra tu app o que llegó a tu correo |
+| 2 | Verificar | Confirma el código y abre la plataforma |
+| 3 | Perdí mi autenticador | Si ya no tienes la app, te envía un código al correo de tu cuenta para configurar una app nueva |
 
-Si tienes los dos métodos activos, puedes cambiar al otro desde la misma pantalla.
+### 5.4 Recuperar la contraseña
 
-El código se escribe en **seis casillas**, una por dígito: puedes teclearlo o pegarlo completo.
-Un candado sobre el título se abre al enviar el código completo y se sacude si no es válido; con la
-app autenticadora, un anillo muestra cuántos segundos faltan para que la app cambie de código.
+![Pantalla para pedir el enlace de recuperación](img/manual/05-recuperar.png)
 
-La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
-
-### 4.3.1 Olvidé mi contraseña
-
-![Formulario para pedir el enlace de recuperación](img/manual/11-recuperar.png)
-
-| # | Campo | Qué hacer |
+| # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Correo electrónico | El correo de tu cuenta |
-| 2 | Enviar enlace | Envía el enlace para crear una contraseña nueva |
+| 1 | Correo | El correo de tu cuenta |
+| 2 | Enviar enlace | Envía a ese correo un enlace para crear una contraseña nueva |
 
-En **Ingresar**, pulsa **¿Olvidaste tu contraseña?** y escribe tu correo. Si la cuenta existe y está
-activa, te llega un enlace para crear una contraseña nueva. El enlace vence en 30 minutos y sirve una
-sola vez. La pantalla muestra el mismo mensaje exista o no la cuenta.
+El mensaje es el mismo exista o no la cuenta. Abre el enlace del correo (vence en poco tiempo y
+sirve una sola vez), escribe la contraseña nueva y vuelve a ingresar.
 
-Al abrir el enlace solo escribes la **contraseña nueva** y su **confirmación** (mínimo 10
-caracteres). Al guardarla se **cierran las sesiones abiertas** en todos tus equipos; ingresa de nuevo
-con la contraseña nueva. Tu verificación en dos pasos **sigue activa**: después de la contraseña
-se pide el código como siempre.
+## 6. Pantalla principal
 
-### 4.3.2 Cambiar la contraseña
+Al ingresar se abre **Tus tareas**.
 
-Con la sesión iniciada, abre **Contraseña** en el menú, escribe la actual y la nueva dos veces. Tu
-sesión actual sigue abierta y se cierran las de tus otros equipos.
+![Pantalla de tareas con sus partes numeradas](img/manual/06-pantalla-principal.png)
 
-### 4.3.3 Verificación en dos pasos (obligatoria)
-
-Cada ingreso pide, además de la contraseña, un código. La primera vez que ingresas (o al crear la
-cuenta) eliges cómo recibirlo:
-
-| Método | Cómo funciona |
-|---|---|
-| **App autenticadora** (recomendado) | Escaneas un código QR con Google Authenticator, Microsoft Authenticator u otra app; desde ese momento la app muestra un código nuevo cada 30 segundos, incluso sin internet. Si no puedes escanear, escribe la clave que aparece bajo el QR. |
-| **Código por correo** | Cada vez que ingresas te llega un código de 6 dígitos que vence en 10 minutos y sirve una sola vez. |
-
-En la app autenticadora la cuenta aparece como **Gestor de tareas**, y los correos (códigos y
-enlaces) llegan con ese mismo nombre. Si configuraste la app antes de este cambio, puede seguir
-mostrando el nombre anterior: tus códigos siguen funcionando igual.
-
-Confirma el método escribiendo el primer código. Desde **Seguridad** (menú superior) puedes
-**agregar el método que no elegiste** y escoger cuál se pide **por defecto**; tener los dos te
-permite entrar aunque no tengas el teléfono a mano.
-
-### 4.3.4 Perdí mi autenticador
-
-Si cambiaste o perdiste el teléfono con la app autenticadora:
-
-![Pantalla de Perdí mi autenticador con sus campos numerados](img/manual/13-perdi-autenticador.png)
-
-| # | Campo | Qué hacer |
+| # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Código de 6 dígitos | El código que llegó al correo de tu cuenta |
-| 2 | Continuar | Lleva al código QR para tu app nueva |
-| 3 | Enviar otro código | Pide un código nuevo si no llegó |
+| 1 | Menú lateral | Lleva a Tareas, Analítica y Datos (ver 7. Navegación) |
+| 2 | Nueva tarea | Escribe la tarea y pulsa **Agregar** (8.1) |
+| 3 | Tarea | Cada tarjeta muestra el título, la categoría, la prioridad y la fecha límite |
+| 4 | Filtrar | Busca por título y filtra por estado o categoría |
 
-1. Ingresa con tu correo y contraseña.
-2. En la pantalla **Escribe tu código**, pulsa **Perdí mi autenticador** (siempre visible).
-3. Te llega un **código de 6 dígitos al correo de tu cuenta**, aunque no tengas activado el código
-   por correo. Vence en 15 minutos y sirve una sola vez; si no llega, pulsa **Enviar otro código**.
-4. Escribe el código y pulsa **Continuar**.
-5. Escanea el **código QR nuevo** con la app autenticadora de tu teléfono nuevo y escribe el
-   código que muestra para terminar de ingresar.
+A la derecha, **Ver tu analítica** abre el panel de avance (8.2).
 
-Desde ese momento la app anterior deja de funcionar. Si escribes el código errado varias veces, la
-recuperación se bloquea unos minutos. Si no pediste este código, cambia tu contraseña.
+## 7. Navegación
 
-### 4.4 Tus tareas
+En el computador el menú está a la izquierda: **Tareas**, **Analítica** y **Datos**, y al pie
+**Contraseña**, **Seguridad**, **API** (documentación para desarrolladores) y **Salir**.
+**Compactar menú** lo reduce a íconos.
 
-**Menú lateral.** A la izquierda están **Tareas**, **Analítica** y **Datos** (y **Admin** y
-**Usuarios** para el administrador); una luz verde marca la sección actual. Al pie están el aviso
-**en vivo** (los cambios llegan al instante), tu nombre, **Contraseña**, **Seguridad**, **API ↗** y
-**Salir**. **Compactar menú** lo reduce a solo íconos (al pasar el cursor aparece el nombre de
-cada uno) y la preferencia se recuerda en ese equipo.
+![Menú lateral compacto](img/manual/07-navegacion.png)
 
-![Menú lateral compacto con el nombre de la opción al pasar el cursor](img/manual/16-menu-compacto.png)
+En la tablet en vertical y en el celular, el menú pasa a una barra inferior; **Más** abre una hoja
+con las opciones de la cuenta. El botón ◐ cambia entre tema claro y oscuro.
 
-**En la tablet en vertical y en el celular** el menú se convierte en una **barra inferior**
-translúcida (Tareas, Analítica, Datos y **Más**, que abre una hoja desde abajo con el resto de
-opciones). La página se reacomoda sola al girar la pantalla.
+| Tablet en vertical | Celular con la hoja "Más" |
+|:-:|:-:|
+| ![Analítica en una tablet en vertical](img/manual/08-navegacion-tablet.png) | ![Celular con la hoja Más abierta](img/manual/09-navegacion-movil.png) |
 
-![Informe de productividad en una tablet en vertical](img/manual/17-tablet-vertical.png)
+## 8. Funcionalidades
 
-![Tareas en el celular con la hoja Más abierta](img/manual/18-movil-mas.png)
+### 8.1 Crear: tareas y fuentes de datos
 
-![Lista de tareas con el formulario y los filtros numerados](img/manual/04-tareas.png)
+**Tarea.** Escribe el título y, si quieres, abre **Más opciones**.
+
+![Formulario de tarea nueva con sus campos numerados](img/manual/10-crear-tarea.png)
 
 | # | Campo | Qué escribir |
 |:-:|---|---|
-| 1 | ¿Qué necesitas hacer? | Título de la tarea (3 a 140 caracteres) |
-| 2 | Categoría | Texto libre para agrupar: Trabajo, Personal, Hogar… (en **Más opciones**) |
-| 3 | Prioridad | Baja, media o alta |
-| 4 | Fecha límite | Fecha de vencimiento |
-| 5 | Descripción | Detalle opcional |
-| 6 | Agregar | Agrega la tarea a la lista sin recargar |
-| 7 | Buscar por título | Parte del título que buscas |
-| 8 | Estado | Pendientes, En progreso o Completadas (la categoría se filtra en la lista de abajo) |
+| 1 | ¿Qué necesitas hacer? | El título de la tarea |
+| 2 | Categoría | Por ejemplo Hogar, Trabajo o Estudio |
+| 3 | Prioridad | Alta, media o baja |
+| 4 | Fecha límite | Hasta cuándo tienes para hacerla |
+| 5 | Descripción | Un detalle opcional |
+| 6 | Agregar | Crea la tarea |
 
-Pulsa **Aplicar** para filtrar o **Limpiar** para quitar los filtros. En cada tarea, la casilla la
-marca como completada (o la devuelve a pendiente) y el botón de eliminar la borra.
+**Fuente de datos.** En **Datos** puedes generar un lote simulado o subir tu archivo.
 
-### 4.5 Analítica: informe de productividad
+![Pantalla de datos con sus elementos numerados](img/manual/11-crear-datos.png)
 
-![Informe de productividad con filtros numerados](img/manual/05-analitica.png)
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Volumen | Elige el tamaño del lote simulado (aleatorio, pequeño, mediano o grande) |
+| 2 | Generar lote | Crea un lote de ventas simulado, distinto cada vez |
+| 3 | Sube tu propio archivo | Arrastra o elige un CSV, Excel o JSON (hasta 10 MB) |
+| 4 | Abrir informe | Abre el informe gerencial de esa fuente (8.2) |
+| 5 | Borrar | Elimina la fuente de datos |
+
+### 8.2 Consultar: analítica e informe
+
+**Analítica de tareas.** Muestra tu cumplimiento, los tiempos de cierre y la evolución semanal.
+
+![Analítica de tareas con sus filtros numerados](img/manual/12-consultar-analitica.png)
 
 | # | Filtro | Qué hace |
 |:-:|---|---|
-| 1 | Desde | Fecha inicial del análisis |
-| 2 | Hasta | Fecha final |
-| 3 | Categoría | Limita a una categoría |
-| 4 | Prioridad | Limita a una prioridad |
+| 1 | Desde | Fecha inicial del periodo |
+| 2 | Hasta | Fecha final del periodo |
+| 3 | Categoría | Limita el panel a una categoría |
+| 4 | Prioridad | Limita el panel a una prioridad |
 
-Cada indicador lleva un punto de color (verde si va bien, rojo si requiere atención, como las
-tareas vencidas sin cerrar) y una línea de acento abajo; al pasar el cursor la tarjeta se eleva.
+Las tarjetas comparan las últimas 4 semanas con las 4 anteriores (▲ mejora, ▼ empeora) y la «i»
+explica qué mide cada una. **Imprimir / PDF** guarda el panel.
 
-Todo se recalcula al cambiar un filtro, y también solo cuando creas, completas o eliminas una
-tarea. **Limpiar filtros** vuelve a mostrarlo todo.
+**Informe gerencial.** En **Datos → Abrir informe** se abre el informe de la fuente.
 
-**Cómo leer este panel** (arriba, plegable) explica el panel en tres pasos y muestra la leyenda de
-colores: verde = completada, azul = en progreso, naranja = pendiente.
-
-**Indicadores.** Pasa el cursor por la **i** de cada tarjeta para ver qué mide.
-
-| Indicador | Qué significa | Etiqueta debajo |
-|---|---|---|
-| Tareas registradas | Tareas que cumplen los filtros | Creadas en las últimas 4 semanas frente a las 4 anteriores |
-| Cumplimiento | Porcentaje de tareas completadas | Cambio en puntos; verde ▲ si mejora, rojo ▼ si empeora |
-| Tiempo medio de cierre | Promedio entre creación y finalización | Verde si baja (se cierra más rápido) |
-| Vencidas sin cerrar | Abiertas con la fecha límite vencida | Cuántas abiertas hay en total |
-
-Debajo, tres **hallazgos** resumen el panel en frases (por ejemplo, la categoría que concentra
-más tareas o la de menor cumplimiento).
-
-**Gráficos.** Cada uno tiene el botón **¿Cómo leerlo?**, que explica qué muestra, cómo leerlo y
-qué pregunta responde.
-
-| Gráfico | Qué responde |
-|---|---|
-| Creadas frente a completadas | ¿Estoy al día o se acumula trabajo? Semanas completas, de lunes a domingo |
-| Distribución por estado | ¿Cuánto está terminado, en marcha o sin empezar? |
-| Estado por prioridad | ¿Estoy atendiendo primero lo importante? |
-| Categorías | ¿Dónde se concentra el trabajo y qué área va más atrasada? |
-
-**Imprimir / PDF** genera el informe sin los controles.
-
-### 4.6 Datos: elegir una fuente
-
-![Página de datos con el generador, la carga y las fuentes](img/manual/06-datos.png)
-
-| # | Elemento | Qué hacer | Reglas |
-|:-:|---|---|---|
-| 1 | Volumen | Elige **Aleatorio**, **Pequeño** (500 a 2.000 filas), **Mediano** (2.000 a 8.000) o **Grande** (8.000 a 20.000) | Solo para lotes simulados |
-| 2 | Generar lote | Crea un lote de ventas simulado | Cada clic usa una semilla nueva: cambian el volumen, el periodo, la tendencia, la temporada, la región y el canal líderes, y puede haber una promoción o un desabastecimiento |
-| 3 | Sube tu propio archivo | Arrastra un CSV, Excel (`.xlsx`) o JSON, o haz clic para elegirlo | Máximo **10 MB** y **500.000 filas**; el JSON debe ser una lista de objetos sin anidar |
-| 4 | Abrir informe | Abre el informe gerencial de esa fuente | — |
-| 5 | Eliminar | Borra la fuente (pide confirmación) | — |
-
-Cada tarjeta indica si la fuente es un **archivo subido** o un lote **generado** (con su semilla),
-sus filas, columnas y tamaño. En los lotes generados se resume el escenario: periodo, tendencia,
-temporada alta, región líder y evento.
-
-Cada cuenta conserva hasta **5 fuentes**, que se borran tras **24 horas sin uso** o al cerrar
-sesión.
-
-### 4.7 Informe gerencial: resumen ejecutivo
-
-![Resumen ejecutivo del informe con sus controles numerados](img/manual/07-informe.png)
-
-Arriba están el nombre de la fuente, su periodo y el **recorrido de los datos** en cinco pasos:
-fuente → lectura → almacén → modelo → informe. Debajo, **Cómo leer este informe** lo explica en
-cuatro pasos y aclara los símbolos (▲ mejora, ▼ empeora, «—» sin dato para comparar, **M** =
-millones, **mil M** = miles de millones).
+![Informe gerencial de una fuente de datos con sus partes numeradas](img/manual/13-consultar-informe.png)
 
 | # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Desde / Hasta | Acota el periodo de todo el informe |
-| 2 | Segmentadores | Filtran por categoría (por ejemplo, canal o región). Aplican a todas las pestañas |
+| 1 | Periodo | Acota el informe por fechas |
+| 2 | Filtros | Limita por canal, categoría, región o vendedor |
 | 3 | Pestañas | Resumen ejecutivo, Tabla dinámica, Medidas DAX, Explorador y Origen y calidad |
-| 4 | **i** de cada indicador | Explica en una frase qué mide |
-| 5 | ¿Cómo leerlo? | Explica el gráfico: qué muestra, cómo leerlo y qué pregunta responde |
-| 6 | Clic para filtrar | Un clic en una barra, una celda o un color filtra todo el informe por ese valor; aparece como un chip con **×** para quitarlo |
-| 7 | Descargar CSV | Baja la fuente completa, lista para Excel o Power BI |
-| 8 | Imprimir / PDF | Genera el informe sin los controles |
+| 4 | Indicadores | Total, registros, promedio y margen, comparados con el mes anterior |
+| 5 | ¿Cómo leerlo? | Explica cada gráfico; al hacer clic en una barra se filtra el informe por ella |
 
-Los **indicadores** muestran el total del periodo filtrado y una etiqueta que compara el último
-mes completo con el anterior. Debajo, tres **hallazgos** resumen lo más importante en frases.
+### 8.3 Modificar: tareas y tabla dinámica
 
-| Gráfico | Qué responde |
-|---|---|
-| Evolución mensual | ¿Crecemos, estamos estancados o caemos? Incluye promedio móvil de 3 meses y, si hay historia, el año anterior |
-| Participación | ¿De dónde sale la mayor parte del negocio? |
-| ¿Quién crece y quién cae? | ¿Qué explica la variación del mes? Verde ▲ sube, rojo ▼ baja |
-| Mezcla mensual | ¿Está cambiando la forma en que vendemos? |
-| Mapa de calor | ¿Hay meses fuertes o débiles que se repiten? |
+**Tareas.** Desde la lista cambias el estado o eliminas una tarea.
 
-Al pie de cada gráfico se indica la **fuente**: el archivo, las filas filtradas y cómo se agrupó.
-
-### 4.8 Tabla dinámica
-
-![Tabla dinámica con sus campos numerados](img/manual/08-pivote.png)
-
-| # | Campo | Qué elegir |
-|:-:|---|---|
-| 1 | Filas | La dimensión de las filas, o Año, Trimestre o Mes de la fecha |
-| 2 | Columnas | La dimensión de las columnas, o ninguna |
-| 3 | Valores | La columna numérica a resumir, o contar registros |
-| 4 | Resumir con | Suma, promedio, conteo, distintos, máximo o mínimo |
-| 5 | Mostrar como | Valor, % del total general, % de la fila o % de la columna |
-| 6 | Exportar | Descarga la tabla en CSV, con los filtros aplicados |
-| 7 | Ver la consulta DAX equivalente | Muestra la misma tabla escrita como consulta DAX |
-
-La última fila y la última columna son los **totales**. Cuanto más verde la celda, mayor el valor.
-
-### 4.9 Medidas DAX
-
-![Medidas DAX y editor de nueva medida](img/manual/09-medidas.png)
+![Acciones sobre una tarea con sus elementos numerados](img/manual/14-modificar-tareas.png)
 
 | # | Elemento | Qué hace |
 |:-:|---|---|
-| 1 | Medidas del modelo | Cada medida con su fórmula DAX y su valor en el **rango filtrado** y en el **último mes completo** |
-| 2 | Ejemplos | Botones que escriben una fórmula de ejemplo en el editor |
-| 3 | Fórmula | Escribe tu medida, por ejemplo `Participación = DIVIDE([Total], CALCULATE([Total], ALL('tabla'[canal])))` |
-| 4 | Desglosar por | Calcula la medida para cada valor de una dimensión |
-| 5 | Calcular medida | Muestra el resultado, la fórmula, la tabla del desglose y su gráfico |
+| 1 | Casilla | Marca la tarea como completada (o la vuelve a pendiente) |
+| 2 | Eliminar | Aparece al pasar el cursor; pide confirmación antes de borrar |
+| 3 | Estado | Muestra solo las pendientes o las completadas |
 
-Puedes usar las medidas del modelo entre corchetes (`[Total]`, `[Registros]`…). Funciones
-disponibles: SUM, AVERAGE, MIN, MAX, MEDIAN, COUNT, COUNTROWS, DISTINCTCOUNT, DIVIDE, CALCULATE,
-ALL, DATEADD, SAMEPERIODLASTYEAR, DATESYTD, DATESMTD, DATESINPERIOD, TOTALYTD, TOTALMTD, IF,
-ROUND y ABS. Si la fórmula tiene un error, se muestra un mensaje que dice qué corregir.
+**Tabla dinámica.** En la pestaña **Tabla dinámica** del informe armas tu propio cruce.
 
-### 4.10 Origen y calidad
+![Tabla dinámica con sus opciones numeradas](img/manual/15-modificar-pivote.png)
 
-![Ficha de origen y calidad de los datos](img/manual/10-origen.png)
+| # | Opción | Qué hace |
+|:-:|---|---|
+| 1 | Filas | La dimensión de las filas (por ejemplo, canal) |
+| 2 | Columnas | La dimensión de las columnas (por ejemplo, trimestre) |
+| 3 | Valores | La cifra que se resume |
+| 4 | Resumir con | Suma, promedio, conteo, mínimo o máximo |
+| 5 | Mostrar como | Valor o porcentaje |
+| 6 | Exportar | Descarga la tabla |
+
+### 8.4 Reportar: medidas, origen y descargas
+
+**Medidas DAX.** Cada medida muestra su fórmula y su resultado; también puedes escribir una nueva.
+
+![Medidas DAX y nueva medida con sus elementos numerados](img/manual/16-reportar-medidas.png)
+
+| # | Elemento | Qué hace |
+|:-:|---|---|
+| 1 | Medidas del modelo | Fórmula de cada medida y su valor en el periodo filtrado |
+| 2 | Nueva medida | Escribe una fórmula DAX; los ejemplos de arriba la llenan con un clic |
+| 3 | Calcular medida | Calcula y desglosa el resultado |
+| 4 | Descargar CSV | Descarga los datos filtrados |
+| 5 | Imprimir / PDF | Guarda el informe en PDF |
+
+**Origen y calidad.** Dice de dónde vienen los datos y qué tan completos están.
+
+![Origen y calidad de los datos con sus partes numeradas](img/manual/17-reportar-origen.png)
 
 | # | Elemento | Qué muestra |
 |:-:|---|---|
-| 1 | Ficha de origen | Archivo, formato, tamaño, fecha de carga, almacenamiento y vigencia. En los lotes simulados, además: semilla, volumen, periodo, tendencia, estacionalidad, región líder y evento |
-| 2 | Completitud | Porcentaje de celdas con dato, celdas vacías y filas duplicadas |
-| 3 | Cómo se interpretó cada columna | El rol que el informe le dio a cada columna: medida principal, eje de tiempo, dimensión o medida |
+| 1 | Ficha | Nombre, origen, fecha de carga, filas y columnas |
+| 2 | Calidad | Qué porcentaje de celdas está completo |
+| 3 | Columnas | Tipo de dato y valores vacíos de cada columna |
 
-### 4.11 Explorador
+## 9. Gestión de perfil
 
-La pestaña **Explorador** permite un gráfico libre:
+### 9.1 Cambiar contraseña
 
-| Campo | Qué elegir |
+![Formulario de cambio de contraseña con sus campos numerados](img/manual/18-contrasena.png)
+
+| # | Campo | Qué escribir |
+|:-:|---|---|
+| 1 | Contraseña actual | Tu contraseña de hoy |
+| 2 | Nueva contraseña | Mínimo 10 caracteres |
+| 3 | Confirma la nueva contraseña | La misma contraseña nueva |
+| 4 | Guardar contraseña | Guarda el cambio; se cierran tus otras sesiones |
+
+### 9.2 Seguridad
+
+![Pantalla de seguridad con los métodos de verificación](img/manual/19-seguridad.png)
+
+| Método | Qué puedes hacer |
 |---|---|
-| Gráfico | Barras, líneas, área, torta, dispersión, caja o histograma |
-| Agrupar por | La columna que forma las categorías |
-| Medida | La columna numérica que se calcula |
-| Función | Cantidad de registros, suma, promedio, máximo o mínimo |
+| App autenticadora | Ver si está activa y si es el método que se pide por defecto |
+| Código por correo | **Agregar** el método que te falta o **Pedir este por defecto** |
 
-Debajo, la **Vista previa** muestra las primeras 20 filas de la fuente.
+## 10. Mensajes frecuentes
 
-### 4.12 API
+| Mensaje | Qué significa | Qué hacer |
+|---|---|---|
+| Correo o contraseña incorrectos | Los datos no coinciden | Revísalos o usa **¿Olvidaste tu contraseña?** |
+| Ese correo ya está registrado | Ya existe una cuenta con ese correo | Ingresa con él o recupera la contraseña |
+| La contraseña debe tener al menos 10 caracteres | La contraseña es muy corta | Escribe una más larga |
+| El código no es correcto o ya venció. | El código escrito no es el vigente | Escribe el código que muestra ahora la app |
+| Pediste varios códigos seguidos. Espera unos minutos. | Se pidieron muchos códigos en poco tiempo | Espera unos minutos |
+| ¿Eliminar esta tarea? | Confirmación antes de borrar | **Aceptar** la borra; **Cancelar** no hace nada |
+| La función … no está soportada en este tablero. | La fórmula usa algo que el informe no calcula | Usa una de las funciones listadas en Nueva medida |
+| Esta cuenta está suspendida | La cuenta no está habilitada | Escribe a soporte (ver 11) |
+| Página no encontrada | La dirección que abriste no existe | Vuelve con el menú |
+| Sin conexión | Tu equipo no tiene internet | La pantalla reintenta sola |
 
-**API ↗** abre la documentación interactiva de la API REST (`/docs`), con tu misma sesión.
-Para ingresar por la API, `POST /api/auth/login` exige además el campo `codigo` (el de tu app o
-del correo; si tu método es el correo y no lo envías, la API te manda uno).
+| Página no encontrada | Sin conexión |
+|:-:|:-:|
+| ![Página no encontrada](img/manual/20-no-encontrada.png) | ![Pantalla sin conexión](img/manual/21-sin-conexion.png) |
 
-### 4.13 Preguntas frecuentes
+## 11. Preguntas frecuentes
 
-**¿Por qué desapareció mi archivo?** Los archivos se borran tras 24 horas sin uso o al cerrar
-sesión. Vuelve a subirlo.
+**¿Por qué desaparecieron mis archivos de datos?** Se borran al cerrar sesión, a propósito: así no
+quedan archivos guardados. Tus tareas sí se conservan.
 
-**¿Por qué el JSON no carga?** Debe ser una lista de objetos planos, como
-`[{"ciudad": "Cali", "valor": 10}]`. Las estructuras anidadas se rechazan.
+**¿Por qué la primera carga tarda unos segundos?** El servicio se suspende cuando nadie lo usa y la
+primera acción lo reactiva.
 
-**¿Qué mide el "tiempo medio de cierre"?** El promedio entre la creación y la finalización de las
-tareas completadas en el rango filtrado.
+**¿Otra persona puede ver mis tareas o mis datos?** No. Cada cuenta ve lo suyo.
 
-**¿Por qué cada lote generado es distinto?** Cada clic en **Generar lote** usa una semilla nueva que
-define el volumen, el periodo y el escenario de negocio. La semilla queda en **Origen y calidad**:
-con la misma semilla se obtiene exactamente el mismo lote.
+**¿Se puede instalar como aplicación?** Sí: en Chrome o Edge, **Instalar aplicación**; en iPhone,
+Safari → **Compartir → Agregar a inicio**.
 
-**¿Qué significa "—" en una medida?** Que no hay datos para comparar, por ejemplo el año anterior de
-un archivo que cubre menos de un año. Se deja vacío para no comparar contra un periodo a medias.
+**¿Dónde pido ayuda o reporto un problema?** Telegram [@lfac6](https://t.me/lfac6), WhatsApp
+[@carraian160](https://wa.me/carraian160) o [ariascluisf@hotmail.com](mailto:ariascluisf@hotmail.com).
 
-**¿Por qué no se compara el mes en curso?** Si el archivo termina a mitad de mes, se compara el
-último mes completo: un mes a medias haría parecer que todo cayó. Por lo mismo, el informe de
-productividad muestra solo semanas completas.
+## 12. Glosario
 
-**¿Es Power BI?** No. Es un intérprete del DAX más usado en informes gerenciales, calculado con
-pandas sobre tu archivo. Las fórmulas se pueden copiar a Power BI.
-
-**¿Cómo quito un filtro que puse con un clic en un gráfico?** Pulsa la **×** del chip que aparece en
-la barra de filtros, o **Limpiar filtros**.
-
-**¿Puedo instalarlo como aplicación?** Sí. En Chrome o Edge usa **Instalar aplicación** (ícono
-en la barra de direcciones o menú ⋮); en el iPhone, en Safari, **Compartir → Agregar a inicio**. Se
-abre en su propia ventana y entra directo a tus tareas.
-
-**¿Qué pasa si me quedo sin internet?** Aparece la pantalla **Sin conexión**, que reintenta sola
-cada pocos segundos (o con **Reintentar ahora**) y vuelve a la página cuando hay red.
-
-![Pantalla sin conexión con reintento automático](img/manual/15-sin-conexion.png)
-
-**Abrí un enlace y dice "Esta tarea no está en el tablero".** La dirección no existe (un enlace
-viejo o una tarea eliminada). Usa **Ver tareas** o **Volver al inicio**; si tenías la sesión
-abierta, sigue abierta.
-
-![Página no encontrada](img/manual/14-no-encontrada.png)
-
-**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus tareas y tus datos siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola (un anillo muestra los segundos que faltan para el siguiente intento) y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
-
-## 5. Seguridad: tu información protegida
-
-Tu confianza es lo primero: la plataforma solo pide los datos necesarios para funcionar, los protege y no los comparte con terceros. Esto es lo que se guarda y cómo se protege.
-
-### Qué datos se guardan y dónde
-
-| Dato | Para qué se usa | Dónde se guarda | Quién lo ve |
-|---|---|---|---|
-| Nombre y correo | Identificar tu cuenta | MongoDB Atlas | Tú y el administrador |
-| Contraseña | Iniciar sesión | MongoDB Atlas, **solo su huella** | Nadie: no se puede leer ni recuperar |
-| Tareas | Tu lista y tu analítica | MongoDB Atlas, marcadas con tu cuenta | Tú y el administrador |
-| Archivos que subes | Análisis | MongoDB (GridFS, convertidos a Parquet) | Solo tú; se borran a las 24 h sin uso o al salir |
-| Lotes simulados | Probar el informe sin datos propios | Igual que los archivos, con su semilla y escenario | Solo tú; los datos son ficticios |
-| Fórmulas DAX que escribes | Calcular una medida | No se guardan: se evalúan al momento | Solo tú |
-| Sesión | Mantenerte conectado | Cookie en tu navegador | Firmada e invisible para JavaScript |
-| Verificación en dos pasos | Confirmar que eres tú al ingresar | MongoDB Atlas: clave de la app **cifrada** y código del correo **solo como huella** | Nadie: no se puede leer desde la base |
-
-### Cómo se protege tu información
-
-Comprobado en el código del proyecto (`backend/app/security.py`, `routers/web.py`,
-`repositorio.py`, `datos.py`, `main.py`):
-
-- **Contraseñas con hash y una clave adicional** guardada fuera de la base:
-  aunque se filtrara la base, las huellas no sirven sin esa clave. Las huellas antiguas se
-  actualizan solas al siguiente ingreso.
-- **Verificación en dos pasos obligatoria** con app autenticadora (TOTP) o código por correo:
-  la clave de la app se guarda cifrada, un código no se acepta dos veces, los intentos errados
-  bloquean temporalmente y el código del correo vence en pocos minutos.
-- **Sesión con doble límite:** vence por inactividad (se renueva con el uso) y por tiempo máximo,
-  en una cookie segura.
-- **Cada quien ve solo lo suyo:** la pertenencia de tareas y archivos se verifica dentro de la
-  propia consulta a la base, también en la API.
-- **Archivos acotados:** formato, tamaño (10 MB), filas (500.000) y cantidad (5) limitados, con
-  caducidad automática.
-- **Cabeceras de seguridad** en todas las respuestas: `X-Content-Type-Options: nosniff`,
-  `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy`.
-- **Plantillas con escape automático** (Jinja2). Los nombres que vienen de tus archivos también se
-  escapan en los hallazgos escritos.
-- **Las fórmulas DAX no ejecutan código:** un intérprete propio solo admite las funciones de la
-  lista; el texto nunca se pasa a `eval`.
-- **Secretos fuera del repositorio:** conexión a MongoDB, clave JWT y pimienta en variables de
-  entorno de Cloud Run.
-- **Bloqueo temporal** ante intentos fallidos repetidos de contraseña o de código.
-- **Registro de eventos de seguridad:** ingresos, intentos fallidos, bloqueos y cambios de
-  contraseña quedan registrados (nunca contraseñas ni códigos) y se depuran solos.
-- **Al día en seguridad:** el runtime, el sistema y las dependencias se mantienen con los últimos
-  parches y se revisan periódicamente.
-
-## 6. Agradecimientos
-
-A mi familia, por su apoyo incondicional, su paciencia y por creer en cada proyecto incluso cuando apenas era una idea. Este trabajo también es de ustedes.
-
-Y a ti, que usas esta plataforma: cada prueba, comentario y sugerencia ayuda a que siga mejorando.
+| Término | Qué significa |
+|---|---|
+| **App autenticadora** | Aplicación del celular que muestra un código nuevo cada 30 segundos para confirmar que eres tú |
+| **Cumplimiento** | Porcentaje de tareas completadas |
+| **DAX** | Lenguaje de fórmulas de Power BI y Excel para calcular medidas |
+| **Lote simulado** | Datos de ventas de ejemplo que la plataforma genera para probar el informe |
+| **Medida** | Una cifra calculada con una fórmula, como el total o el margen |
+| **Tabla dinámica** | Resumen que cruza dos dimensiones (filas y columnas) y una cifra |
+| **Verificación en dos pasos** | Además de la contraseña, se pide un código que solo tú puedes recibir |
