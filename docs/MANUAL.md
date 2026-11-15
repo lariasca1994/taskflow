@@ -118,6 +118,10 @@ Después de la contraseña aparece la pantalla del código:
 
 Si tienes los dos métodos activos, puedes cambiar al otro desde la misma pantalla.
 
+El código se escribe en **seis casillas**, una por dígito: puedes teclearlo o pegarlo completo.
+Un candado sobre el título se abre al enviar el código completo y se sacude si no es válido; con la
+app autenticadora, un anillo muestra cuántos segundos faltan para que la app cambie de código.
+
 La sesión se cierra tras **30 minutos sin actividad** y, en cualquier caso, a las **12 horas**.
 
 ### 4.3.1 Olvidé mi contraseña
@@ -186,6 +190,22 @@ recuperación se bloquea unos minutos. Si no pediste este código, cambia tu con
 
 ### 4.4 Tus tareas
 
+**Menú lateral.** A la izquierda están **Tareas**, **Analítica** y **Datos** (y **Admin** y
+**Usuarios** para el administrador); una luz verde marca la sección actual. Al pie están el aviso
+**en vivo** (los cambios llegan al instante), tu nombre, **Contraseña**, **Seguridad**, **API ↗** y
+**Salir**. **Compactar menú** lo reduce a solo íconos (al pasar el cursor aparece el nombre de
+cada uno) y la preferencia se recuerda en ese equipo.
+
+![Menú lateral compacto con el nombre de la opción al pasar el cursor](img/manual/16-menu-compacto.png)
+
+**En la tablet en vertical y en el celular** el menú se convierte en una **barra inferior**
+translúcida (Tareas, Analítica, Datos y **Más**, que abre una hoja desde abajo con el resto de
+opciones). La página se reacomoda sola al girar la pantalla.
+
+![Informe de productividad en una tablet en vertical](img/manual/17-tablet-vertical.png)
+
+![Tareas en el celular con la hoja Más abierta](img/manual/18-movil-mas.png)
+
 ![Lista de tareas con el formulario y los filtros numerados](img/manual/04-tareas.png)
 
 | # | Campo | Qué escribir |
@@ -212,6 +232,9 @@ marca como completada (o la devuelve a pendiente) y el botón de eliminar la bor
 | 2 | Hasta | Fecha final |
 | 3 | Categoría | Limita a una categoría |
 | 4 | Prioridad | Limita a una prioridad |
+
+Cada indicador lleva un punto de color (verde si va bien, rojo si requiere atención, como las
+tareas vencidas sin cerrar) y una línea de acento abajo; al pasar el cursor la tarjeta se eleva.
 
 Todo se recalcula al cambiar un filtro, y también solo cuando creas, completas o eliminas una
 tarea. **Limpiar filtros** vuelve a mostrarlo todo.
@@ -385,7 +408,22 @@ pandas sobre tu archivo. Las fórmulas se pueden copiar a Power BI.
 **¿Cómo quito un filtro que puse con un clic en un gráfico?** Pulsa la **×** del chip que aparece en
 la barra de filtros, o **Limpiar filtros**.
 
-**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus tareas y tus datos siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
+**¿Puedo instalarlo como aplicación?** Sí. En Chrome o Edge usa **Instalar aplicación** (ícono
+en la barra de direcciones o menú ⋮); en el iPhone, en Safari, **Compartir → Agregar a inicio**. Se
+abre en su propia ventana y entra directo a tus tareas.
+
+**¿Qué pasa si me quedo sin internet?** Aparece la pantalla **Sin conexión**, que reintenta sola
+cada pocos segundos (o con **Reintentar ahora**) y vuelve a la página cuando hay red.
+
+![Pantalla sin conexión con reintento automático](img/manual/15-sin-conexion.png)
+
+**Abrí un enlace y dice "Esta tarea no está en el tablero".** La dirección no existe (un enlace
+viejo o una tarea eliminada). Usa **Ver tareas** o **Volver al inicio**; si tenías la sesión
+abierta, sigue abierta.
+
+![Página no encontrada](img/manual/14-no-encontrada.png)
+
+**¿Qué significa la pantalla "Estamos en mantenimiento"?** El servicio o su base de datos no están respondiendo en ese momento. No se perdió nada: tus tareas y tus datos siguen guardados, y ninguna acción quedó a medias (si no viste la confirmación, no se guardó). La pantalla se actualiza sola (un anillo muestra los segundos que faltan para el siguiente intento) y vuelve a la normalidad apenas el servicio responda; también puedes reintentar más tarde.
 
 ## 5. Seguridad: tu información protegida
 
