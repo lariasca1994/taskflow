@@ -55,7 +55,7 @@ sudo -u taskflow bash -c "
 sudo -u taskflow bash -c "
     cd /home/taskflow/app/backend &&
     /home/taskflow/app/.venv/bin/python -m app.comandos.crear_admin \
-        ariascluisf@proton.me \"Luis Felipe Arias\" ADMIN_PASSWORD_AQUI
+        ariascluisf@proton.me \"Luis F. A.\" ADMIN_PASSWORD_AQUI
 "
 
 # --------------------------------------------------------------- systemd
