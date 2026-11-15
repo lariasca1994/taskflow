@@ -6,6 +6,7 @@ suspender/reactivar/eliminar cuentas -- mismo espiritu que /admin/pagos en
 PRPagos y el acceso de ADMIN en Gestor de Casos QA, pero con permisos de
 escritura reales.
 """
+from app.etiquetas import etiqueta
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -17,6 +18,7 @@ from app.esquemas import Estado
 
 router = APIRouter()
 plantillas = Jinja2Templates(directory="app/templates")
+plantillas.env.filters["etiqueta"] = etiqueta
 
 
 # ──────────────────────────────── tareas ───────────────────────────────

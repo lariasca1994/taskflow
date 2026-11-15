@@ -5,6 +5,8 @@
 {% block cabeza %}
 <link rel="stylesheet" href="/static/tablero.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="https://cdn.plot.ly/plotly-locale-es-2.35.2.js" charset="utf-8"></script>
+<script>Plotly.setPlotConfig({ locale: "es" });</script>
 <script src="/static/js/tablero.js" defer></script>
 {% endblock %}
 
@@ -130,7 +132,7 @@
     {% endif %}
     {% for dim, valores in opciones.items() %}
     <div class="tb-filtro">
-        <label for="s_{{ loop.index }}">{{ dim | replace("_", " ") }}</label>
+        <label for="s_{{ loop.index }}">{{ dim | etiqueta }}</label>
         <select id="s_{{ loop.index }}" name="s_{{ dim }}" class="tb-campo {% if filtros.segmentos[dim] %}activo{% endif %}">
             <option value="">Todos</option>
             {% for v in valores %}
@@ -142,7 +144,7 @@
     {# Filtros que llegaron con un clic en un grafico (dimension sin selector). #}
     <span class="tb-extra" id="tb-extra">
         {% for dim, valor in filtros.segmentos.items() if valor and dim not in opciones %}
-        <span class="tb-chip-filtro">{{ dim | replace("_", " ") }}: {{ valor }}
+        <span class="tb-chip-filtro">{{ dim | etiqueta }}: {{ valor }}
             <input type="hidden" name="s_{{ dim }}" value="{{ valor }}">
             <button type="button" data-tb-quitar aria-label="Quitar filtro {{ dim }}">×</button>
         </span>

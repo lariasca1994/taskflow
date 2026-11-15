@@ -4,6 +4,7 @@ Los fragmentos devuelven solo el trozo de HTML que cambia; HTMX lo
 inserta en su sitio. Es lo que permite tener una interfaz reactiva sin
 escribir JavaScript propio.
 """
+from app.etiquetas import etiqueta
 
 import html
 import threading
@@ -35,6 +36,7 @@ from app.security import (
 
 router = APIRouter()
 plantillas = Jinja2Templates(directory="app/templates")
+plantillas.env.filters["etiqueta"] = etiqueta
 
 
 def _sesion(respuesta: Response, usuario: dict) -> None:
@@ -78,7 +80,7 @@ def procesar_login(
         return plantillas.TemplateResponse(
             request,
             "login.html",
-            {"error": "Correo o contrasena incorrectos", "email": email},
+            {"error": "Correo o contraseña incorrectos", "email": email},
             status_code=401,
         )
 
@@ -114,7 +116,7 @@ def procesar_registro(
             request,
             "registro.html",
             {
-                "error": "La contrasena debe tener al menos 10 caracteres",
+                "error": "La contraseña debe tener al menos 10 caracteres",
                 "nombre": nombre,
                 "email": email,
             },

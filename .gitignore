@@ -38,3 +38,4 @@ shape-config.json
 
 # Restos locales del antiguo despliegue en OCI (identificadores de infraestructura)
 estado-lanzamiento.txt
+backend/.venv-pruebas/

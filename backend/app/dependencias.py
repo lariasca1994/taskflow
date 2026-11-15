@@ -46,7 +46,7 @@ def usuario_api(request: Request) -> dict:
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sesion no valida o expirada",
+            detail="Sesión no válida o expirada",
         )
     return usuario
 
@@ -82,6 +82,6 @@ def usuario_admin_web(request: Request) -> dict:
     if not es_admin(usuario):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Esta seccion es solo para administradores",
+            detail="Esta sección es solo para administradores",
         )
     return usuario

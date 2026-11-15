@@ -1,4 +1,5 @@
 """Punto de entrada de TaskFlow."""
+from app.etiquetas import etiqueta
 
 import asyncio
 import logging
@@ -71,6 +72,7 @@ app.include_router(web.router)
 
 
 plantillas = Jinja2Templates(directory="app/templates")
+plantillas.env.filters["etiqueta"] = etiqueta
 
 
 @app.exception_handler(StarletteHTTPException)

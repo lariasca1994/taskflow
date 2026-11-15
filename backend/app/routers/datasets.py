@@ -1,4 +1,5 @@
 """Modulo de analisis de archivos: paginas y fragmentos HTMX."""
+from app.etiquetas import etiqueta
 
 import io
 from pathlib import Path
@@ -15,6 +16,7 @@ from app.dependencias import usuario_web
 
 router = APIRouter(prefix="/datos")
 plantillas = Jinja2Templates(directory="app/templates")
+plantillas.env.filters["etiqueta"] = etiqueta
 plantillas.env.filters["cifra"] = tablero.cifra
 plantillas.env.filters["dax"] = dax.resaltar
 plantillas.env.filters["miles"] = lambda v: f"{v:,}".replace(",", ".")

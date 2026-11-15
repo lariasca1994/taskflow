@@ -83,7 +83,7 @@ def vacio(mensaje: str, alto: int = 320) -> str:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
     )
-    return figura.to_html(full_html=False, include_plotlyjs=False, config={"displayModeBar": False})
+    return figura.to_html(full_html=False, include_plotlyjs=False, config={"displayModeBar": False, "locale": "es"})
 
 
 def _agregar(df: pd.DataFrame, dimension: str, medida: str | None, funcion: str) -> pd.DataFrame:

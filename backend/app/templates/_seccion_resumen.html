@@ -76,11 +76,11 @@
     <article class="tb-tarjeta tb-col-7">
         <div class="tb-tarjeta-cabeza">
             <div>
-                <h2 class="tb-tarjeta-titulo">¿Quién crece y quién cae? · {{ detalle_dim | replace("_", " ") }}</h2>
+                <h2 class="tb-tarjeta-titulo">¿Quién crece y quién cae? · {{ detalle_dim | etiqueta }}</h2>
                 <p class="tb-tarjeta-nota">Cambio de {{ mes_cierre or "el último mes" }} frente a {{ mes_previo or "el anterior" }}, en valor y porcentaje.</p>
             </div>
             {{ ayuda(
-                "La diferencia de " ~ medida ~ " entre " ~ (mes_cierre or "el último mes") ~ " y " ~ (mes_previo or "el mes anterior") ~ " para cada " ~ (detalle_dim | replace('_', ' ')) ~ ". Con muchos valores se muestran los seis que más suben y los seis que más bajan.",
+                "La diferencia de " ~ medida ~ " entre " ~ (mes_cierre or "el último mes") ~ " y " ~ (mes_previo or "el mes anterior") ~ " para cada " ~ (detalle_dim | etiqueta) ~ ". Con muchos valores se muestran los seis que más suben y los seis que más bajan.",
                 "Verde con ▲ hacia la derecha: creció. Rojo con ▼ hacia la izquierda: cayó. El largo de la barra es el tamaño del cambio en dinero; entre paréntesis, el cambio en porcentaje.",
                 "¿Qué explica la variación del mes y dónde hay que actuar primero?") }}
         </div>
